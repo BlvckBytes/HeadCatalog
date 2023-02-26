@@ -1,4 +1,4 @@
-package me.blvckbytes.headcatalog;
+package me.blvckbytes.headcatalog.command;
 
 import me.blvckbytes.bukkitboilerplate.PlayerCommand;
 import me.blvckbytes.headcatalog.config.HeadCatalogCommandSection;

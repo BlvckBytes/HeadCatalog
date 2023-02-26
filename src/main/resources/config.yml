@@ -12,3 +12,18 @@ command:
   aliases:
     - hc
   description: Opens the head catalog
+
+apis:
+  -
+    # TODO: Support multiple URLs per extractor/mapper in order to not have to repeat them
+    url: https://minecraft-heads.com/scripts/api.php?tags=true&cat=alphabet
+    dataType: JSON
+    arrayExtractor$: 'result'
+    itemMapper$: |
+      make_head(
+        item["name"],
+        item["value"],
+        list_of("alphabet"),
+        item["uuid"],
+        split(item["tags"], ",")
+      )

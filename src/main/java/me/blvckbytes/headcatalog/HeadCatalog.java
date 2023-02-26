@@ -12,6 +12,9 @@ import me.blvckbytes.bukkitevaluable.ConfigManager;
 import me.blvckbytes.bukkitevaluable.GPEEELogRedirect;
 import me.blvckbytes.bukkitevaluable.IConfigManager;
 import me.blvckbytes.bukkitevaluable.IConfigPathsProvider;
+import me.blvckbytes.headcatalog.apis.ApisManager;
+import me.blvckbytes.headcatalog.command.HeadCatalogCommand;
+import me.blvckbytes.headcatalog.config.ApisSection;
 import me.blvckbytes.headcatalog.config.HeadCatalogCommandSection;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -42,10 +45,15 @@ public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider {
       .addSingleton(GPEEELogRedirect.class)
       .addSingleton(ConfigManager.class)
       .addSingleton(CommandRegisterer.class)
+      .addSingleton(ApisManager.class)
       .addSingleton(PluginFileHandler.class)
       .addSingleton(HeadCatalogCommandSection.class, dependencies -> {
         IConfigManager configManager = (IConfigManager) dependencies[0];
         return configManager.getMapper("config.yml").mapSection("command", HeadCatalogCommandSection.class);
+      }, null, IConfigManager.class)
+      .addSingleton(ApisSection.class, dependencies -> {
+        IConfigManager configManager = (IConfigManager) dependencies[0];
+        return configManager.getMapper("config.yml").mapSection("apis", ApisSection.class);
       }, null, IConfigManager.class)
       .addInstantiationListener(Listener.class, (listener, dependencies) -> {
         Bukkit.getPluginManager().registerEvents(listener, this);
