@@ -50,10 +50,10 @@ public class MySQLPersistence implements IPersistence, ICleanable {
             "`uuid`," +
             "`categories`," +
             "`tags`," +
-            "`created_at`" +
+            "`last_update`" +
           ") VALUES " + valuesBuilder + " AS `new` " +
           "ON DUPLICATE KEY UPDATE " +
-          "`updated_at` = NOW()," +
+          "`last_update` = NOW()," +
           "`uuid` = `new`.`uuid`," +
           "`categories` = `new`.`categories`," +
           "`tags` = `new`.`tags`"
@@ -80,9 +80,9 @@ public class MySQLPersistence implements IPersistence, ICleanable {
     try {
       try (
         PreparedStatement statement = this.connection.prepareStatement(
-          "SELECT `created_at`, `updated_at`" +
+          "SELECT `last_update`" +
           "FROM `" + tableName + "`" +
-          "ORDER BY `updated_at` DESC, `created_at` DESC " +
+          "ORDER BY `last_update` DESC " +
           "LIMIT 1"
         )
       ) {
@@ -91,12 +91,7 @@ public class MySQLPersistence implements IPersistence, ICleanable {
         if (!resultSet.next())
           return 0;
 
-
-        Date updatedAt = resultSet.getDate("updated_at");
-        if (!resultSet.wasNull())
-          return updatedAt.getTime();
-
-        return resultSet.getDate("created_at").getTime();
+        return resultSet.getDate("last_update").getTime();
       }
     } catch (Exception e) {
       logger.log(ELogLevel.ERROR, "Could not read the last update stamp");
@@ -120,9 +115,8 @@ public class MySQLPersistence implements IPersistence, ICleanable {
           UUID uuid = UUID.fromString(resultSet.getString("uuid"));
           Set<String> categories = new HashSet<>(Arrays.asList(resultSet.getString("categories").split(",")));
           Set<String> tags = new HashSet<>(Arrays.asList(resultSet.getString("tags").split(",")));
-          Date createdAt = resultSet.getTimestamp("created_at");
-          Date updatedAt = resultSet.getTimestamp("updated_at");
-          result.add(new HeadModel(name, skinUrl, categories, uuid, tags, createdAt, updatedAt));
+          Date lastUpdate = resultSet.getTimestamp("last_update");
+          result.add(new HeadModel(name, skinUrl, categories, uuid, tags, lastUpdate));
         }
       }
     } catch (Exception e) {
@@ -200,8 +194,7 @@ public class MySQLPersistence implements IPersistence, ICleanable {
           "`uuid` VARCHAR(255) NOT NULL," +
           "`categories` TEXT NOT NULL," +
           "`tags` TEXT NOT NULL," +
-          "`created_at` DATETIME NOT NULL," +
-          "`updated_at` DATETIME NULL," +
+          "`last_update` DATETIME NOT NULL," +
           "PRIMARY KEY(`name`, `skin_url`)" +
         ")"
       )

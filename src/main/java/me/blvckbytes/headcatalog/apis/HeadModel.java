@@ -1,7 +1,5 @@
 package me.blvckbytes.headcatalog.apis;
 
-import org.jetbrains.annotations.Nullable;
-
 import java.util.*;
 
 public class HeadModel {
@@ -13,21 +11,19 @@ public class HeadModel {
   public final Set<String> categories;
   public final Set<String> tags;
 
-  public final Date createdAt;
-  public final @Nullable Date updatedAt;
+  public Date lastUpdate;
 
-  public HeadModel(String name, String skinUrl, Set<String> categories, UUID uuid, Set<String> tags, Date createdAt, @Nullable Date updatedAt) {
+  public HeadModel(String name, String skinUrl, Set<String> categories, UUID uuid, Set<String> tags, Date lastUpdate) {
     this.name = name;
     this.skinUrl = skinUrl;
     this.categories = Collections.unmodifiableSet(categories);
     this.uuid = uuid;
     this.tags = Collections.unmodifiableSet(tags);
-    this.createdAt = createdAt;
-    this.updatedAt = updatedAt;
+    this.lastUpdate = lastUpdate;
   }
 
   public HeadModel(String name, String skinUrl, Set<String> categories, UUID uuid, Set<String> tags) {
-    this(name, skinUrl, categories, uuid, tags, new Date(), null);
+    this(name, skinUrl, categories, uuid, tags, new Date());
   }
 
   @Override
@@ -47,8 +43,7 @@ public class HeadModel {
       "  uuid='" + uuid + "',\n" +
       "  categories='" + categories + "',\n" +
       "  tags='" + tags + "',\n" +
-      "  createdAt='" + createdAt + "',\n" +
-      "  updatedAt='" + updatedAt + "'\n" +
+      "  lastUpdate='" + lastUpdate + "'\n" +
     '}';
   }
 }
