@@ -224,7 +224,7 @@ public class HeadApisManager implements IHeadApisManager, IInitializable, IClean
 
     List<HeadModel> mappedHeads = new ArrayList<>();
     for (Object item : (List<?>) extractedArray) {
-      IEvaluationEnvironment mapperEnvironment = getApiResultMappingEnvironment(item);
+      IEvaluationEnvironment mapperEnvironment = getApiResultMappingEnvironment(item, urlString);
       Object mappedItem = api.getItemMapper().asRawObject(mapperEnvironment);
 
       if (!(mappedItem instanceof HeadModel)) {
@@ -244,9 +244,10 @@ public class HeadApisManager implements IHeadApisManager, IInitializable, IClean
       .build();
   }
 
-  private IEvaluationEnvironment getApiResultMappingEnvironment(Object item) {
+  private IEvaluationEnvironment getApiResultMappingEnvironment(Object item, String url) {
     return new EvaluationEnvironmentBuilder()
       .withStaticVariable("item", item)
+      .withStaticVariable("url", url)
       .withFunction("make_head", makeHeadFunction)
       .withFunction("base64_to_skin_url", base64ToSkinUrlFunction)
       .build();

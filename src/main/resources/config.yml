@@ -52,7 +52,7 @@ source:
         make_head(
           item["name"],
           base64_to_skin_url(item["value"]),
-          list_of("alphabet"),
+          list_of(substring(url, r_index(url, "=") + 1)),
           item["uuid"],
           split(item["tags"], ",")
         )
