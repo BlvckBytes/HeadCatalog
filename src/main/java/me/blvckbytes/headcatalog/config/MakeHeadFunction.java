@@ -42,9 +42,9 @@ public class MakeHeadFunction extends AExpressionFunction {
     return arguments;
   }
 
-  private @Nullable UUID decideUUID(@Nullable String uuidString) {
+  private UUID decideUUID(@Nullable String uuidString) {
     if (uuidString == null)
-      return null;
+      return UUID.randomUUID();
 
     try {
       return UUID.fromString(uuidString);
@@ -56,9 +56,9 @@ public class MakeHeadFunction extends AExpressionFunction {
     }
   }
 
-  private @Nullable Set<String> convertStringCollection(@Nullable Collection<Object> values) {
+  private Set<String> convertStringCollection(@Nullable Collection<Object> values) {
     if (values == null)
-      return null;
+      return new HashSet<>();
 
     Set<String> stringSet = new HashSet<>();
     for (Object value : values)
