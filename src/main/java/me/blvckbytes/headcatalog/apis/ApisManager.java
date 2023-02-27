@@ -10,6 +10,7 @@ import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import me.blvckbytes.headcatalog.config.Base64ToSkinUrlFunction;
 import me.blvckbytes.headcatalog.config.MakeHeadFunction;
+import me.blvckbytes.headcatalog.persistence.IPersistence;
 import me.blvckbytes.utilitytypes.Tuple;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
@@ -31,13 +32,16 @@ public class ApisManager implements IInitializable {
   private final JsonParser jsonParser;
   private final Plugin plugin;
   private final ILogger logger;
+  private final IPersistence persistence;
 
   public ApisManager(
     ILogger logger,
     Plugin plugin,
-    IHeadApisProvider headApisProvider
+    IHeadApisProvider headApisProvider,
+    IPersistence persistence
   ) {
     this.headApisProvider = headApisProvider;
+    this.persistence = persistence;
     this.plugin = plugin;
     this.logger = logger;
 
@@ -49,10 +53,11 @@ public class ApisManager implements IInitializable {
   @Override
   public void initialize() {
     fetchHeadApis(result -> {
-      for (HeadModel model : result)
-        System.out.println(model);
-
       logger.log(ELogLevel.INFO, "Fetched " + result.size() + " head models! :)");
+      if (persistence.storeHeadModels(result))
+        logger.log(ELogLevel.INFO, "Stored!");
+      else
+        logger.log(ELogLevel.ERROR, "Could not store, :(");
     });
   }
 

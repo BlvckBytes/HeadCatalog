@@ -27,7 +27,48 @@ public class MySQLPersistence implements IPersistence, ICleanable {
   }
 
   @Override
-  public void storeHeadModels(Collection<HeadModel> headModels) {
+  public boolean storeHeadModels(Collection<HeadModel> headModels) {
+    StringBuilder valuesBuilder = new StringBuilder();
+    String table = credentialsProvider.getTable();
+
+    for (int i = 0; i < headModels.size(); i++) {
+      if (i != 0)
+        valuesBuilder.append(',');
+      valuesBuilder.append("(?, ?, ?, ?, ?)");
+    }
+
+    try {
+      try (
+        PreparedStatement statement = this.connection.prepareStatement(
+          "INSERT INTO `" + table + "` (" +
+            "`name`," +
+            "`textures_url`," +
+            "`uuid`," +
+            "`categories`," +
+            "`tags`" +
+          ") VALUES " + valuesBuilder + " AS `new` " +
+          "ON DUPLICATE KEY UPDATE " +
+          "`uuid`=`new`.`uuid`," +
+          "`categories`=`new`.`categories`," +
+          "`tags`=`new`.`tags`"
+        );
+      ) {
+        int argumentIndex = 1;
+        for (HeadModel headModel : headModels) {
+          statement.setString(argumentIndex++, headModel.name);
+          statement.setString(argumentIndex++, headModel.textureUrl);
+          statement.setString(argumentIndex++, headModel.uuid.toString());
+          statement.setString(argumentIndex++, String.join(",", headModel.categories));
+          statement.setString(argumentIndex++, String.join(",", headModel.tags));
+        }
+        statement.executeUpdate();
+        return true;
+      }
+    } catch (Exception e) {
+      logger.log(ELogLevel.ERROR, "Could not store head models:");
+      logger.logError(e);
+      return false;
+    }
   }
 
   @Override
@@ -49,6 +90,7 @@ public class MySQLPersistence implements IPersistence, ICleanable {
         }
       }
     } catch (Exception e) {
+      logger.log(ELogLevel.ERROR, "Could not load head models:");
       logger.logError(e);
     }
 
@@ -124,7 +166,7 @@ public class MySQLPersistence implements IPersistence, ICleanable {
           "`uuid` VARCHAR(255) NOT NULL," +
           "`categories` TEXT NOT NULL," +
           "`tags` TEXT NOT NULL," +
-          "PRIMARY KEY(`name`, `value`)" +
+          "PRIMARY KEY(`name`, `textures_url`)" +
         ")"
       )
     ) {

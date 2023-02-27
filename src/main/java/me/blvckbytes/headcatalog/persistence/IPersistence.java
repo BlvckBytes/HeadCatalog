@@ -6,7 +6,7 @@ import java.util.Collection;
 
 public interface IPersistence {
 
-  void storeHeadModels(Collection<HeadModel> headModels);
+  boolean storeHeadModels(Collection<HeadModel> headModels);
 
   Collection<HeadModel> loadHeadModels();
 

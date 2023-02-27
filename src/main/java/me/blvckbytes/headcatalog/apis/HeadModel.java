@@ -1,5 +1,6 @@
 package me.blvckbytes.headcatalog.apis;
 
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -23,7 +24,11 @@ public class HeadModel {
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, textureUrl);
+    return Objects.hash(normalizeKey(name), normalizeKey(textureUrl));
+  }
+
+  private String normalizeKey(String input) {
+    return input.toLowerCase(Locale.ROOT).trim();
   }
 
   @Override
