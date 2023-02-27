@@ -5,7 +5,7 @@ import me.blvckbytes.bukkitboilerplate.ILogger;
 import me.blvckbytes.gpeee.functions.AExpressionFunction;
 import me.blvckbytes.gpeee.functions.ExpressionFunctionArgument;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
-import me.blvckbytes.headcatalog.apis.HeadModel;
+import me.blvckbytes.headcatalog.source.HeadModel;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;

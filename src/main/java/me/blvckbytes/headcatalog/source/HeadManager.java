@@ -1,6 +1,7 @@
-package me.blvckbytes.headcatalog.apis;
+package me.blvckbytes.headcatalog.source;
 
 import com.google.gson.*;
+import me.blvckbytes.autowirer.ICleanable;
 import me.blvckbytes.autowirer.IInitializable;
 import me.blvckbytes.bukkitboilerplate.ELogLevel;
 import me.blvckbytes.bukkitboilerplate.ILogger;
@@ -14,6 +15,7 @@ import me.blvckbytes.headcatalog.persistence.IPersistence;
 import me.blvckbytes.utilitytypes.Tuple;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
@@ -25,47 +27,98 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class ApisManager implements IInitializable {
+public class HeadManager implements IHeadManager, IInitializable, ICleanable {
+
+  private final Collection<HeadModel> EMPTY_COLLECTION = Collections.unmodifiableList(new ArrayList<>());
+
+  private static final long UPDATE_CHECKER_PERIOD_T = 20 * 60;
+
+  // Smallest update period we'll allow is going to be 24 hours
+  private static final long API_UPDATE_PERIOD_S_MIN = 60 * 60 * 24;
 
   private final AExpressionFunction makeHeadFunction, base64ToSkinUrlFunction;
-  private final IHeadApisProvider headApisProvider;
+  private final IHeadSourceProvider headSourceProvider;
   private final JsonParser jsonParser;
   private final Plugin plugin;
   private final ILogger logger;
   private final IPersistence persistence;
 
-  public ApisManager(
+  private final List<Consumer<Collection<HeadModel>>> updateConsumers;
+
+  private @Nullable BukkitTask updateTask;
+  private final long updatePeriod;
+
+  private @Nullable Collection<HeadModel> headsUnmodifiable;
+  private long lastFetchedLastStoreStamp;
+
+  public HeadManager(
     ILogger logger,
     Plugin plugin,
-    IHeadApisProvider headApisProvider,
+    IHeadSourceProvider headSourceProvider,
     IPersistence persistence
   ) {
-    this.headApisProvider = headApisProvider;
+    this.headSourceProvider = headSourceProvider;
     this.persistence = persistence;
     this.plugin = plugin;
     this.logger = logger;
 
+    this.updateConsumers = new ArrayList<>();
     this.jsonParser = new JsonParser();
     this.makeHeadFunction = new MakeHeadFunction(logger);
     this.base64ToSkinUrlFunction = new Base64ToSkinUrlFunction();
+    this.updatePeriod = Math.max(API_UPDATE_PERIOD_S_MIN, this.headSourceProvider.getUpdatePeriodSeconds());
+  }
+
+  private void checkForUpdates() {
+    long lastStoreStamp = persistence.getLastHeadModelsStoreStamp();
+
+    // Update period elapsed, fetch new data from APIs
+    if (System.currentTimeMillis() - lastStoreStamp >= updatePeriod * 1000) {
+      fetchHeadApis(result -> {
+        headsUnmodifiable = Collections.unmodifiableCollection(result);
+        logger.log(ELogLevel.INFO, "Fetched " + result.size() + " heads from APIs");
+        persistence.storeHeadModels(result);
+        notifyUpdateConsumers();
+      });
+
+      return;
+    }
+
+    // The database holds newer values then currently loaded into memory
+    if (headsUnmodifiable == null || lastFetchedLastStoreStamp < lastStoreStamp) {
+      headsUnmodifiable = Collections.unmodifiableCollection(persistence.loadHeadModels());
+      logger.log(ELogLevel.INFO, "Loaded " + headsUnmodifiable.size() + " heads from DB");
+      lastFetchedLastStoreStamp = lastStoreStamp;
+      notifyUpdateConsumers();
+    }
+  }
+
+  private void notifyUpdateConsumers() {
+    Collection<HeadModel> heads = getHeads();
+    for (Consumer<Collection<HeadModel>> consumer : updateConsumers)
+      consumer.accept(heads);
   }
 
   @Override
   public void initialize() {
-    fetchHeadApis(result -> {
-      logger.log(ELogLevel.INFO, "Fetched " + result.size() + " head models! :)");
-      if (persistence.storeHeadModels(result))
-        logger.log(ELogLevel.INFO, "Stored!");
-      else
-        logger.log(ELogLevel.ERROR, "Could not store, :(");
-    });
+    this.updateTask = Bukkit.getScheduler().runTaskTimerAsynchronously(
+      this.plugin,
+      this::checkForUpdates,
+      0L, UPDATE_CHECKER_PERIOD_T
+    );
+  }
+
+  @Override
+  public void cleanup() {
+    if (this.updateTask != null)
+      this.updateTask.cancel();
   }
 
   private void fetchHeadApis(Consumer<Set<HeadModel>> completion) {
     Set<HeadModel> result = Collections.synchronizedSet(new HashSet<>());
     AtomicInteger entriesCounter = new AtomicInteger(0);
 
-    List<? extends IHeadApi> apis = this.headApisProvider.getApis();
+    List<? extends IHeadApi> apis = this.headSourceProvider.getApis();
 
     if (apis.size() == 0) {
       completion.accept(result);
@@ -218,5 +271,14 @@ public class ApisManager implements IInitializable {
       String body = bufferedReader.lines().collect(Collectors.joining());
       return new Tuple<>(code, body);
     }
+  }
+
+  public Collection<HeadModel> getHeads() {
+    return headsUnmodifiable == null ? EMPTY_COLLECTION : headsUnmodifiable;
+  }
+
+  @Override
+  public void registerUpdateCallback(Consumer<Collection<HeadModel>> consumer) {
+    this.updateConsumers.add(consumer);
   }
 }

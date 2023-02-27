@@ -13,29 +13,32 @@ command:
     - hc
   description: Opens the head catalog
 
-apis:
-  -
-    urls:
-      - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=alphabet'
-      - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=animals'
-      - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=blocks'
-      - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=decoration'
-      - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=food-drinks'
-      - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=humans'
-      - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=humanoid'
-      - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=miscellaneous'
-      - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=monsters'
-      - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=plants'
-    dataType: JSON
-    arrayExtractor$: 'result'
-    itemMapper$: |
-      make_head(
-        item["name"],
-        base64_to_skin_url(item["value"]),
-        list_of("alphabet"),
-        item["uuid"],
-        split(item["tags"], ",")
-      )
+source:
+  # Every 24h will be the minimum value accepted
+  updatePeriodSeconds: 86400
+  apis:
+    -
+      urls:
+        - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=alphabet'
+        - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=animals'
+        - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=blocks'
+        - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=decoration'
+        - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=food-drinks'
+        - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=humans'
+        - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=humanoid'
+        - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=miscellaneous'
+        - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=monsters'
+        - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=plants'
+      dataType: JSON
+      arrayExtractor$: 'result'
+      itemMapper$: |
+        make_head(
+          item["name"],
+          base64_to_skin_url(item["value"]),
+          list_of("alphabet"),
+          item["uuid"],
+          split(item["tags"], ",")
+        )
 
 persistence:
   type: MySQL

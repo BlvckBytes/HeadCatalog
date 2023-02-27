@@ -1,12 +1,14 @@
 package me.blvckbytes.headcatalog.persistence;
 
-import me.blvckbytes.headcatalog.apis.HeadModel;
+import me.blvckbytes.headcatalog.source.HeadModel;
 
 import java.util.Collection;
 
 public interface IPersistence {
 
-  boolean storeHeadModels(Collection<HeadModel> headModels);
+  void storeHeadModels(Collection<HeadModel> headModels);
+
+  long getLastHeadModelsStoreStamp();
 
   Collection<HeadModel> loadHeadModels();
 

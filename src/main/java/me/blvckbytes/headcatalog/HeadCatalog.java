@@ -12,11 +12,10 @@ import me.blvckbytes.bukkitevaluable.ConfigManager;
 import me.blvckbytes.bukkitevaluable.GPEEELogRedirect;
 import me.blvckbytes.bukkitevaluable.IConfigManager;
 import me.blvckbytes.bukkitevaluable.IConfigPathsProvider;
-import me.blvckbytes.headcatalog.apis.ApisManager;
+import me.blvckbytes.headcatalog.source.HeadManager;
 import me.blvckbytes.headcatalog.command.HeadCatalogCommand;
-import me.blvckbytes.headcatalog.config.ApisSection;
+import me.blvckbytes.headcatalog.config.SourceSection;
 import me.blvckbytes.headcatalog.config.HeadCatalogCommandSection;
-import me.blvckbytes.headcatalog.config.MySQLCredentialsSection;
 import me.blvckbytes.headcatalog.config.PersistenceSection;
 import me.blvckbytes.headcatalog.persistence.IPersistence;
 import me.blvckbytes.headcatalog.persistence.PersistenceFactory;
@@ -49,7 +48,7 @@ public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider {
       .addSingleton(GPEEELogRedirect.class)
       .addSingleton(ConfigManager.class)
       .addSingleton(CommandRegisterer.class)
-      .addSingleton(ApisManager.class)
+      .addSingleton(HeadManager.class)
       .addSingleton(PluginFileHandler.class)
       .addSingleton(PersistenceFactory.class)
       .addSingleton(HeadCatalogCommandSection.class, dependencies -> {
@@ -60,9 +59,9 @@ public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider {
         IConfigManager configManager = (IConfigManager) dependencies[0];
         return configManager.getMapper("config.yml").mapSection("persistence", PersistenceSection.class);
       }, null, IConfigManager.class)
-      .addSingleton(ApisSection.class, dependencies -> {
+      .addSingleton(SourceSection.class, dependencies -> {
         IConfigManager configManager = (IConfigManager) dependencies[0];
-        return configManager.getMapper("config.yml").mapSection("apis", ApisSection.class);
+        return configManager.getMapper("config.yml").mapSection("source", SourceSection.class);
       }, null, IConfigManager.class)
       .addSingleton(IPersistence.class, dependencies -> {
         PersistenceFactory factory = (PersistenceFactory) dependencies[0];

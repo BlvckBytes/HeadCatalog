@@ -3,7 +3,7 @@ package me.blvckbytes.headcatalog.persistence;
 import me.blvckbytes.autowirer.ICleanable;
 import me.blvckbytes.bukkitboilerplate.ELogLevel;
 import me.blvckbytes.bukkitboilerplate.ILogger;
-import me.blvckbytes.headcatalog.apis.HeadModel;
+import me.blvckbytes.headcatalog.source.HeadModel;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -15,6 +15,7 @@ public class MySQLPersistence implements IPersistence, ICleanable {
 
   private final IMySQLCredentialsProvider credentialsProvider;
   private final ILogger logger;
+  private final String tableName;
 
   private Connection connection;
 
@@ -24,34 +25,39 @@ public class MySQLPersistence implements IPersistence, ICleanable {
   ) {
     this.credentialsProvider = credentialsProvider;
     this.logger = logger;
+    this.tableName = credentialsProvider.getTable();
   }
 
   @Override
-  public boolean storeHeadModels(Collection<HeadModel> headModels) {
+  public void storeHeadModels(Collection<HeadModel> headModels) {
+    if (headModels.size() == 0)
+      return;
+
     StringBuilder valuesBuilder = new StringBuilder();
-    String table = credentialsProvider.getTable();
 
     for (int i = 0; i < headModels.size(); i++) {
       if (i != 0)
         valuesBuilder.append(',');
-      valuesBuilder.append("(?, ?, ?, ?, ?)");
+      valuesBuilder.append("(?, ?, ?, ?, ?, NOW())");
     }
 
     try {
       try (
         PreparedStatement statement = this.connection.prepareStatement(
-          "INSERT INTO `" + table + "` (" +
+          "INSERT INTO `" + tableName + "` (" +
             "`name`," +
             "`textures_url`," +
             "`uuid`," +
             "`categories`," +
-            "`tags`" +
+            "`tags`," +
+            "`created_at`" +
           ") VALUES " + valuesBuilder + " AS `new` " +
           "ON DUPLICATE KEY UPDATE " +
-          "`uuid`=`new`.`uuid`," +
-          "`categories`=`new`.`categories`," +
-          "`tags`=`new`.`tags`"
-        );
+          "`updated_at` = NOW()," +
+          "`uuid` = `new`.`uuid`," +
+          "`categories` = `new`.`categories`," +
+          "`tags` = `new`.`tags`"
+        )
       ) {
         int argumentIndex = 1;
         for (HeadModel headModel : headModels) {
@@ -62,12 +68,40 @@ public class MySQLPersistence implements IPersistence, ICleanable {
           statement.setString(argumentIndex++, String.join(",", headModel.tags));
         }
         statement.executeUpdate();
-        return true;
       }
     } catch (Exception e) {
       logger.log(ELogLevel.ERROR, "Could not store head models:");
       logger.logError(e);
-      return false;
+    }
+  }
+
+  @Override
+  public long getLastHeadModelsStoreStamp() {
+    try {
+      try (
+        PreparedStatement statement = this.connection.prepareStatement(
+          "SELECT `created_at`, `updated_at`" +
+          "FROM `" + tableName + "`" +
+          "ORDER BY `updated_at` DESC, `created_at` DESC " +
+          "LIMIT 1"
+        )
+      ) {
+        ResultSet resultSet = statement.executeQuery();
+
+        if (!resultSet.next())
+          return 0;
+
+
+        Date updatedAt = resultSet.getDate("updated_at");
+        if (!resultSet.wasNull())
+          return updatedAt.getTime();
+
+        return resultSet.getDate("created_at").getTime();
+      }
+    } catch (Exception e) {
+      logger.log(ELogLevel.ERROR, "Could not read the last update stamp");
+      logger.logError(e);
+      return 0;
     }
   }
 
@@ -77,7 +111,7 @@ public class MySQLPersistence implements IPersistence, ICleanable {
 
     try {
       try (
-        PreparedStatement statement = this.connection.prepareStatement("")
+        PreparedStatement statement = this.connection.prepareStatement("SELECT * FROM `" + tableName + "`")
       ) {
         ResultSet resultSet = statement.executeQuery();
         while (resultSet.next()) {
@@ -86,7 +120,9 @@ public class MySQLPersistence implements IPersistence, ICleanable {
           UUID uuid = UUID.fromString(resultSet.getString("uuid"));
           Set<String> categories = new HashSet<>(Arrays.asList(resultSet.getString("categories").split(",")));
           Set<String> tags = new HashSet<>(Arrays.asList(resultSet.getString("tags").split(",")));
-          result.add(new HeadModel(name, texturesUrl, categories, uuid, tags));
+          Date createdAt = resultSet.getDate("created_at");
+          Date updatedAt = resultSet.getDate("updated_at");
+          result.add(new HeadModel(name, texturesUrl, categories, uuid, tags, createdAt, updatedAt));
         }
       }
     } catch (Exception e) {
@@ -143,29 +179,29 @@ public class MySQLPersistence implements IPersistence, ICleanable {
     String database = credentialsProvider.getDatabase();
 
     try (
-      PreparedStatement statement = this.connection.prepareStatement("CREATE DATABASE IF NOT EXISTS `" + database + "`");
+      PreparedStatement statement = this.connection.prepareStatement("CREATE DATABASE IF NOT EXISTS `" + database + "`")
     ) {
       statement.executeUpdate();
     }
 
     try (
-      PreparedStatement statement = this.connection.prepareStatement("USE `" + database + "`");
+      PreparedStatement statement = this.connection.prepareStatement("USE `" + database + "`")
     ) {
       statement.executeUpdate();
     }
   }
 
   private void createTables() throws Exception {
-    String table = credentialsProvider.getTable();
-
     try (
       PreparedStatement statement = this.connection.prepareStatement(
-        "CREATE TABLE IF NOT EXISTS `" + table + "` (" +
+        "CREATE TABLE IF NOT EXISTS `" + tableName + "` (" +
           "`name` VARCHAR(255) NOT NULL," +
           "`textures_url` VARCHAR(255) NOT NULL," +
           "`uuid` VARCHAR(255) NOT NULL," +
           "`categories` TEXT NOT NULL," +
           "`tags` TEXT NOT NULL," +
+          "`created_at` DATETIME NOT NULL," +
+          "`updated_at` DATETIME NULL," +
           "PRIMARY KEY(`name`, `textures_url`)" +
         ")"
       )
