@@ -31,7 +31,7 @@ apis:
     itemMapper$: |
       make_head(
         item["name"],
-        item["value"],
+        base64_to_skin_url(item["value"]),
         list_of("alphabet"),
         item["uuid"],
         split(item["tags"], ",")

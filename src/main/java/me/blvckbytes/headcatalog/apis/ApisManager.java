@@ -8,6 +8,7 @@ import me.blvckbytes.gpeee.GPEEE;
 import me.blvckbytes.gpeee.functions.AExpressionFunction;
 import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
+import me.blvckbytes.headcatalog.config.Base64ToSkinUrlFunction;
 import me.blvckbytes.headcatalog.config.MakeHeadFunction;
 import me.blvckbytes.utilitytypes.Tuple;
 import org.bukkit.Bukkit;
@@ -25,7 +26,7 @@ import java.util.stream.Collectors;
 
 public class ApisManager implements IInitializable {
 
-  private final AExpressionFunction makeHeadFunction;
+  private final AExpressionFunction makeHeadFunction, base64ToSkinUrlFunction;
   private final IHeadApisProvider headApisProvider;
   private final JsonParser jsonParser;
   private final Plugin plugin;
@@ -42,11 +43,17 @@ public class ApisManager implements IInitializable {
 
     this.jsonParser = new JsonParser();
     this.makeHeadFunction = new MakeHeadFunction(logger);
+    this.base64ToSkinUrlFunction = new Base64ToSkinUrlFunction();
   }
 
   @Override
   public void initialize() {
-    fetchHeadApis(result -> logger.log(ELogLevel.INFO, "Fetched " + result.size() + " head models! :)"));
+    fetchHeadApis(result -> {
+      for (HeadModel model : result)
+        System.out.println(model);
+
+      logger.log(ELogLevel.INFO, "Fetched " + result.size() + " head models! :)");
+    });
   }
 
   private void fetchHeadApis(Consumer<Set<HeadModel>> completion) {
@@ -186,6 +193,7 @@ public class ApisManager implements IInitializable {
     return new EvaluationEnvironmentBuilder()
       .withStaticVariable("item", item)
       .withFunction("make_head", makeHeadFunction)
+      .withFunction("base64_to_skin_url", base64ToSkinUrlFunction)
       .build();
   }
 
