@@ -13,6 +13,23 @@ command:
     - hc
   description: Opens the head catalog
 
+gui:
+  representative:
+    type: PLAYER_HEAD
+    textures$: 'skin_url_to_base64(head.skinUrl)'
+    name$: '"&8» &d" & head.name & " &8«"'
+    lore$:
+      - '" "'
+      - '"&7Categories:"'
+      - 'iter_map(head.categories, (category) => "&8➥ &d" & title_case(category), "&cNo Categories")'
+      - '" "'
+      - '"&7Tags:"'
+      - 'iter_map(head.tags, (tag) => "&8➥ &d" & title_case(tag), "&cNo Tags")'
+      - '" "'
+      - '"&7Updated: &d" & date_format(head.updatedAt ?? head.createdAt, "date", lut["dateFormat"])'
+      - '" "'
+      - '"&7Click to &dreceive &7this head"'
+
 source:
   # Every 24h will be the minimum value accepted
   updatePeriodSeconds: 86400
@@ -49,3 +66,6 @@ persistence:
     password: mysql2001
     database: head_catalog
     table: head_model
+
+lut:
+  dateFormat: 'dd.MM.yyyy HH:mm:ss'

@@ -46,7 +46,7 @@ public class MySQLPersistence implements IPersistence, ICleanable {
         PreparedStatement statement = this.connection.prepareStatement(
           "INSERT INTO `" + tableName + "` (" +
             "`name`," +
-            "`textures_url`," +
+            "`skin_url`," +
             "`uuid`," +
             "`categories`," +
             "`tags`," +
@@ -62,7 +62,7 @@ public class MySQLPersistence implements IPersistence, ICleanable {
         int argumentIndex = 1;
         for (HeadModel headModel : headModels) {
           statement.setString(argumentIndex++, headModel.name);
-          statement.setString(argumentIndex++, headModel.textureUrl);
+          statement.setString(argumentIndex++, headModel.skinUrl);
           statement.setString(argumentIndex++, headModel.uuid.toString());
           statement.setString(argumentIndex++, String.join(",", headModel.categories));
           statement.setString(argumentIndex++, String.join(",", headModel.tags));
@@ -116,13 +116,13 @@ public class MySQLPersistence implements IPersistence, ICleanable {
         ResultSet resultSet = statement.executeQuery();
         while (resultSet.next()) {
           String name = resultSet.getString("name");
-          String texturesUrl = resultSet.getString("textures_url");
+          String skinUrl = resultSet.getString("skin_url");
           UUID uuid = UUID.fromString(resultSet.getString("uuid"));
           Set<String> categories = new HashSet<>(Arrays.asList(resultSet.getString("categories").split(",")));
           Set<String> tags = new HashSet<>(Arrays.asList(resultSet.getString("tags").split(",")));
-          Date createdAt = resultSet.getDate("created_at");
-          Date updatedAt = resultSet.getDate("updated_at");
-          result.add(new HeadModel(name, texturesUrl, categories, uuid, tags, createdAt, updatedAt));
+          Date createdAt = resultSet.getTimestamp("created_at");
+          Date updatedAt = resultSet.getTimestamp("updated_at");
+          result.add(new HeadModel(name, skinUrl, categories, uuid, tags, createdAt, updatedAt));
         }
       }
     } catch (Exception e) {
@@ -196,13 +196,13 @@ public class MySQLPersistence implements IPersistence, ICleanable {
       PreparedStatement statement = this.connection.prepareStatement(
         "CREATE TABLE IF NOT EXISTS `" + tableName + "` (" +
           "`name` VARCHAR(255) NOT NULL," +
-          "`textures_url` VARCHAR(255) NOT NULL," +
+          "`skin_url` VARCHAR(255) NOT NULL," +
           "`uuid` VARCHAR(255) NOT NULL," +
           "`categories` TEXT NOT NULL," +
           "`tags` TEXT NOT NULL," +
           "`created_at` DATETIME NOT NULL," +
           "`updated_at` DATETIME NULL," +
-          "PRIMARY KEY(`name`, `textures_url`)" +
+          "PRIMARY KEY(`name`, `skin_url`)" +
         ")"
       )
     ) {

@@ -3,9 +3,7 @@ package me.blvckbytes.headcatalog.source;
 import java.util.Collection;
 import java.util.function.Consumer;
 
-public interface IHeadManager {
-
-  Collection<HeadModel> getHeads();
+public interface IHeadApisManager {
 
   void registerUpdateCallback(Consumer<Collection<HeadModel>> consumer);
 

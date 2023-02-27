@@ -43,6 +43,7 @@
                             <include>me.blvckbytes:BukkitEvaluable</include>
                             <include>me.blvckbytes:BBConfigMapper</include>
                             <include>org.yaml:snakeyaml</include>
+                            <include>com.github.cryptomorin:XSeries</include>
                         </includes>
                     </artifactSet>
 
@@ -56,6 +57,10 @@
                         <relocation>
                             <pattern>org.yaml.snakeyaml</pattern>
                             <shadedPattern>me.blvckbytes.${package.name}.org.yaml.snakeyaml</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>com.cryptomorin.xseries</pattern>
+                            <shadedPattern>me.blvckbytes.${package.name}.com.cryptomorin.xseries</shadedPattern>
                         </relocation>
                     </relocations>
 

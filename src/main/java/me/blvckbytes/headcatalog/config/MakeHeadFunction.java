@@ -34,7 +34,7 @@ public class MakeHeadFunction extends AExpressionFunction {
     List<ExpressionFunctionArgument> arguments = new ArrayList<>();
 
     arguments.add(new ExpressionFunctionArgument("name", "Name of the head texture", true, String.class));
-    arguments.add(new ExpressionFunctionArgument("value", "Base64 value of the head texture", true, String.class));
+    arguments.add(new ExpressionFunctionArgument("skinUrl", "URL of the skin sprite", true, String.class));
     arguments.add(new ExpressionFunctionArgument("categories", "Categories of the head texture", false, Collection.class));
     arguments.add(new ExpressionFunctionArgument("uuid", "UUID to use for the GameProfile", false, String.class));
     arguments.add(new ExpressionFunctionArgument("tags", "Tags this head is a member of", false, Collection.class));

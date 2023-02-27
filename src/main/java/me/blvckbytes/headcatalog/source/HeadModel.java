@@ -7,7 +7,7 @@ import java.util.*;
 public class HeadModel {
 
   public final String name;
-  public final String textureUrl;
+  public final String skinUrl;
   public final UUID uuid;
 
   public final Set<String> categories;
@@ -16,9 +16,9 @@ public class HeadModel {
   public final Date createdAt;
   public final @Nullable Date updatedAt;
 
-  public HeadModel(String name, String textureUrl, Set<String> categories, UUID uuid, Set<String> tags, Date createdAt, @Nullable Date updatedAt) {
+  public HeadModel(String name, String skinUrl, Set<String> categories, UUID uuid, Set<String> tags, Date createdAt, @Nullable Date updatedAt) {
     this.name = name;
-    this.textureUrl = textureUrl;
+    this.skinUrl = skinUrl;
     this.categories = Collections.unmodifiableSet(categories);
     this.uuid = uuid;
     this.tags = Collections.unmodifiableSet(tags);
@@ -26,13 +26,13 @@ public class HeadModel {
     this.updatedAt = updatedAt;
   }
 
-  public HeadModel(String name, String textureUrl, Set<String> categories, UUID uuid, Set<String> tags) {
-    this(name, textureUrl, categories, uuid, tags, new Date(), null);
+  public HeadModel(String name, String skinUrl, Set<String> categories, UUID uuid, Set<String> tags) {
+    this(name, skinUrl, categories, uuid, tags, new Date(), null);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(normalizeKey(name), normalizeKey(textureUrl));
+    return Objects.hash(normalizeKey(name), normalizeKey(skinUrl));
   }
 
   private String normalizeKey(String input) {
@@ -43,7 +43,7 @@ public class HeadModel {
   public String toString() {
     return "HeadModel {\n" +
       "  name='" + name + "',\n" +
-      "  textureUrl='" + textureUrl + "',\n" +
+      "  skinUrl='" + skinUrl + "',\n" +
       "  uuid='" + uuid + "',\n" +
       "  categories='" + categories + "',\n" +
       "  tags='" + tags + "',\n" +

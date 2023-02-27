@@ -27,9 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class HeadManager implements IHeadManager, IInitializable, ICleanable {
-
-  private final Collection<HeadModel> EMPTY_COLLECTION = Collections.unmodifiableList(new ArrayList<>());
+public class HeadApisManager implements IHeadApisManager, IInitializable, ICleanable {
 
   private static final long UPDATE_CHECKER_PERIOD_T = 20 * 60;
 
@@ -37,7 +35,7 @@ public class HeadManager implements IHeadManager, IInitializable, ICleanable {
   private static final long API_UPDATE_PERIOD_S_MIN = 60 * 60 * 24;
 
   private final AExpressionFunction makeHeadFunction, base64ToSkinUrlFunction;
-  private final IHeadSourceProvider headSourceProvider;
+  private final IHeadApisProvider headSourceProvider;
   private final JsonParser jsonParser;
   private final Plugin plugin;
   private final ILogger logger;
@@ -48,13 +46,13 @@ public class HeadManager implements IHeadManager, IInitializable, ICleanable {
   private @Nullable BukkitTask updateTask;
   private final long updatePeriod;
 
-  private @Nullable Collection<HeadModel> headsUnmodifiable;
+  private @Nullable Collection<HeadModel> headModelsUnmodifiable;
   private long lastFetchedLastStoreStamp;
 
-  public HeadManager(
+  public HeadApisManager(
     ILogger logger,
     Plugin plugin,
-    IHeadSourceProvider headSourceProvider,
+    IHeadApisProvider headSourceProvider,
     IPersistence persistence
   ) {
     this.headSourceProvider = headSourceProvider;
@@ -75,7 +73,7 @@ public class HeadManager implements IHeadManager, IInitializable, ICleanable {
     // Update period elapsed, fetch new data from APIs
     if (System.currentTimeMillis() - lastStoreStamp >= updatePeriod * 1000) {
       fetchHeadApis(result -> {
-        headsUnmodifiable = Collections.unmodifiableCollection(result);
+        headModelsUnmodifiable = Collections.unmodifiableCollection(result);
         logger.log(ELogLevel.INFO, "Fetched " + result.size() + " heads from APIs");
         persistence.storeHeadModels(result);
         notifyUpdateConsumers();
@@ -85,18 +83,17 @@ public class HeadManager implements IHeadManager, IInitializable, ICleanable {
     }
 
     // The database holds newer values then currently loaded into memory
-    if (headsUnmodifiable == null || lastFetchedLastStoreStamp < lastStoreStamp) {
-      headsUnmodifiable = Collections.unmodifiableCollection(persistence.loadHeadModels());
-      logger.log(ELogLevel.INFO, "Loaded " + headsUnmodifiable.size() + " heads from DB");
+    if (headModelsUnmodifiable == null || lastFetchedLastStoreStamp < lastStoreStamp) {
+      headModelsUnmodifiable = Collections.unmodifiableCollection(persistence.loadHeadModels());
+      logger.log(ELogLevel.INFO, "Loaded " + headModelsUnmodifiable.size() + " heads from DB");
       lastFetchedLastStoreStamp = lastStoreStamp;
       notifyUpdateConsumers();
     }
   }
 
   private void notifyUpdateConsumers() {
-    Collection<HeadModel> heads = getHeads();
     for (Consumer<Collection<HeadModel>> consumer : updateConsumers)
-      consumer.accept(heads);
+      consumer.accept(headModelsUnmodifiable);
   }
 
   @Override
@@ -271,10 +268,6 @@ public class HeadManager implements IHeadManager, IInitializable, ICleanable {
       String body = bufferedReader.lines().collect(Collectors.joining());
       return new Tuple<>(code, body);
     }
-  }
-
-  public Collection<HeadModel> getHeads() {
-    return headsUnmodifiable == null ? EMPTY_COLLECTION : headsUnmodifiable;
   }
 
   @Override

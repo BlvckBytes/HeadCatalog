@@ -3,11 +3,11 @@ package me.blvckbytes.headcatalog.config;
 import me.blvckbytes.bbconfigmapper.sections.CSAlways;
 import me.blvckbytes.bbconfigmapper.sections.IConfigSection;
 import me.blvckbytes.headcatalog.source.IHeadApi;
-import me.blvckbytes.headcatalog.source.IHeadSourceProvider;
+import me.blvckbytes.headcatalog.source.IHeadApisProvider;
 
 import java.util.List;
 
-public class SourceSection implements IConfigSection, IHeadSourceProvider {
+public class SourceSection implements IConfigSection, IHeadApisProvider {
 
   @CSAlways
   private List<ApiSection> apis;

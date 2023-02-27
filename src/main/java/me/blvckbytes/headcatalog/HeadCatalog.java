@@ -12,7 +12,9 @@ import me.blvckbytes.bukkitevaluable.ConfigManager;
 import me.blvckbytes.bukkitevaluable.GPEEELogRedirect;
 import me.blvckbytes.bukkitevaluable.IConfigManager;
 import me.blvckbytes.bukkitevaluable.IConfigPathsProvider;
-import me.blvckbytes.headcatalog.source.HeadManager;
+import me.blvckbytes.headcatalog.config.GuiSection;
+import me.blvckbytes.headcatalog.heads.HeadManager;
+import me.blvckbytes.headcatalog.source.HeadApisManager;
 import me.blvckbytes.headcatalog.command.HeadCatalogCommand;
 import me.blvckbytes.headcatalog.config.SourceSection;
 import me.blvckbytes.headcatalog.config.HeadCatalogCommandSection;
@@ -48,12 +50,17 @@ public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider {
       .addSingleton(GPEEELogRedirect.class)
       .addSingleton(ConfigManager.class)
       .addSingleton(CommandRegisterer.class)
+      .addSingleton(HeadApisManager.class)
       .addSingleton(HeadManager.class)
       .addSingleton(PluginFileHandler.class)
       .addSingleton(PersistenceFactory.class)
       .addSingleton(HeadCatalogCommandSection.class, dependencies -> {
         IConfigManager configManager = (IConfigManager) dependencies[0];
         return configManager.getMapper("config.yml").mapSection("command", HeadCatalogCommandSection.class);
+      }, null, IConfigManager.class)
+      .addSingleton(GuiSection.class, dependencies -> {
+        IConfigManager configManager = (IConfigManager) dependencies[0];
+        return configManager.getMapper("config.yml").mapSection("gui", GuiSection.class);
       }, null, IConfigManager.class)
       .addSingleton(PersistenceSection.class, dependencies -> {
         IConfigManager configManager = (IConfigManager) dependencies[0];
