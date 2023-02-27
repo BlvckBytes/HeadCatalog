@@ -16,6 +16,10 @@ import me.blvckbytes.headcatalog.apis.ApisManager;
 import me.blvckbytes.headcatalog.command.HeadCatalogCommand;
 import me.blvckbytes.headcatalog.config.ApisSection;
 import me.blvckbytes.headcatalog.config.HeadCatalogCommandSection;
+import me.blvckbytes.headcatalog.config.MySQLCredentialsSection;
+import me.blvckbytes.headcatalog.config.PersistenceSection;
+import me.blvckbytes.headcatalog.persistence.IPersistence;
+import me.blvckbytes.headcatalog.persistence.PersistenceFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.event.Listener;
@@ -47,14 +51,23 @@ public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider {
       .addSingleton(CommandRegisterer.class)
       .addSingleton(ApisManager.class)
       .addSingleton(PluginFileHandler.class)
+      .addSingleton(PersistenceFactory.class)
       .addSingleton(HeadCatalogCommandSection.class, dependencies -> {
         IConfigManager configManager = (IConfigManager) dependencies[0];
         return configManager.getMapper("config.yml").mapSection("command", HeadCatalogCommandSection.class);
+      }, null, IConfigManager.class)
+      .addSingleton(PersistenceSection.class, dependencies -> {
+        IConfigManager configManager = (IConfigManager) dependencies[0];
+        return configManager.getMapper("config.yml").mapSection("persistence", PersistenceSection.class);
       }, null, IConfigManager.class)
       .addSingleton(ApisSection.class, dependencies -> {
         IConfigManager configManager = (IConfigManager) dependencies[0];
         return configManager.getMapper("config.yml").mapSection("apis", ApisSection.class);
       }, null, IConfigManager.class)
+      .addSingleton(IPersistence.class, dependencies -> {
+        PersistenceFactory factory = (PersistenceFactory) dependencies[0];
+        return factory.createPersistence();
+      }, null, PersistenceFactory.class)
       .addInstantiationListener(Listener.class, (listener, dependencies) -> {
         Bukkit.getPluginManager().registerEvents(listener, this);
       })

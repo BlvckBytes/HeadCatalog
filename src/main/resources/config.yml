@@ -36,3 +36,13 @@ apis:
         item["uuid"],
         split(item["tags"], ",")
       )
+
+persistence:
+  type: MySQL
+  mySqlCredentials:
+    host: 'localhost'
+    port: 3306
+    username: root
+    password: mysql2001
+    database: head_catalog
+    table: head_model
