@@ -3,7 +3,7 @@ package me.blvckbytes.headcatalog.persistence;
 import me.blvckbytes.autowirer.ICleanable;
 import me.blvckbytes.bukkitboilerplate.ELogLevel;
 import me.blvckbytes.bukkitboilerplate.ILogger;
-import me.blvckbytes.headcatalog.source.HeadModel;
+import me.blvckbytes.headcatalog.apis.HeadModel;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

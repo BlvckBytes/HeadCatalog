@@ -1,6 +1,6 @@
 package me.blvckbytes.headcatalog.persistence;
 
-import me.blvckbytes.headcatalog.source.HeadModel;
+import me.blvckbytes.headcatalog.apis.HeadModel;
 
 import java.util.Collection;
 

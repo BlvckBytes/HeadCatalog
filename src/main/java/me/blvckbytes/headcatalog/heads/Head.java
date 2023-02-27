@@ -1,6 +1,6 @@
 package me.blvckbytes.headcatalog.heads;
 
-import me.blvckbytes.headcatalog.source.HeadModel;
+import me.blvckbytes.headcatalog.apis.HeadModel;
 import org.bukkit.inventory.ItemStack;
 
 public class Head {

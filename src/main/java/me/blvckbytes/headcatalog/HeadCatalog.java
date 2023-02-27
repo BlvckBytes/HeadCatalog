@@ -14,7 +14,7 @@ import me.blvckbytes.bukkitevaluable.IConfigManager;
 import me.blvckbytes.bukkitevaluable.IConfigPathsProvider;
 import me.blvckbytes.headcatalog.config.GuiSection;
 import me.blvckbytes.headcatalog.heads.HeadManager;
-import me.blvckbytes.headcatalog.source.HeadApisManager;
+import me.blvckbytes.headcatalog.apis.HeadApisManager;
 import me.blvckbytes.headcatalog.command.HeadCatalogCommand;
 import me.blvckbytes.headcatalog.config.SourceSection;
 import me.blvckbytes.headcatalog.config.HeadCatalogCommandSection;

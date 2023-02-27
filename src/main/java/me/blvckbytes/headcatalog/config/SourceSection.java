@@ -2,8 +2,8 @@ package me.blvckbytes.headcatalog.config;
 
 import me.blvckbytes.bbconfigmapper.sections.CSAlways;
 import me.blvckbytes.bbconfigmapper.sections.IConfigSection;
-import me.blvckbytes.headcatalog.source.IHeadApi;
-import me.blvckbytes.headcatalog.source.IHeadApisProvider;
+import me.blvckbytes.headcatalog.apis.IHeadApi;
+import me.blvckbytes.headcatalog.apis.IHeadApisProvider;
 
 import java.util.List;
 

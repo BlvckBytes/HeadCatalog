@@ -1,4 +1,4 @@
-package me.blvckbytes.headcatalog.source;
+package me.blvckbytes.headcatalog.apis;
 
 import me.blvckbytes.bbconfigmapper.IEvaluable;
 import me.blvckbytes.bukkitevaluable.BukkitEvaluable;

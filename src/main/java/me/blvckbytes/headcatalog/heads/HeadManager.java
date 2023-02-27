@@ -5,8 +5,8 @@ import me.blvckbytes.gpeee.functions.AExpressionFunction;
 import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import me.blvckbytes.headcatalog.config.SkinUrlToBase64Function;
-import me.blvckbytes.headcatalog.source.HeadModel;
-import me.blvckbytes.headcatalog.source.IHeadApisManager;
+import me.blvckbytes.headcatalog.apis.HeadModel;
+import me.blvckbytes.headcatalog.apis.IHeadApisManager;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 

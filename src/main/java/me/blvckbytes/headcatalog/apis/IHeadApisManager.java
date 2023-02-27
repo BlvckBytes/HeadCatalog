@@ -1,4 +1,4 @@
-package me.blvckbytes.headcatalog.source;
+package me.blvckbytes.headcatalog.apis;
 
 import java.util.Collection;
 import java.util.function.Consumer;

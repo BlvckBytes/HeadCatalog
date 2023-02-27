@@ -4,7 +4,7 @@ import me.blvckbytes.bbconfigmapper.IEvaluable;
 import me.blvckbytes.bbconfigmapper.sections.CSAlways;
 import me.blvckbytes.bbconfigmapper.sections.IConfigSection;
 import me.blvckbytes.bukkitevaluable.BukkitEvaluable;
-import me.blvckbytes.headcatalog.source.IHeadApi;
+import me.blvckbytes.headcatalog.apis.IHeadApi;
 
 import java.util.List;
 

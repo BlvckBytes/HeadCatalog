@@ -1,4 +1,4 @@
-package me.blvckbytes.headcatalog.source;
+package me.blvckbytes.headcatalog.apis;
 
 import com.google.gson.*;
 import me.blvckbytes.autowirer.ICleanable;

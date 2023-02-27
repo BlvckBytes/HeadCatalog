@@ -3,7 +3,7 @@
 # __  /_/ /_  _ \  __ `/  __  /_  /    _  __ `/  __/  __ `/_  /_  __ \_  __ `/
 # _  __  / /  __/ /_/ // /_/ / / /___  / /_/ // /_ / /_/ /_  / / /_/ /  /_/ /
 # /_/ /_/  \___/\__,_/ \__,_/  \____/  \__,_/ \__/ \__,_/ /_/  \____/_\__, /
-# /____/
+# /____/                                                             /____/
 # HeadCatalog - Developed by BlvckBytes <blvckbytes@gmail.com>
 # (ascii-art: https://patorjk.com/software/taag/#p=display&f=Speed&t=HeadCatalog)
 
@@ -67,5 +67,6 @@ persistence:
     database: head_catalog
     table: head_model
 
+# Lookup table for this file, used to centralize and deduplicate constants
 lut:
   dateFormat: 'dd.MM.yyyy HH:mm:ss'

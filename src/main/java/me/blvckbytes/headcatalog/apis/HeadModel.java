@@ -1,4 +1,4 @@
-package me.blvckbytes.headcatalog.source;
+package me.blvckbytes.headcatalog.apis;
 
 import org.jetbrains.annotations.Nullable;
 
