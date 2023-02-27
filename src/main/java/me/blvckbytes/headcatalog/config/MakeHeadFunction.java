@@ -22,8 +22,8 @@ public class MakeHeadFunction extends AExpressionFunction {
   public Object apply(IEvaluationEnvironment environment, List<@Nullable Object> args) {
     String name = nonNull(args, 0);
     String value = nonNull(args, 1);
-    Collection<Object> categories = nullable(args, 2);
-    String uuidString = nullable(args, 3);
+    String uuidString = nullable(args, 2);
+    Collection<Object> categories = nullable(args, 3);
     Collection<Object> tags = nullable(args, 4);
 
     return new HeadModel(name, value, convertStringCollection(categories), decideUUID(uuidString), convertStringCollection(tags));
@@ -35,8 +35,8 @@ public class MakeHeadFunction extends AExpressionFunction {
 
     arguments.add(new ExpressionFunctionArgument("name", "Name of the head texture", true, String.class));
     arguments.add(new ExpressionFunctionArgument("skinUrl", "URL of the skin sprite", true, String.class));
-    arguments.add(new ExpressionFunctionArgument("categories", "Categories of the head texture", false, Collection.class));
     arguments.add(new ExpressionFunctionArgument("uuid", "UUID to use for the GameProfile", false, String.class));
+    arguments.add(new ExpressionFunctionArgument("categories", "Categories of the head texture", false, Collection.class));
     arguments.add(new ExpressionFunctionArgument("tags", "Tags this head is a member of", false, Collection.class));
 
     return arguments;

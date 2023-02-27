@@ -35,6 +35,7 @@ source:
   updatePeriodSeconds: 86400
   apis:
     -
+      # Each of these URLs will be ran through the extractor and mapper below
       urls:
         - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=alphabet'
         - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=animals'
@@ -46,14 +47,24 @@ source:
         - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=miscellaneous'
         - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=monsters'
         - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=plants'
+
+      # Endpoint type, currently supported: JSON
       dataType: JSON
+
+      # Extracts the array from the response given by the API at the current URL
+      # result - Result given by the API
       arrayExtractor$: 'result'
+
+      # Maps each entry within the array to a internal head model
+      # make_head(name: String, skinUrl: String, categories: Collection, tags: Collection, uuid: String): HeadModel
+      # item - Current item of the array extracted by the arrayExtractor
+      # url - Current URL in the list of URLs
       itemMapper$: |
         make_head(
           item["name"],
           base64_to_skin_url(item["value"]),
-          list_of(substring(url, r_index(url, "=") + 1)),
           item["uuid"],
+          list_of(substring(url, r_index(url, "=") + 1)),
           split(item["tags"], ",")
         )
 
