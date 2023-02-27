@@ -3,6 +3,7 @@ package me.blvckbytes.headcatalog.apis;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -21,6 +22,11 @@ public class HeadModel {
     this.categories = categories == null ? null : Collections.unmodifiableSet(categories);
     this.uuid = uuid == null ? UUID.randomUUID() : uuid;
     this.tags = tags == null ? null : Collections.unmodifiableSet(tags);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(name, value);
   }
 
   @Override

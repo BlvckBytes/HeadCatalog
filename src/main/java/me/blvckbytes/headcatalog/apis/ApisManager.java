@@ -46,17 +46,12 @@ public class ApisManager implements IInitializable {
 
   @Override
   public void initialize() {
-    fetchHeadApis(result -> {
-      logger.log(ELogLevel.INFO, "Fetched " + result.size() + " head models! :)");
-
-      for (HeadModel headModel : result)
-        System.out.println(headModel);
-    });
+    fetchHeadApis(result -> logger.log(ELogLevel.INFO, "Fetched " + result.size() + " head models! :)"));
   }
 
-  private void fetchHeadApis(Consumer<List<HeadModel>> completion) {
-    List<HeadModel> result = Collections.synchronizedList(new ArrayList<>());
-    AtomicInteger fetchResultCounter = new AtomicInteger(0);
+  private void fetchHeadApis(Consumer<Set<HeadModel>> completion) {
+    Set<HeadModel> result = Collections.synchronizedSet(new HashSet<>());
+    AtomicInteger entriesCounter = new AtomicInteger(0);
 
     List<? extends IHeadApi> apis = this.headApisProvider.getApis();
 
@@ -67,36 +62,44 @@ public class ApisManager implements IInitializable {
 
     for (IHeadApi headApi : apis)
       Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-        List<HeadModel> fetchResult = this.fetchHeadApi(headApi);
+        this.fetchHeadApiUrls(headApi, result);
 
-        if (fetchResult != null)
-          result.addAll(fetchResult);
-
-        if (fetchResultCounter.incrementAndGet() == apis.size())
+        if (entriesCounter.incrementAndGet() == apis.size())
           completion.accept(result);
       });
   }
 
-  private @Nullable List<HeadModel> fetchHeadApi(IHeadApi headApi) {
+  private void fetchHeadApiUrls(IHeadApi headApi, Collection<HeadModel> result) {
+    List<String> urlStrings = headApi.getUrls();
+
+    for (String urlString : urlStrings) {
+      List<HeadModel> fetchResult = fetchHeadApiUrl(headApi, urlString);
+
+      if (fetchResult != null)
+        result.addAll(fetchResult);
+    }
+  }
+
+  private @Nullable List<HeadModel> fetchHeadApiUrl(IHeadApi headApi, String urlString) {
     try {
-      URL url = new URL(headApi.getUrl());
+      URL url = new URL(urlString);
       Tuple<Integer, @Nullable String> result = performGetRequest(url);
 
       if (result.b == null)
         throw new IllegalStateException("API request to " + url + " failed (" + result.a + ")!");
 
-      return parseHeadApiResult(headApi, result.b);
+      return parseHeadApiResult(headApi, urlString, result.b);
     } catch (Exception e) {
       this.logger.logError(e);
       return null;
     }
   }
 
-  private @Nullable List<HeadModel> parseHeadApiResult(IHeadApi headApi, String resultBody) {
+  private @Nullable List<HeadModel> parseHeadApiResult(IHeadApi headApi, String urlString, String resultBody) {
     EApiDataType dataType = headApi.getDataType().asEnumerationConstant(EApiDataType.class, GPEEE.EMPTY_ENVIRONMENT);
 
     if (dataType == EApiDataType.JSON)
-      return mapHeadApiJsonResult(headApi, this.jsonParser.parse(resultBody));
+      return mapHeadApiJsonResult(headApi, urlString, this.jsonParser.parse(resultBody));
 
     throw new IllegalStateException("Unknown API data type: " + dataType);
   }
@@ -147,13 +150,13 @@ public class ApisManager implements IInitializable {
     return result;
   }
 
-  private @Nullable List<HeadModel> mapHeadApiJsonResult(IHeadApi api, JsonElement json) {
+  private @Nullable List<HeadModel> mapHeadApiJsonResult(IHeadApi api, String urlString, JsonElement json) {
     Object result = convertJsonElementToObject(json);
     IEvaluationEnvironment extractorEnvironment = getApiResultExtractorEnvironment(result);
     Object extractedArray = api.getArrayExtractor().asRawObject(extractorEnvironment);
 
     if (!(extractedArray instanceof Collection)) {
-      logger.log(ELogLevel.ERROR, "The array extractor of " + api.getUrl() + " didn't yield a collection");
+      logger.log(ELogLevel.ERROR, "The array extractor of " + urlString + " didn't yield a collection");
       return null;
     }
 
@@ -163,7 +166,7 @@ public class ApisManager implements IInitializable {
       Object mappedItem = api.getItemMapper().asRawObject(mapperEnvironment);
 
       if (!(mappedItem instanceof HeadModel)) {
-        logger.log(ELogLevel.ERROR, "The item mapper of " + api.getUrl() + " didn't yield a HeadModel");
+        logger.log(ELogLevel.ERROR, "The item mapper of " + urlString + " didn't yield a HeadModel");
         return null;
       }
 

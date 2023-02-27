@@ -15,8 +15,17 @@ command:
 
 apis:
   -
-    # TODO: Support multiple URLs per extractor/mapper in order to not have to repeat them
-    url: https://minecraft-heads.com/scripts/api.php?tags=true&cat=alphabet
+    urls:
+      - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=alphabet'
+      - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=animals'
+      - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=blocks'
+      - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=decoration'
+      - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=food-drinks'
+      - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=humans'
+      - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=humanoid'
+      - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=miscellaneous'
+      - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=monsters'
+      - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=plants'
     dataType: JSON
     arrayExtractor$: 'result'
     itemMapper$: |
