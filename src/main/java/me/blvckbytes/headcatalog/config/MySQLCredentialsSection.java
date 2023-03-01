@@ -3,6 +3,8 @@ package me.blvckbytes.headcatalog.config;
 import me.blvckbytes.bbconfigmapper.sections.IConfigSection;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
+
 public class MySQLCredentialsSection implements IConfigSection {
 
   protected String host;
@@ -13,8 +15,8 @@ public class MySQLCredentialsSection implements IConfigSection {
   protected String table;
 
   @Override
-  public @Nullable Object defaultFor(Class<?> type, String field) {
-    switch (field) {
+  public @Nullable Object defaultFor(Field field) {
+    switch (field.getName()) {
       case "host":
         return "localhost";
 

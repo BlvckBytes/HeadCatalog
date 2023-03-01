@@ -5,6 +5,7 @@ import me.blvckbytes.bbconfigmapper.sections.IConfigSection;
 import me.blvckbytes.bukkitboilerplate.ICommandConfigProvider;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 public class HeadCatalogCommandSection implements IConfigSection, ICommandConfigProvider {
@@ -15,8 +16,8 @@ public class HeadCatalogCommandSection implements IConfigSection, ICommandConfig
   private List<String> aliases;
 
   @Override
-  public @Nullable Object defaultFor(Class<?> type, String field) {
-    if (field.equals("name"))
+  public @Nullable Object defaultFor(Field field) {
+    if (field.getName().equals("name"))
       return "headcatalog";
     return null;
   }
