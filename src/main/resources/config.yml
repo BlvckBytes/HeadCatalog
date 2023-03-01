@@ -21,10 +21,10 @@ gui:
     lore$:
       - '" "'
       - '"&7Categories:"'
-      - 'iter_map(head.categories, (category) => "&8➥ &d" & title_case(category), "&cNo Categories")'
+      - 'map(head.categories, (category) => "&8➥ &d" & title_case(category), "&cNo Categories")'
       - '" "'
       - '"&7Tags:"'
-      - 'iter_map(head.tags, (tag) => "&8➥ &d" & title_case(tag), "&cNo Tags")'
+      - 'map(head.tags, (tag) => "&8➥ &d" & title_case(tag), "&cNo Tags")'
       - '" "'
       - '"&7Updated: &d" & date_format(head.lastUpdate, "date", lut["dateFormat"])'
       - '" "'
