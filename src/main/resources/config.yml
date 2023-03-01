@@ -13,6 +13,53 @@ command:
     - hc
   description: Opens the head catalog
 
+singleChoiceUI:
+  search:
+    type: NAME_TAG
+    name: '&6Search'
+
+  # Pagination Environment
+  # viewer: Player
+  # currentPage: Integer
+  # pageSize: Integer
+  # numberOfPages: Integer
+  # numberOfPageables: Integer
+
+  previousPage:
+    type: PLAYER_HEAD
+    textures$: 'lut["ARROW_LEFT"]'
+    name: '&6Previous Page'
+
+  currentPage:
+    type: PAPER
+    name: '&6Current Page'
+
+  nextPage:
+    type: PLAYER_HEAD
+    textures$: 'lut["ARROW_RIGHT"]'
+    name: '&6Next Page'
+
+  paginationSlots$: |
+    flatten(
+      range(10, 16),
+      range(19, 25),
+      range(28, 34)
+    )
+
+  numberOfRows: 5
+
+  title$: '"&6" & name & "\ss Inventory"'
+
+  border:
+    type: ORANGE_STAINED_GLASS_PANE
+
+  # TODO: Try ranges on values
+  slotContents:
+    previousPage: 38
+    currentPage: 40
+    nextPage: 42
+    search: 44
+
 gui:
   representative:
     type: PLAYER_HEAD
@@ -81,3 +128,7 @@ persistence:
 # Lookup table for this file, used to centralize and deduplicate constants
 lut:
   dateFormat: 'dd.MM.yyyy HH:mm:ss'
+  ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTE4YTJkZDViZWYwYjA3M2IxMzI3MWE3ZWViOWNmZWE3YWZlODU5M2M1N2E5MzgyMWU0MzE3NTU3MjQ2MTgxMiJ9fX0='
+  ARROW_LEFT_RED: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWRmNWMyZjg5M2JkM2Y4OWNhNDA3MDNkZWQzZTQyZGQwZmJkYmE2ZjY3NjhjODc4OWFmZGZmMWZhNzhiZjYifX19'
+  ARROW_RIGHT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDllY2NjNWMxYzc5YWE3ODI2YTE1YTdmNWYxMmZiNDAzMjgxNTdjNTI0MjE2NGJhMmFlZjQ3ZTVkZTlhNWNmYyJ9fX0='
+  ARROW_RIGHT_RED: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWJhZTg5ZTkyYWMzNjI2MzViYTNlOWZiN2MxMmI3ZGRkOWIzOGFkYjExZGY4YWExYWZmM2U1MWFjNDI4YTQifX19'
