@@ -9,7 +9,12 @@ import java.util.*;
 
 public abstract class PageableInventoryUI<T extends IPageableParameterProvider> extends AInventoryUI<T> {
 
-  private final List<Integer> paginationSlotIndices;
+  private static final String
+    KEY_PREVIOUS_PAGE = "previousPage",
+    KEY_CURRENT_PAGE = "currentPage",
+    KEY_NEXT_PAGE = "nextPage";
+
+  private final List<Long> paginationSlotIndices;
   private final int pageSize;
 
   private List<UISlot> pageableSlots;
@@ -36,15 +41,15 @@ public abstract class PageableInventoryUI<T extends IPageableParameterProvider> 
       UISlot slotContent = null;
 
       switch (contentEntry.getKey()) {
-        case "previousPage":
+        case KEY_PREVIOUS_PAGE:
           slotContent = new UISlot(() -> parameterProvider.getPreviousPage().build(paginationEnvironment), this::handlePreviousPageClick);
           break;
 
-        case "nextPage":
+        case KEY_NEXT_PAGE:
           slotContent = new UISlot(() -> parameterProvider.getNextPage().build(paginationEnvironment), this::handleNextPageClick);
           break;
 
-        case "currentPage":
+        case KEY_CURRENT_PAGE:
           slotContent = new UISlot(() -> parameterProvider.getCurrentPage().build(paginationEnvironment));
           break;
       }
@@ -56,56 +61,78 @@ public abstract class PageableInventoryUI<T extends IPageableParameterProvider> 
     }
   }
 
-  protected void setPageableSlots(Collection<UISlot> items) {
+  public void setPageableSlots(Collection<UISlot> items) {
     this.pageableSlots = new ArrayList<>(items);
     this.numberOfPageables = this.pageableSlots.size();
 
-    int numberOfIndices = this.paginationSlotIndices.size();
-
-    if (numberOfIndices == 0) {
+    if (this.pageSize == 0) {
       this.numberOfPages = 0;
       setCurrentPage(0);
       return;
     }
 
     int oldNumberOfPages = this.numberOfPages;
-    this.numberOfPages = (int) Math.ceil(this.paginationSlotIndices.size() / (float) numberOfIndices);
+    this.numberOfPages = (int) Math.ceil(this.numberOfPageables / (float) this.pageSize);
 
     // Try to keep the current page, if possible, only reset if it would be out of bounds
     if (this.numberOfPages < oldNumberOfPages)
       setCurrentPage(0);
+
+    else
+      this.drawPagination();
   }
 
   private void drawCurrentPage() {
     for (int i = 0; i < pageSize; i++) {
-      int slot = paginationSlotIndices.get(i);
-      int pageableSlotsIndex = this.currentPage * this.pageSize + 1;
+      // FIXME: This really should be an int list...
+      int slot = paginationSlotIndices.get(i).intValue();
+      int pageableSlotsIndex = this.currentPage * this.pageSize + i;
+
+      UISlot slotValue;
 
       if (pageableSlotsIndex >= this.numberOfPageables)
-        break;
+        slotValue = null;
+      else
+        slotValue = pageableSlots.get(pageableSlotsIndex);
 
-      setSlot(slot, pageableSlots.get(pageableSlotsIndex));
+      setSlot(slot, slotValue);
+      drawSlot(slot);
     }
+  }
+
+  private void drawPagination() {
+    this.drawCurrentPage();
+    this.drawNamedSlot(KEY_PREVIOUS_PAGE);
+    this.drawNamedSlot(KEY_CURRENT_PAGE);
+    this.drawNamedSlot(KEY_NEXT_PAGE);
   }
 
   private void setCurrentPage(int slot) {
     this.currentPage = slot;
-    this.drawCurrentPage();
+    this.drawPagination();
   }
 
   private EnumSet<EClickResultFlag> handlePreviousPageClick(UIInteraction action) {
-    System.out.println("Clicked previous page");
     if (this.currentPage == 0)
       return null;
+
+    if (action.clickType.isRightClick()) {
+      setCurrentPage(0);
+      return null;
+    }
 
     setCurrentPage(this.currentPage - 1);
     return null;
   }
 
   private EnumSet<EClickResultFlag> handleNextPageClick(UIInteraction action) {
-    System.out.println("Clicked next page");
     if (this.currentPage == numberOfPages - 1)
       return null;
+
+    if (action.clickType.isRightClick()) {
+      setCurrentPage(this.numberOfPages - 1);
+      return null;
+    }
 
     setCurrentPage(this.currentPage + 1);
     return null;
@@ -114,10 +141,10 @@ public abstract class PageableInventoryUI<T extends IPageableParameterProvider> 
   private IEvaluationEnvironment getPaginationEnvironment() {
     return new EvaluationEnvironmentBuilder()
       .withLiveVariable("name", viewer::getName)
-      .withLiveVariable("currentPage", () -> this.currentPage)
-      .withLiveVariable("pageSize", () -> this.pageSize)
-      .withLiveVariable("numberOfPages", () -> this.numberOfPages)
-      .withLiveVariable("numberOfPageables", () -> this.numberOfPageables)
+      .withLiveVariable("current_page", () -> this.currentPage + 1)
+      .withLiveVariable("page_size", () -> this.pageSize)
+      .withLiveVariable("number_of_pages", () -> this.numberOfPages)
+      .withLiveVariable("number_of_pageables", () -> this.numberOfPageables)
       .build();
   }
 }

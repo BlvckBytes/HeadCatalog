@@ -36,6 +36,16 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider> {
       setItem(slotEntry.getKey(), slotEntry.getValue().itemSupplier);
   }
 
+  protected void drawNamedSlot(String name) {
+    Set<Long> slots = parameterProvider.getSlotContents().get(name);
+
+    if (slots == null)
+      return;
+
+    for (long slot : slots)
+      drawSlot((int) slot);
+  }
+
   protected void drawSlot(int slot) {
     UISlot targetSlot = this.slots.get(slot);
 
@@ -109,6 +119,10 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider> {
     return this.inventory;
   }
 
+  public Player getViewer() {
+    return this.viewer;
+  }
+
   protected abstract void handleClose();
 
   protected abstract boolean canInteractWithOwnInventory();
@@ -124,8 +138,6 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider> {
   }
 
   public void handleInteraction(UIInteraction interaction) {
-    System.out.println(interaction);
-
     int slot = interaction.slot;
 
     if (!interaction.wasTopInventory)

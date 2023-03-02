@@ -15,6 +15,8 @@ public class SingleChoiceUI extends PageableInventoryUI<ISingleChoiceParameterPr
 
   // TODO: Updatable inventory names would be useful
 
+  private static final String KEY_SEARCH = "search";
+
   public SingleChoiceUI(ISingleChoiceParameterProvider singleChoiceParameters, SingleChoiceParameter parameter) {
     super(singleChoiceParameters, parameter.viewer);
   }
@@ -28,7 +30,7 @@ public class SingleChoiceUI extends PageableInventoryUI<ISingleChoiceParameterPr
       UISlot slotContent = null;
 
       switch (contentEntry.getKey()) {
-        case "search":
+        case KEY_SEARCH:
           slotContent = new UISlot(() -> parameterProvider.getSearch().build(), this::handleSearchClick);
           break;
       }

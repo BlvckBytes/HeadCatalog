@@ -12,6 +12,6 @@ public interface IPageableParameterProvider extends IInventoryUIParameterProvide
 
   IItemBuildable getNextPage();
 
-  List<Integer> getPaginationSlots();
+  List<Long> getPaginationSlots();
 
 }

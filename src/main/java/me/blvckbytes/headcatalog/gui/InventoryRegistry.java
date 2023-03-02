@@ -86,7 +86,7 @@ public class InventoryRegistry implements ICleanable, Listener {
       return;
 
     for (int slot : event.getRawSlots()) {
-      inventoryUI.handleInteraction(UIInteraction.fromDragEvent(event, slot));
+      inventoryUI.handleInteraction(UIInteraction.fromDragEvent(inventoryUI, event, slot));
 
       if (event.isCancelled())
         break;
@@ -106,6 +106,6 @@ public class InventoryRegistry implements ICleanable, Listener {
     if (inventoryUI == null)
       return;
 
-    inventoryUI.handleInteraction(UIInteraction.fromClickEvent(event));
+    inventoryUI.handleInteraction(UIInteraction.fromClickEvent(inventoryUI, event));
   }
 }
