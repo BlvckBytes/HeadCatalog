@@ -14,6 +14,7 @@ command:
   description: Opens the head catalog
 
 anvilSearchUI:
+  animating: true
   searchDebounceTicks: 5
 
   title: '&5Search UI'
@@ -85,7 +86,7 @@ anvilSearchUI:
           "&8● &7Already on the &clast &7page"
         )
 
-  paginationSlots$: 'range(inventory_size + 0, inventory_size + 26)'
+  paginationSlots$: 'range(inventory_size, inventory_size + 26)'
 
   customItems:
     darkGlass:

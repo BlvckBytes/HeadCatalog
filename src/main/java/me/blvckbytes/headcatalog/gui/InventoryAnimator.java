@@ -18,11 +18,19 @@ public class InventoryAnimator {
   private int numberOfRows;
   private int currentFrame;
 
+  private int slotOffset;
+
   public InventoryAnimator(BiConsumer<Integer, ItemStack> setter) {
     this.setter = setter;
   }
 
+  public void setSlotOffset(int slotOffset) {
+    this.slotOffset = slotOffset;
+  }
+
   public void animateTo(EAnimationType animationType, List<Integer> mask, int inventorySize, Function<Integer, ItemStack> itemGetter) {
+    inventorySize = Math.max(0, inventorySize - slotOffset);
+
     if (inventorySize % 9 != 0)
       return;
 
@@ -30,7 +38,7 @@ public class InventoryAnimator {
       this.toLayout = new ItemStack[inventorySize];
 
     for (int i = 0; i < inventorySize; i++)
-      this.toLayout[i] = itemGetter.apply(i);
+      this.toLayout[i] = itemGetter.apply(i + slotOffset);
 
     this.animationType = animationType;
     this.mask = mask;
@@ -48,24 +56,25 @@ public class InventoryAnimator {
   }
 
   public void saveLayout(int inventorySize, Function<Integer, ItemStack> itemGetter) {
+    inventorySize = Math.max(0, inventorySize - slotOffset);
+
     if (this.fromLayout == null || this.fromLayout.length >= inventorySize)
       this.fromLayout = new ItemStack[inventorySize];
 
     for (int i = 0; i < inventorySize; i++)
-      this.fromLayout[i] = itemGetter.apply(i);
+      this.fromLayout[i] = itemGetter.apply(i + slotOffset);
   }
 
-  public boolean tick() {
+  public void tick() {
     if (this.animationType == null)
-      return false;
+      return;
 
     if (++currentFrame < numberOfFrames) {
       drawCurrentFrame();
-      return true;
+      return;
     }
 
     this.animationType = null;
-    return false;
   }
 
   private void drawCurrentFrame() {
@@ -106,8 +115,8 @@ public class InventoryAnimator {
             int destinationSlot = drawCol + i;
             int sourceSlot = readCol + i;
 
-            if (mask == null || (mask.contains(destinationSlot) && mask.contains(sourceSlot)))
-              this.setter.accept(destinationSlot, getItem(origin, sourceSlot));
+            if (mask == null || (mask.contains(destinationSlot + slotOffset) && mask.contains(sourceSlot + slotOffset)))
+              this.setter.accept(destinationSlot + slotOffset, getItem(origin, sourceSlot));
           }
         }
         break;
@@ -145,8 +154,8 @@ public class InventoryAnimator {
             int destinationSlot = drawRow * 9 + i;
             int sourceSlot = readRow * 9 + i;
 
-            if (mask == null || (mask.contains(destinationSlot) && mask.contains(sourceSlot)))
-              this.setter.accept(destinationSlot, getItem(origin, sourceSlot));
+            if (mask == null || (mask.contains(destinationSlot + slotOffset) && mask.contains(sourceSlot + slotOffset)))
+              this.setter.accept(destinationSlot + slotOffset, getItem(origin, sourceSlot));
           }
         }
         break;

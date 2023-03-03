@@ -38,7 +38,14 @@ public abstract class AInventoryUI<Provider extends IInventoryUIParameterProvide
     this.parameter = parameter;
     this.inventory = createInventory();
     this.fakeSlotItemCache = new HashMap<>();
+
     this.animator = new InventoryAnimator(this::setItem);
+
+    // If the inventory is not chest-like, skip it on the animator
+    int inventorySize = this.inventory.getSize();
+    if (inventorySize % 9 != 0)
+      this.animator.setSlotOffset(inventorySize);
+
     this.inventoryEnvironment = getInventoryEnvironment();
     this.slotContents = parameter.provider.getSlotContents(this.inventoryEnvironment);
   }
