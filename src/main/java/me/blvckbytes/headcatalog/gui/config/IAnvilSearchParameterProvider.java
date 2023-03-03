@@ -1,4 +1,3 @@
 package me.blvckbytes.headcatalog.gui.config;
 
-public interface IAnvilSearchParameterProvider extends IInventoryUIParameterProvider {
-}
+public interface IAnvilSearchParameterProvider extends IPageableParameterProvider {}

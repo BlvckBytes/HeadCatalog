@@ -1,8 +1,7 @@
 package me.blvckbytes.headcatalog.gui.config;
 
 import me.blvckbytes.bbconfigmapper.IEvaluable;
-import me.blvckbytes.bukkitevaluable.IItemBuildable;
-import org.jetbrains.annotations.Nullable;
+import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 
 import java.util.Map;
 import java.util.Set;
@@ -17,10 +16,6 @@ public interface IInventoryUIParameterProvider {
 
   int getAnimationPeriod();
 
-  @Nullable IItemBuildable getFill();
-
-  @Nullable IItemBuildable getBorder();
-
-  Map<String, Set<Long>> getSlotContents();
+  Map<String, Set<Integer>> getSlotContents(IEvaluationEnvironment environment);
 
 }

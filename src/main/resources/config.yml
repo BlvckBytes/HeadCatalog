@@ -16,6 +16,55 @@ command:
 anvilSearchUI:
   title: '&5Search UI'
 
+  # Pagination Environment
+  # current_page: Integer
+  # pageSize: Integer
+  # numberOfPages: Integer
+  # numberOfPageables: Integer
+
+  previousPage:
+    type: PLAYER_HEAD
+    textures$: 'lut[if current_page > 1 then "ARROW_LEFT" else "ARROW_LEFT_RED"]'
+    name$: '"&8» " & (if current_page > 1 then "&dPrevious Page" else "&cNo Previous Page") & " &8«"'
+    lore$:
+      - '" "'
+      - |
+        if current_page > 1 then list_of(
+          "&8● &7Left click: &dPrevious Page",
+          "&8● &7Right click: &dFirst Page"
+        ) else list_of(
+          "&8● &7Already on the &cfirst &7page"
+        )
+
+  currentPage:
+    type: PAPER
+    name$: '"&8» &dPage &5" & current_page & "&7/&5" & max(1, number_of_pages) & " &8«"'
+    lore$:
+      - '" "'
+      - '"&8● &7Page size: &d" & page_size'
+      - '"&8● &7Items total: &d" & number_of_pageables'
+
+  nextPage:
+    type: PLAYER_HEAD
+    textures$: 'lut[if current_page < number_of_pages then "ARROW_RIGHT" else "ARROW_RIGHT_RED"]'
+    name$: '"&8» " & (if current_page < number_of_pages then "&dNext Page" else "&cNo Next Page") & " &8«"'
+    lore$:
+      - '" "'
+      - |
+        if current_page < number_of_pages then list_of(
+          "&8● &7Left click: &dNext Page",
+          "&8● &7Right click: &dLast Page"
+        ) else list_of(
+          "&8● &7Already on the &clast &7page"
+        )
+
+  paginationSlots$: 'range(inventory_size + 0, inventory_size + 26)'
+
+  slotContents:
+    previousPage$: 'inventory_size + 29'
+    currentPage$: 'inventory_size + 31'
+    nextPage$: 'inventory_size + 33'
+
 singleChoiceUI:
   animating: true
 

@@ -15,7 +15,7 @@ import org.bukkit.inventory.Inventory;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AnvilSearchUI extends AInventoryUI<IAnvilSearchParameterProvider> {
+public class AnvilSearchUI extends PageableInventoryUI<IAnvilSearchParameterProvider> {
 
   private String searchText;
 

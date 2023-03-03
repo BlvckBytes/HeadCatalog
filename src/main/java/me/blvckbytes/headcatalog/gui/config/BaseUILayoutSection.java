@@ -7,14 +7,14 @@ import me.blvckbytes.bbconfigmapper.sections.IConfigSection;
 import me.blvckbytes.bukkitevaluable.BukkitEvaluable;
 import me.blvckbytes.bukkitevaluable.IItemBuildable;
 import me.blvckbytes.bukkitevaluable.ItemBuilder;
-import me.blvckbytes.gpeee.GPEEE;
+import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import org.bukkit.Material;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.util.*;
 
-public class UIBaseLayoutSection implements IConfigSection, IInventoryUIParameterProvider {
+public class BaseUILayoutSection implements IConfigSection, IInventoryUIParameterProvider {
 
   private static final IItemBuildable ITEM_NOT_CONFIGURED;
 
@@ -43,16 +43,8 @@ public class UIBaseLayoutSection implements IConfigSection, IInventoryUIParamete
   @CSAlways
   private Map<String, IEvaluable> slotContents;
 
-  private Map<String, Set<Long>> evaluatedSlotContents;
-
   @Override
   public void afterParsing(List<Field> fields) throws Exception {
-    this.evaluatedSlotContents = new HashMap<>();
-    for (Map.Entry<String, IEvaluable> entry : slotContents.entrySet()) {
-      Set<Long> indices = entry.getValue().asSet(ScalarType.LONG, GPEEE.EMPTY_ENVIRONMENT);
-      this.evaluatedSlotContents.put(entry.getKey(), indices);
-    }
-
     this.animationPeriod = Math.max(1, animationPeriod);
   }
 
@@ -89,17 +81,14 @@ public class UIBaseLayoutSection implements IConfigSection, IInventoryUIParamete
   }
 
   @Override
-  public @Nullable IItemBuildable getFill() {
-    return fill;
-  }
+  public Map<String, Set<Integer>> getSlotContents(IEvaluationEnvironment environment) {
+    Map<String, Set<Integer>> evaluatedSlotContents = new HashMap<>();
 
-  @Override
-  public @Nullable IItemBuildable getBorder() {
-    return border;
-  }
+    for (Map.Entry<String, IEvaluable> entry : slotContents.entrySet()) {
+      Set<Integer> indices = entry.getValue().asSet(ScalarType.INT, environment);
+      evaluatedSlotContents.put(entry.getKey(), indices);
+    }
 
-  @Override
-  public Map<String, Set<Long>> getSlotContents() {
     return evaluatedSlotContents;
   }
 }

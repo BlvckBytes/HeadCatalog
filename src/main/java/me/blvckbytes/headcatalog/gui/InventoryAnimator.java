@@ -8,7 +8,6 @@ import java.util.function.BiConsumer;
 
 public class InventoryAnimator {
 
-  private final @Nullable ItemStack fillerItem;
   private final BiConsumer<Integer, ItemStack> setter;
 
   private ItemStack @Nullable [] fromLayout, toLayout;
@@ -18,9 +17,8 @@ public class InventoryAnimator {
   private int numberOfRows;
   private int currentFrame;
 
-  public InventoryAnimator(@Nullable ItemStack fillerItem, BiConsumer<Integer, ItemStack> setter) {
+  public InventoryAnimator(BiConsumer<Integer, ItemStack> setter) {
     this.setter = setter;
-    this.fillerItem = fillerItem;
   }
 
   public void animateTo(EAnimationType animationType, List<Integer> mask, IReadonlyInventory inventory) {
@@ -160,7 +158,7 @@ public class InventoryAnimator {
 
   private ItemStack getItem(ItemStack[] contents, int slot) {
     if (slot >= contents.length)
-      return this.fillerItem;
+      return null;
     return contents[slot];
   }
 

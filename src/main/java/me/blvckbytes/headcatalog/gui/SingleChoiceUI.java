@@ -26,8 +26,8 @@ public class SingleChoiceUI extends PageableInventoryUI<ISingleChoiceParameterPr
   protected void decorate() {
     super.decorate();
 
-    for (Map.Entry<String, Set<Long>> contentEntry : parameterProvider.getSlotContents().entrySet()) {
-      Set<Long> slots = contentEntry.getValue();
+    for (Map.Entry<String, Set<Integer>> contentEntry : slotContents.entrySet()) {
+      Set<Integer> slots = contentEntry.getValue();
       UISlot slotContent = null;
 
       switch (contentEntry.getKey()) {

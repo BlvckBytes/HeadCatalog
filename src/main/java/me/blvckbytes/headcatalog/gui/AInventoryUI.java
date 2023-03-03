@@ -1,9 +1,9 @@
 package me.blvckbytes.headcatalog.gui;
 
 import me.blvckbytes.bbreflect.packets.communicator.IFakeSlotCommunicator;
-import me.blvckbytes.bukkitevaluable.IItemBuildable;
+import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
+import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import me.blvckbytes.headcatalog.gui.config.IInventoryUIParameterProvider;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryType;
@@ -20,6 +20,9 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider> impl
   protected final InventoryAnimator animator;
   protected final T parameterProvider;
   protected final Player viewer;
+  protected final Map<String, Set<Integer>> slotContents;
+  protected final IEvaluationEnvironment inventoryEnvironment;
+
   private final Map<Integer, UISlot> slots;
   private final Map<Integer, ItemStack> fakeSlotItemCache;
   private final IFakeSlotCommunicator fakeSlotCommunicator;
@@ -31,19 +34,15 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider> impl
     this.parameterProvider = parameterProvider;
     this.inventory = createInventory();
     this.fakeSlotItemCache = new HashMap<>();
-    this.animator = new InventoryAnimator(getFillerItem(), this::setItem);
+    this.animator = new InventoryAnimator(this::setItem);
+    this.inventoryEnvironment = getInventoryEnvironment();
+    this.slotContents = parameterProvider.getSlotContents(this.inventoryEnvironment);
   }
 
-  private ItemStack getFillerItem() {
-    IItemBuildable fillBuildable = parameterProvider.getFill();
-    if (fillBuildable != null)
-      return fillBuildable.build();
-
-    IItemBuildable borderBuildable = parameterProvider.getFill();
-    if (borderBuildable != null)
-      return borderBuildable.build();
-
-    return new ItemStack(Material.AIR);
+  private IEvaluationEnvironment getInventoryEnvironment() {
+    return new EvaluationEnvironmentBuilder()
+      .withStaticVariable("inventory_size", this.inventory.getSize())
+      .build();
   }
 
   private void setItem(int slot, ItemStack item) {
@@ -74,13 +73,13 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider> impl
   }
 
   protected void drawNamedSlot(String name) {
-    Set<Long> slots = parameterProvider.getSlotContents().get(name);
+    Set<Integer> slots = slotContents.get(name);
 
     if (slots == null)
       return;
 
-    for (long slot : slots)
-      drawSlot((int) slot);
+    for (int slot : slots)
+      drawSlot(slot);
   }
 
   protected void drawSlot(int slot) {
@@ -119,38 +118,7 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider> impl
       inventory.getViewers().remove(0).closeInventory();
   }
 
-  protected void decorate() {
-    IItemBuildable borderBuildable = parameterProvider.getBorder();
-    IItemBuildable fillBuildable = parameterProvider.getFill();
-    int invSize = inventory.getSize();
-
-    if (fillBuildable != null) {
-      UISlot slotValue = new UISlot(fillBuildable::build);
-      for (int i = 0; i < invSize; i++)
-        setSlot(i, slotValue);
-    }
-
-    // Borders are only supported on row-based inventories
-    if (borderBuildable != null && invSize % 9 == 0) {
-      UISlot slotValue = new UISlot(borderBuildable::build);
-      int numRows = invSize / 9;
-
-      for (int i = 0; i < invSize; i++) {
-        if (
-          // First row
-          i < 9 ||
-          // First slot in row
-          i % 9 == 0 ||
-          // Last slot in row
-          (i + 1) % 9 == 0 ||
-          // Last row
-          i >= (numRows - 1) * 9
-        ) {
-          setSlot(i, slotValue);
-        }
-      }
-    }
-  }
+  protected abstract void decorate();
 
   protected abstract Inventory createInventory();
 

@@ -30,7 +30,7 @@ public abstract class PageableInventoryUI<T extends IPageableParameterProvider> 
   public PageableInventoryUI(IFakeSlotCommunicator fakeSlotCommunicator, T pageableParameters, Player viewer) {
     super(fakeSlotCommunicator, pageableParameters, viewer);
     this.pageableSlots = new ArrayList<>();
-    this.paginationSlotIndices = parameterProvider.getPaginationSlots();
+    this.paginationSlotIndices = parameterProvider.getPaginationSlots(inventoryEnvironment);
     this.animationPeriod = parameterProvider.getAnimationPeriod();
     this.pageSize = this.paginationSlotIndices.size();
     this.isFirstPageRender = true;
@@ -38,12 +38,10 @@ public abstract class PageableInventoryUI<T extends IPageableParameterProvider> 
 
   @Override
   protected void decorate() {
-    super.decorate();
-
     IEvaluationEnvironment paginationEnvironment = getPaginationEnvironment();
 
-    for (Map.Entry<String, Set<Long>> contentEntry : parameterProvider.getSlotContents().entrySet()) {
-      Set<Long> slots = contentEntry.getValue();
+    for (Map.Entry<String, Set<Integer>> contentEntry : slotContents.entrySet()) {
+      Set<Integer> slots = contentEntry.getValue();
       UISlot slotContent = null;
 
       switch (contentEntry.getKey()) {
