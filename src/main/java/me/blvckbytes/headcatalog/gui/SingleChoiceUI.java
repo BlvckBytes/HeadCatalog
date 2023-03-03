@@ -4,6 +4,7 @@ import me.blvckbytes.bbconfigmapper.ScalarType;
 import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import me.blvckbytes.headcatalog.gui.config.ISingleChoiceParameterProvider;
+import me.blvckbytes.headcatalog.gui.reflect.IFakeSlotCommunicator;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 
@@ -17,8 +18,8 @@ public class SingleChoiceUI extends PageableInventoryUI<ISingleChoiceParameterPr
 
   private static final String KEY_SEARCH = "search";
 
-  public SingleChoiceUI(ISingleChoiceParameterProvider singleChoiceParameters, SingleChoiceParameter parameter) {
-    super(singleChoiceParameters, parameter.viewer);
+  public SingleChoiceUI(IFakeSlotCommunicator fakeSlotCommunicator, ISingleChoiceParameterProvider singleChoiceParameters, SingleChoiceParameter parameter) {
+    super(fakeSlotCommunicator, singleChoiceParameters, parameter.viewer);
   }
 
   @Override
@@ -56,6 +57,7 @@ public class SingleChoiceUI extends PageableInventoryUI<ISingleChoiceParameterPr
 
   @Override
   protected void handleClose() {
+    super.handleClose();
     System.out.println("Closed");
   }
 

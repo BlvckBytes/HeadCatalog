@@ -13,7 +13,12 @@ command:
     - hc
   description: Opens the head catalog
 
+anvilSearchUI:
+  title: '&5Search UI'
+
 singleChoiceUI:
+  animating: true
+
   search:
     type: NAME_TAG
     name: '&8» &dSearch &8«'

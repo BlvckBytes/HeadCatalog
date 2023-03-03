@@ -13,6 +13,10 @@ public interface IInventoryUIParameterProvider {
 
   int getNumberOfRows();
 
+  boolean isAnimating();
+
+  int getAnimationPeriod();
+
   @Nullable IItemBuildable getFill();
 
   @Nullable IItemBuildable getBorder();

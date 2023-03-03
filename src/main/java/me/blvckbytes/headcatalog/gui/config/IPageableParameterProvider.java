@@ -3,6 +3,7 @@ package me.blvckbytes.headcatalog.gui.config;
 import me.blvckbytes.bukkitevaluable.IItemBuildable;
 
 import java.util.List;
+import java.util.Set;
 
 public interface IPageableParameterProvider extends IInventoryUIParameterProvider {
 
@@ -12,6 +13,6 @@ public interface IPageableParameterProvider extends IInventoryUIParameterProvide
 
   IItemBuildable getNextPage();
 
-  List<Long> getPaginationSlots();
+  List<Integer> getPaginationSlots();
 
 }

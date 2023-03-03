@@ -31,10 +31,14 @@ public class UIBaseLayoutSection implements IConfigSection, IInventoryUIParamete
   private int numberOfRows;
 
   @CSAlways
-  private IEvaluable title;
+  private BukkitEvaluable title;
 
   private @Nullable IItemBuildable fill;
   private @Nullable IItemBuildable border;
+
+  private boolean animating;
+
+  private int animationPeriod;
 
   @CSAlways
   private Map<String, IEvaluable> slotContents;
@@ -48,6 +52,8 @@ public class UIBaseLayoutSection implements IConfigSection, IInventoryUIParamete
       Set<Long> indices = entry.getValue().asSet(ScalarType.LONG, GPEEE.EMPTY_ENVIRONMENT);
       this.evaluatedSlotContents.put(entry.getKey(), indices);
     }
+
+    this.animationPeriod = Math.max(1, animationPeriod);
   }
 
   @Override
@@ -70,6 +76,16 @@ public class UIBaseLayoutSection implements IConfigSection, IInventoryUIParamete
   @Override
   public int getNumberOfRows() {
     return numberOfRows;
+  }
+
+  @Override
+  public boolean isAnimating() {
+    return animating;
+  }
+
+  @Override
+  public int getAnimationPeriod() {
+    return animationPeriod;
   }
 
   @Override

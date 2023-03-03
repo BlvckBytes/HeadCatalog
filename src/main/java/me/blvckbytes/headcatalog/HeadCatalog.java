@@ -4,6 +4,7 @@ import me.blvckbytes.autowirer.AutoWirer;
 import me.blvckbytes.bbreflect.CommandRegisterer;
 import me.blvckbytes.bbreflect.IReflectionHelper;
 import me.blvckbytes.bbreflect.ReflectionHelperFactory;
+import me.blvckbytes.bbreflect.packets.PacketInterceptorRegistry;
 import me.blvckbytes.bukkitboilerplate.ConsoleSenderLogger;
 import me.blvckbytes.bukkitboilerplate.ELogLevel;
 import me.blvckbytes.bukkitboilerplate.ILogger;
@@ -13,8 +14,12 @@ import me.blvckbytes.bukkitevaluable.GPEEELogRedirect;
 import me.blvckbytes.bukkitevaluable.IConfigManager;
 import me.blvckbytes.bukkitevaluable.IConfigPathsProvider;
 import me.blvckbytes.headcatalog.config.GuiSection;
+import me.blvckbytes.headcatalog.gui.reflect.FakeSlotCommunicator;
 import me.blvckbytes.headcatalog.gui.InventoryRegistry;
+import me.blvckbytes.headcatalog.gui.config.AnvilSearchUISection;
 import me.blvckbytes.headcatalog.gui.config.SingleChoiceUISection;
+import me.blvckbytes.headcatalog.gui.reflect.ItemNameWatcher;
+import me.blvckbytes.headcatalog.gui.reflect.WindowOpenWatcher;
 import me.blvckbytes.headcatalog.heads.HeadManager;
 import me.blvckbytes.headcatalog.apis.HeadApisManager;
 import me.blvckbytes.headcatalog.command.HeadCatalogCommand;
@@ -57,6 +62,10 @@ public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider {
       .addSingleton(PluginFileHandler.class)
       .addSingleton(PersistenceFactory.class)
       .addSingleton(InventoryRegistry.class)
+      .addSingleton(FakeSlotCommunicator.class)
+      .addSingleton(PacketInterceptorRegistry.class)
+      .addSingleton(ItemNameWatcher.class)
+      .addSingleton(WindowOpenWatcher.class)
       .addSingleton(HeadCatalogCommandSection.class, dependencies -> {
         IConfigManager configManager = (IConfigManager) dependencies[0];
         return configManager.getMapper("config.yml").mapSection("command", HeadCatalogCommandSection.class);
@@ -76,6 +85,10 @@ public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider {
       .addSingleton(SingleChoiceUISection.class, dependencies -> {
         IConfigManager configManager = (IConfigManager) dependencies[0];
         return configManager.getMapper("config.yml").mapSection("singleChoiceUI", SingleChoiceUISection.class);
+      }, null, IConfigManager.class)
+      .addSingleton(AnvilSearchUISection.class, dependencies -> {
+        IConfigManager configManager = (IConfigManager) dependencies[0];
+        return configManager.getMapper("config.yml").mapSection("anvilSearchUI", AnvilSearchUISection.class);
       }, null, IConfigManager.class)
       .addSingleton(IPersistence.class, dependencies -> {
         PersistenceFactory factory = (PersistenceFactory) dependencies[0];

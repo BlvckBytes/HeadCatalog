@@ -3,7 +3,9 @@ package me.blvckbytes.headcatalog.gui;
 import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import me.blvckbytes.headcatalog.gui.config.IPageableParameterProvider;
+import me.blvckbytes.headcatalog.gui.reflect.IFakeSlotCommunicator;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -14,20 +16,24 @@ public abstract class PageableInventoryUI<T extends IPageableParameterProvider> 
     KEY_CURRENT_PAGE = "currentPage",
     KEY_NEXT_PAGE = "nextPage";
 
-  private final List<Long> paginationSlotIndices;
+  private final List<Integer> paginationSlotIndices;
   private final int pageSize;
+  private final long animationPeriod;
 
   private List<UISlot> pageableSlots;
   private int numberOfPageables;
+  private boolean isFirstPageRender;
 
   private int currentPage;
   private int numberOfPages;
 
-  public PageableInventoryUI(T pageableParameters, Player viewer) {
-    super(pageableParameters, viewer);
+  public PageableInventoryUI(IFakeSlotCommunicator fakeSlotCommunicator, T pageableParameters, Player viewer) {
+    super(fakeSlotCommunicator, pageableParameters, viewer);
     this.pageableSlots = new ArrayList<>();
     this.paginationSlotIndices = parameterProvider.getPaginationSlots();
+    this.animationPeriod = parameterProvider.getAnimationPeriod();
     this.pageSize = this.paginationSlotIndices.size();
+    this.isFirstPageRender = true;
   }
 
   @Override
@@ -67,7 +73,7 @@ public abstract class PageableInventoryUI<T extends IPageableParameterProvider> 
 
     if (this.pageSize == 0) {
       this.numberOfPages = 0;
-      setCurrentPage(0);
+      setCurrentPage(0, null);
       return;
     }
 
@@ -76,16 +82,15 @@ public abstract class PageableInventoryUI<T extends IPageableParameterProvider> 
 
     // Try to keep the current page, if possible, only reset if it would be out of bounds
     if (this.numberOfPages < oldNumberOfPages)
-      setCurrentPage(0);
+      setCurrentPage(0, null);
 
     else
-      this.drawPagination();
+      this.drawPagination(null);
   }
 
   private void drawCurrentPage() {
     for (int i = 0; i < pageSize; i++) {
-      // FIXME: This really should be an int list...
-      int slot = paginationSlotIndices.get(i).intValue();
+      int slot = paginationSlotIndices.get(i);
       int pageableSlotsIndex = this.currentPage * this.pageSize + i;
 
       UISlot slotValue;
@@ -100,16 +105,23 @@ public abstract class PageableInventoryUI<T extends IPageableParameterProvider> 
     }
   }
 
-  private void drawPagination() {
+  private void drawPagination(@Nullable EAnimationType animationType) {
+    animator.saveLayout(this);
+
     this.drawCurrentPage();
     this.drawNamedSlot(KEY_PREVIOUS_PAGE);
     this.drawNamedSlot(KEY_CURRENT_PAGE);
     this.drawNamedSlot(KEY_NEXT_PAGE);
+
+    if (!isFirstPageRender && animationType != null && parameterProvider.isAnimating())
+      animator.animateTo(animationType, paginationSlotIndices, this);
+
+    isFirstPageRender = false;
   }
 
-  private void setCurrentPage(int slot) {
+  private void setCurrentPage(int slot, @Nullable EAnimationType animationType) {
     this.currentPage = slot;
-    this.drawPagination();
+    this.drawPagination(animationType);
   }
 
   private EnumSet<EClickResultFlag> handlePreviousPageClick(UIInteraction action) {
@@ -117,11 +129,11 @@ public abstract class PageableInventoryUI<T extends IPageableParameterProvider> 
       return null;
 
     if (action.clickType.isRightClick()) {
-      setCurrentPage(0);
+      setCurrentPage(0, EAnimationType.SLIDE_RIGHT);
       return null;
     }
 
-    setCurrentPage(this.currentPage - 1);
+    setCurrentPage(this.currentPage - 1, EAnimationType.SLIDE_RIGHT);
     return null;
   }
 
@@ -130,11 +142,11 @@ public abstract class PageableInventoryUI<T extends IPageableParameterProvider> 
       return null;
 
     if (action.clickType.isRightClick()) {
-      setCurrentPage(this.numberOfPages - 1);
+      setCurrentPage(this.numberOfPages - 1, EAnimationType.SLIDE_LEFT);
       return null;
     }
 
-    setCurrentPage(this.currentPage + 1);
+    setCurrentPage(this.currentPage + 1, EAnimationType.SLIDE_LEFT);
     return null;
   }
 
@@ -146,5 +158,17 @@ public abstract class PageableInventoryUI<T extends IPageableParameterProvider> 
       .withLiveVariable("number_of_pages", () -> this.numberOfPages)
       .withLiveVariable("number_of_pageables", () -> this.numberOfPageables)
       .build();
+  }
+
+  @Override
+  public void handleTick(long time) {
+    if (time % animationPeriod == 0)
+      this.animator.tick();
+  }
+
+  @Override
+  public void handleInteraction(UIInteraction interaction) {
+    this.animator.fastForward();
+    super.handleInteraction(interaction);
   }
 }

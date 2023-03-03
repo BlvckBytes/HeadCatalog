@@ -2,10 +2,7 @@ package me.blvckbytes.headcatalog.command;
 
 import me.blvckbytes.bukkitboilerplate.PlayerCommand;
 import me.blvckbytes.headcatalog.config.HeadCatalogCommandSection;
-import me.blvckbytes.headcatalog.gui.InventoryRegistry;
-import me.blvckbytes.headcatalog.gui.SingleChoiceParameter;
-import me.blvckbytes.headcatalog.gui.SingleChoiceUI;
-import me.blvckbytes.headcatalog.gui.UISlot;
+import me.blvckbytes.headcatalog.gui.*;
 import me.blvckbytes.headcatalog.heads.Head;
 import me.blvckbytes.headcatalog.heads.IHeadManager;
 import org.bukkit.entity.Player;
@@ -44,13 +41,16 @@ public class HeadCatalogCommand extends PlayerCommand {
 
   @Override
   protected void onPlayerExecution(Player player, String s, String[] strings) {
-    if (this.headSlots == null) {
-      player.sendMessage("§cHeads aren't ready yet");
-      return;
-    }
+//    if (this.headSlots == null) {
+//      player.sendMessage("§cHeads aren't ready yet");
+//      return;
+//    }
+//
+//    SingleChoiceUI singleChoiceUI = inventoryRegistry.createInventory(SingleChoiceUI.class, new SingleChoiceParameter(player));
+//    singleChoiceUI.show();
+//    singleChoiceUI.setPageableSlots(this.headSlots);
 
-    SingleChoiceUI singleChoiceUI = inventoryRegistry.createInventory(SingleChoiceUI.class, new SingleChoiceParameter(player));
-    singleChoiceUI.show();
-    singleChoiceUI.setPageableSlots(this.headSlots);
+    AnvilSearchUI searchUI = inventoryRegistry.createInventory(AnvilSearchUI.class, new AnvilSearchParameter(player));
+    searchUI.show();
   }
 }

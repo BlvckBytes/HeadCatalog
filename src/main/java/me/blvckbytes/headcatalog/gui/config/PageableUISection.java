@@ -19,7 +19,7 @@ public class PageableUISection extends UIBaseLayoutSection implements IConfigSec
 
   private @Nullable IEvaluable paginationSlots;
 
-  private List<Long> evaluatedPaginationSlots;
+  private List<Integer> evaluatedPaginationSlots;
 
   @Override
   public void afterParsing(List<Field> fields) throws Exception {
@@ -30,7 +30,7 @@ public class PageableUISection extends UIBaseLayoutSection implements IConfigSec
       return;
     }
 
-    this.evaluatedPaginationSlots = paginationSlots.asList(ScalarType.LONG, GPEEE.EMPTY_ENVIRONMENT);
+    this.evaluatedPaginationSlots = paginationSlots.asList(ScalarType.INT, GPEEE.EMPTY_ENVIRONMENT);
   }
 
   @Override
@@ -49,7 +49,7 @@ public class PageableUISection extends UIBaseLayoutSection implements IConfigSec
   }
 
   @Override
-  public List<Long> getPaginationSlots() {
+  public List<Integer> getPaginationSlots() {
     return this.evaluatedPaginationSlots;
   }
 }

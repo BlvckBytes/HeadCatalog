@@ -2,8 +2,11 @@ package me.blvckbytes.headcatalog.gui;
 
 import me.blvckbytes.bukkitevaluable.IItemBuildable;
 import me.blvckbytes.headcatalog.gui.config.IInventoryUIParameterProvider;
+import me.blvckbytes.headcatalog.gui.reflect.IFakeSlotCommunicator;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -11,29 +14,63 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Supplier;
 
-public abstract class AInventoryUI<T extends IInventoryUIParameterProvider> {
+public abstract class AInventoryUI<T extends IInventoryUIParameterProvider> implements IReadonlyInventory {
 
-  private final Inventory inventory;
+  protected final Inventory inventory;
+  protected final InventoryAnimator animator;
   protected final T parameterProvider;
   protected final Player viewer;
   private final Map<Integer, UISlot> slots;
+  private final Map<Integer, ItemStack> fakeSlotItemCache;
+  private final IFakeSlotCommunicator fakeSlotCommunicator;
 
-  public AInventoryUI(T parameterProvider, Player viewer) {
+  public AInventoryUI(IFakeSlotCommunicator fakeSlotCommunicator, T parameterProvider, Player viewer) {
     this.slots = new HashMap<>();
+    this.fakeSlotCommunicator = fakeSlotCommunicator;
     this.viewer = viewer;
     this.parameterProvider = parameterProvider;
     this.inventory = createInventory();
+    this.fakeSlotItemCache = new HashMap<>();
+    this.animator = new InventoryAnimator(getFillerItem(), this::setItem);
   }
 
-  private void setItem(int slot, Supplier<ItemStack> item) {
-    if (slot < 0 || slot >= this.inventory.getSize())
+  private ItemStack getFillerItem() {
+    IItemBuildable fillBuildable = parameterProvider.getFill();
+    if (fillBuildable != null)
+      return fillBuildable.build();
+
+    IItemBuildable borderBuildable = parameterProvider.getFill();
+    if (borderBuildable != null)
+      return borderBuildable.build();
+
+    return new ItemStack(Material.AIR);
+  }
+
+  private void setItem(int slot, ItemStack item) {
+    if (slot < 0)
       return;
-    this.inventory.setItem(slot, item.get());
+
+    int inventorySize = this.inventory.getSize();
+    if (
+      slot >= inventorySize ||
+      this.inventory.getType() == InventoryType.ANVIL
+    ) {
+      this.fakeSlotCommunicator.setFakeSlot(slot, true, item, viewer, 0);
+      this.fakeSlotItemCache.put(slot, item);
+      return;
+    }
+
+    this.inventory.setItem(slot, item);
+  }
+
+
+  private void setSuppliedItem(int slot, Supplier<ItemStack> item) {
+    this.setItem(slot, item.get());
   }
 
   protected void drawAll() {
     for (Map.Entry<Integer, UISlot> slotEntry : this.slots.entrySet())
-      setItem(slotEntry.getKey(), slotEntry.getValue().itemSupplier);
+      setSuppliedItem(slotEntry.getKey(), slotEntry.getValue().itemSupplier);
   }
 
   protected void drawNamedSlot(String name) {
@@ -52,7 +89,7 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider> {
     if (targetSlot == null)
       return;
 
-    setItem(slot, targetSlot.itemSupplier);
+    setSuppliedItem(slot, targetSlot.itemSupplier);
   }
 
   protected void setSlots(UISlot value, Collection<? extends Number> slots) {
@@ -70,9 +107,11 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider> {
   }
 
   public void show() {
+    // Open the inventory before decorating, so that the fake slot
+    // communicator takes effect (has a target window ID), if applicable
+    this.viewer.openInventory(this.inventory);
     this.decorate();
     this.drawAll();
-    this.viewer.openInventory(this.inventory);
   }
 
   public void close() {
@@ -119,13 +158,37 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider> {
     return this.inventory;
   }
 
+  @Override
+  public int getSize() {
+    return this.inventory.getSize();
+  }
+
+  @Override
+  public ItemStack getItem(int slot) {
+    if (slot < 0)
+      return null;
+
+    int inventorySize = this.inventory.getSize();
+    if (
+      slot >= inventorySize ||
+      this.inventory.getType() == InventoryType.ANVIL
+    )
+      return this.fakeSlotItemCache.get(slot);
+
+    return this.inventory.getItem(slot);
+  }
+
   public Player getViewer() {
     return this.viewer;
   }
 
-  protected abstract void handleClose();
+  protected void handleClose() {
+    viewer.updateInventory();
+  }
 
   protected abstract boolean canInteractWithOwnInventory();
+
+  public void handleTick(long time) {}
 
   private boolean isAllowedToInteractWithEmptySlot(UIInteraction interaction) {
     if (interaction.wasTopInventory)
@@ -137,14 +200,23 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider> {
     return interaction.action != InventoryAction.MOVE_TO_OTHER_INVENTORY;
   }
 
+  public void handleItemRename(String name) {}
+
   public void handleInteraction(UIInteraction interaction) {
     int slot = interaction.slot;
 
-    if (!interaction.wasTopInventory)
-      slot += inventory.getSize();
+    // Re-send fake items on interaction, as they could disappear otherwise
+    // Fake slots also always need to be cancelled
+    for (Map.Entry<Integer, ItemStack> fakeItemEntry : fakeSlotItemCache.entrySet()) {
+      int fakeSlot = fakeItemEntry.getKey();
+
+      if (slot == fakeSlot)
+        interaction.cancel.run();
+
+      this.fakeSlotCommunicator.setFakeSlot(fakeItemEntry.getKey(), true, fakeItemEntry.getValue(), viewer, 1);
+    }
 
     UISlot targetSlot = slots.get(slot);
-
     if (targetSlot == null || targetSlot.interactionHandler == null) {
       if (!isAllowedToInteractWithEmptySlot(interaction))
         interaction.cancel.run();
