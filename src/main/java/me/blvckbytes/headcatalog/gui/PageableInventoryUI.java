@@ -3,13 +3,13 @@ package me.blvckbytes.headcatalog.gui;
 import me.blvckbytes.bbreflect.packets.communicator.IFakeSlotCommunicator;
 import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
+import me.blvckbytes.headcatalog.gui.config.AUIParameter;
 import me.blvckbytes.headcatalog.gui.config.IPageableParameterProvider;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public abstract class PageableInventoryUI<T extends IPageableParameterProvider> extends AInventoryUI<T> {
+public abstract class PageableInventoryUI<T extends IPageableParameterProvider, U extends AUIParameter> extends AInventoryUI<T, U> {
 
   private static final String
     KEY_PREVIOUS_PAGE = "previousPage",
@@ -27,8 +27,8 @@ public abstract class PageableInventoryUI<T extends IPageableParameterProvider> 
   private int currentPage;
   private int numberOfPages;
 
-  public PageableInventoryUI(IFakeSlotCommunicator fakeSlotCommunicator, T pageableParameters, Player viewer) {
-    super(fakeSlotCommunicator, pageableParameters, viewer);
+  public PageableInventoryUI(IFakeSlotCommunicator fakeSlotCommunicator, T pageableParameters, U parameter) {
+    super(fakeSlotCommunicator, pageableParameters, parameter);
     this.pageableSlots = new ArrayList<>();
     this.paginationSlotIndices = parameterProvider.getPaginationSlots(inventoryEnvironment);
     this.animationPeriod = parameterProvider.getAnimationPeriod();
@@ -152,7 +152,7 @@ public abstract class PageableInventoryUI<T extends IPageableParameterProvider> 
 
   private IEvaluationEnvironment getPaginationEnvironment() {
     return new EvaluationEnvironmentBuilder()
-      .withLiveVariable("name", viewer::getName)
+      .withLiveVariable("name", parameter.viewer::getName)
       .withLiveVariable("current_page", () -> this.currentPage + 1)
       .withLiveVariable("page_size", () -> this.pageSize)
       .withLiveVariable("number_of_pages", () -> this.numberOfPages)

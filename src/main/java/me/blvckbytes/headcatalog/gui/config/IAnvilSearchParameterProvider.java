@@ -1,3 +1,9 @@
 package me.blvckbytes.headcatalog.gui.config;
 
-public interface IAnvilSearchParameterProvider extends IPageableParameterProvider {}
+import me.blvckbytes.bukkitevaluable.IItemBuildable;
+
+public interface IAnvilSearchParameterProvider extends IPageableParameterProvider {
+
+  IItemBuildable getFilter();
+
+}

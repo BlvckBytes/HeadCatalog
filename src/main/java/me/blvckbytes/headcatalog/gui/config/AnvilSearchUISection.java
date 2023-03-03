@@ -1,3 +1,13 @@
 package me.blvckbytes.headcatalog.gui.config;
 
-public class AnvilSearchUISection extends PageableUISection implements IAnvilSearchParameterProvider { }
+import me.blvckbytes.bukkitevaluable.IItemBuildable;
+
+public class AnvilSearchUISection extends PageableUISection implements IAnvilSearchParameterProvider {
+
+  private IItemBuildable filter;
+
+  @Override
+  public IItemBuildable getFilter() {
+    return this.filter;
+  }
+}

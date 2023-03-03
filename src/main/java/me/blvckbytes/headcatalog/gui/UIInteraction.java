@@ -13,9 +13,9 @@ public class UIInteraction {
   public final Runnable cancel;
   public final InventoryAction action;
   public final ClickType clickType;
-  public final AInventoryUI<?> ui;
+  public final AInventoryUI<?, ?> ui;
 
-  public UIInteraction(AInventoryUI<?> ui, int slot, boolean wasTopInventory, Runnable cancel, InventoryAction action, ClickType clickType) {
+  public UIInteraction(AInventoryUI<?, ?> ui, int slot, boolean wasTopInventory, Runnable cancel, InventoryAction action, ClickType clickType) {
     this.ui = ui;
     this.slot = slot;
     this.wasTopInventory = wasTopInventory;
@@ -24,7 +24,7 @@ public class UIInteraction {
     this.clickType = clickType;
   }
 
-  public static UIInteraction fromDragEvent(AInventoryUI<?> ui, InventoryDragEvent event, int slot) {
+  public static UIInteraction fromDragEvent(AInventoryUI<?, ?> ui, InventoryDragEvent event, int slot) {
     Inventory topInventory = event.getView().getTopInventory();
     int topInventorySize = topInventory.getSize();
     boolean wasTopInventory = slot < topInventorySize;
@@ -39,7 +39,7 @@ public class UIInteraction {
     );
   }
 
-  public static UIInteraction fromClickEvent(AInventoryUI<?> ui, InventoryClickEvent event) {
+  public static UIInteraction fromClickEvent(AInventoryUI<?, ?> ui, InventoryClickEvent event) {
     return new UIInteraction(
       ui,
       event.getRawSlot(),

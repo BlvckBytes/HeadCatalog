@@ -23,7 +23,7 @@ import java.util.Map;
 
 public class InventoryRegistry implements IInitializable, ICleanable, Listener {
 
-  private final Map<Inventory, AInventoryUI<?>> inventories;
+  private final Map<Inventory, AInventoryUI<?, ?>> inventories;
   private final IAutoWirer autoWirer;
   private final IItemNameCommunicator itemNameCommunicator;
   private final Plugin plugin;
@@ -37,7 +37,7 @@ public class InventoryRegistry implements IInitializable, ICleanable, Listener {
   }
 
   @SuppressWarnings("unchecked")
-  public <T extends AInventoryUI<?>> T createInventory(Class<T> inventoryType, AUIParameter parameter) {
+  public <T extends AInventoryUI<?, ?>> T createInventory(Class<T> inventoryType, AUIParameter parameter) {
     Constructor<?>[] constructors = inventoryType.getConstructors();
 
     if (constructors.length != 1)
@@ -76,7 +76,7 @@ public class InventoryRegistry implements IInitializable, ICleanable, Listener {
   public void cleanup() {
     this.itemNameCommunicator.unregisterReceiver(this::onAnvilItemRename);
 
-    for (AInventoryUI<?> inventory : inventories.values())
+    for (AInventoryUI<?, ?> inventory : inventories.values())
       inventory.close();
     inventories.clear();
 
@@ -88,7 +88,7 @@ public class InventoryRegistry implements IInitializable, ICleanable, Listener {
 
   @EventHandler
   public void onClose(InventoryCloseEvent event) {
-    AInventoryUI<?> inventoryUI = inventories.get(event.getInventory());
+    AInventoryUI<?, ?> inventoryUI = inventories.get(event.getInventory());
 
     if (inventoryUI == null)
       return;
@@ -99,7 +99,7 @@ public class InventoryRegistry implements IInitializable, ICleanable, Listener {
   @EventHandler
   public void onDrag(InventoryDragEvent event) {
     Inventory topInventory = event.getView().getTopInventory();
-    AInventoryUI<?> inventoryUI = inventories.get(topInventory);
+    AInventoryUI<?, ?> inventoryUI = inventories.get(topInventory);
 
     if (inventoryUI == null)
       return;
@@ -120,7 +120,7 @@ public class InventoryRegistry implements IInitializable, ICleanable, Listener {
       return;
 
     Inventory topInventory = event.getView().getTopInventory();
-    AInventoryUI<?> inventoryUI = inventories.get(topInventory);
+    AInventoryUI<?, ?> inventoryUI = inventories.get(topInventory);
 
     if (inventoryUI == null)
       return;
@@ -130,7 +130,7 @@ public class InventoryRegistry implements IInitializable, ICleanable, Listener {
 
   private void onAnvilItemRename(Player player, String name) {
     Inventory topInventory = player.getOpenInventory().getTopInventory();
-    AInventoryUI<?> inventoryUI = inventories.get(topInventory);
+    AInventoryUI<?, ?> inventoryUI = inventories.get(topInventory);
 
     if (inventoryUI == null)
       return;
@@ -148,7 +148,7 @@ public class InventoryRegistry implements IInitializable, ICleanable, Listener {
 
       @Override
       public void run() {
-        for (AInventoryUI<?> inventory : inventories.values())
+        for (AInventoryUI<?, ?> inventory : inventories.values())
           inventory.handleTick(time);
         ++time;
       }

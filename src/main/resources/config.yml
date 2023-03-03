@@ -16,6 +16,15 @@ command:
 anvilSearchUI:
   title: '&5Search UI'
 
+  filter:
+    type: HOPPER
+    name: '&8» &dFilter &8«'
+    lore$:
+      - '" "'
+      - 'map(filters, (entry) => "&8➥ " & (if value(entry) then "&d" else "&7") & key(entry), "&cNo filters provided")'
+      - '" "'
+      - '"&7Click to &dcycle &7through filters"'
+
   # Pagination Environment
   # current_page: Integer
   # pageSize: Integer
@@ -69,6 +78,7 @@ anvilSearchUI:
     previousPage$: 'inventory_size + 29'
     currentPage$: 'inventory_size + 31'
     nextPage$: 'inventory_size + 33'
+    filter$: 'inventory_size + 35'
     darkGlass$: |
       list_of(
         inventory_size + 27,

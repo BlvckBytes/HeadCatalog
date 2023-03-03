@@ -12,22 +12,34 @@ import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-public class AnvilSearchUI extends PageableInventoryUI<IAnvilSearchParameterProvider> {
+public class AnvilSearchUI extends PageableInventoryUI<IAnvilSearchParameterProvider, AnvilSearchParameter> {
 
+  private static final String KEY_FILTER = "filter";
+
+  private final Map<String, Boolean> filterStates;
+  private ISearchFilterEnum<?> currentFilter;
   private String searchText;
 
   public AnvilSearchUI(FakeSlotCommunicator fakeSlotCommunicator, IAnvilSearchParameterProvider parameterProvider, AnvilSearchParameter parameter) {
-    super(fakeSlotCommunicator, parameterProvider, parameter.viewer);
+    super(fakeSlotCommunicator, parameterProvider, parameter);
+
     this.searchText = " ";
+
+    this.filterStates = new LinkedHashMap<>();
+    this.currentFilter = parameter.searchFilter;
+    this.setupFilterStates();
+  }
+
+  private void setupFilterStates() {
+    for (ISearchFilterEnum<?> searchFilter : parameter.searchFilter.listValues())
+      filterStates.put(searchFilter.name(), searchFilter == currentFilter);
   }
 
   @Override
   protected Inventory createInventory() {
-    IEvaluationEnvironment titleEnvironment = getTitleEnvironment();
-    String title = parameterProvider.getTitle().asScalar(ScalarType.STRING, titleEnvironment);
+    String title = parameterProvider.getTitle().asScalar(ScalarType.STRING, inventoryEnvironment);
     return Bukkit.createInventory(null, InventoryType.ANVIL, title);
   }
 
@@ -39,6 +51,23 @@ public class AnvilSearchUI extends PageableInventoryUI<IAnvilSearchParameterProv
   @Override
   protected void decorate() {
     super.decorate();
+
+    for (Map.Entry<String, Set<Integer>> contentEntry : slotContents.entrySet()) {
+      UISlot slotContent = null;
+
+      switch (contentEntry.getKey()) {
+        case KEY_FILTER: {
+          IEvaluationEnvironment filterEnvironment = getFilterEnvironment();
+          slotContent = new UISlot(() -> parameterProvider.getFilter().build(filterEnvironment), this::handleFilterClick);
+          break;
+        }
+      }
+
+      if (slotContent == null)
+        continue;
+
+      setSlots(slotContent, contentEntry.getValue());
+    }
 
     setSlot(0, new UISlot(() -> (
       new ItemBuilder(Material.QUARTZ_BLOCK, 1)
@@ -71,9 +100,17 @@ public class AnvilSearchUI extends PageableInventoryUI<IAnvilSearchParameterProv
     return false;
   }
 
-  private IEvaluationEnvironment getTitleEnvironment() {
+  private EnumSet<EClickResultFlag> handleFilterClick(UIInteraction action) {
+    this.filterStates.put(this.currentFilter.name(), false);
+    this.currentFilter = this.currentFilter.nextValue();
+    this.filterStates.put(this.currentFilter.name(), true);
+    drawNamedSlot(KEY_FILTER);
+    return null;
+  }
+
+  private IEvaluationEnvironment getFilterEnvironment() {
     return new EvaluationEnvironmentBuilder()
-      .withLiveVariable("name", viewer::getName)
+      .withStaticVariable("filters", this.filterStates)
       .build();
   }
 }

@@ -9,16 +9,24 @@ public class HeadModel {
   public final UUID uuid;
 
   public final Set<String> categories;
+  public final String categoriesString;
   public final Set<String> tags;
+  public final String tagsString;
 
   public Date lastUpdate;
 
   public HeadModel(String name, String skinUrl, Set<String> categories, UUID uuid, Set<String> tags, Date lastUpdate) {
     this.name = name;
     this.skinUrl = skinUrl;
+
     this.categories = Collections.unmodifiableSet(categories);
+    this.categoriesString = String.join(" ", this.categories);
+
     this.uuid = uuid;
+
     this.tags = Collections.unmodifiableSet(tags);
+    this.tagsString = String.join(" ", this.tags);
+
     this.lastUpdate = lastUpdate;
   }
 

@@ -4,6 +4,7 @@ import me.blvckbytes.bbreflect.packets.communicator.IFakeSlotCommunicator;
 import me.blvckbytes.bukkitevaluable.IItemBuildable;
 import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
+import me.blvckbytes.headcatalog.gui.config.AUIParameter;
 import me.blvckbytes.headcatalog.gui.config.IInventoryUIParameterProvider;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryAction;
@@ -15,12 +16,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Supplier;
 
-public abstract class AInventoryUI<T extends IInventoryUIParameterProvider> implements IReadonlyInventory {
+public abstract class AInventoryUI<T extends IInventoryUIParameterProvider, U extends AUIParameter> implements IReadonlyInventory {
 
   protected final Inventory inventory;
   protected final InventoryAnimator animator;
   protected final T parameterProvider;
-  protected final Player viewer;
+  protected final U parameter;
   protected final Map<String, Set<Integer>> slotContents;
   protected final IEvaluationEnvironment inventoryEnvironment;
 
@@ -28,10 +29,10 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider> impl
   private final Map<Integer, ItemStack> fakeSlotItemCache;
   private final IFakeSlotCommunicator fakeSlotCommunicator;
 
-  public AInventoryUI(IFakeSlotCommunicator fakeSlotCommunicator, T parameterProvider, Player viewer) {
+  public AInventoryUI(IFakeSlotCommunicator fakeSlotCommunicator, T parameterProvider, U parameter) {
     this.slots = new HashMap<>();
     this.fakeSlotCommunicator = fakeSlotCommunicator;
-    this.viewer = viewer;
+    this.parameter = parameter;
     this.parameterProvider = parameterProvider;
     this.inventory = createInventory();
     this.fakeSlotItemCache = new HashMap<>();
@@ -43,7 +44,7 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider> impl
   private IEvaluationEnvironment getInventoryEnvironment() {
     return new EvaluationEnvironmentBuilder()
       .withStaticVariable("inventory_size", this.inventory.getSize())
-      .withStaticVariable("viewer_name", this.viewer.getName())
+      .withStaticVariable("viewer_name", this.parameter.viewer.getName())
       .build();
   }
 
@@ -56,7 +57,7 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider> impl
       slot >= inventorySize ||
       this.inventory.getType() == InventoryType.ANVIL
     ) {
-      this.fakeSlotCommunicator.setFakeSlot(slot, true, item, viewer, 0);
+      this.fakeSlotCommunicator.setFakeSlot(slot, true, item, this.parameter.viewer, 0);
       this.fakeSlotItemCache.put(slot, item);
       return;
     }
@@ -110,7 +111,7 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider> impl
   public void show() {
     // Open the inventory before decorating, so that the fake slot
     // communicator takes effect (has a target window ID), if applicable
-    this.viewer.openInventory(this.inventory);
+    this.parameter.viewer.openInventory(this.inventory);
     this.decorate();
     this.drawAll();
   }
@@ -163,11 +164,11 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider> impl
   }
 
   public Player getViewer() {
-    return this.viewer;
+    return this.parameter.viewer;
   }
 
   protected void handleClose() {
-    viewer.updateInventory();
+    this.parameter.viewer.updateInventory();
   }
 
   protected abstract boolean canInteractWithOwnInventory();
@@ -197,7 +198,7 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider> impl
       if (slot == fakeSlot)
         interaction.cancel.run();
 
-      this.fakeSlotCommunicator.setFakeSlot(fakeItemEntry.getKey(), true, fakeItemEntry.getValue(), viewer, 1);
+      this.fakeSlotCommunicator.setFakeSlot(fakeItemEntry.getKey(), true, fakeItemEntry.getValue(), this.parameter.viewer, 1);
     }
 
     UISlot targetSlot = slots.get(slot);

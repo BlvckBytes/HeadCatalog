@@ -5,7 +5,10 @@ import org.bukkit.entity.Player;
 
 public class AnvilSearchParameter extends AUIParameter {
 
-  public AnvilSearchParameter(Player viewer) {
+  public final ISearchFilterEnum<?> searchFilter;
+
+  public AnvilSearchParameter(Player viewer, ISearchFilterEnum<?> searchFilter) {
     super(viewer);
+    this.searchFilter = searchFilter;
   }
 }

@@ -12,14 +12,14 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 
-public class SingleChoiceUI extends PageableInventoryUI<ISingleChoiceParameterProvider> {
+public class SingleChoiceUI extends PageableInventoryUI<ISingleChoiceParameterProvider, SingleChoiceParameter> {
 
   // TODO: Updatable inventory names would be useful
 
   private static final String KEY_SEARCH = "search";
 
   public SingleChoiceUI(IFakeSlotCommunicator fakeSlotCommunicator, ISingleChoiceParameterProvider singleChoiceParameters, SingleChoiceParameter parameter) {
-    super(fakeSlotCommunicator, singleChoiceParameters, parameter.viewer);
+    super(fakeSlotCommunicator, singleChoiceParameters, parameter);
   }
 
   @Override
@@ -27,7 +27,6 @@ public class SingleChoiceUI extends PageableInventoryUI<ISingleChoiceParameterPr
     super.decorate();
 
     for (Map.Entry<String, Set<Integer>> contentEntry : slotContents.entrySet()) {
-      Set<Integer> slots = contentEntry.getValue();
       UISlot slotContent = null;
 
       switch (contentEntry.getKey()) {
@@ -39,7 +38,7 @@ public class SingleChoiceUI extends PageableInventoryUI<ISingleChoiceParameterPr
       if (slotContent == null)
         continue;
 
-      setSlots(slotContent, slots);
+      setSlots(slotContent, contentEntry.getValue());
     }
   }
 
@@ -68,7 +67,7 @@ public class SingleChoiceUI extends PageableInventoryUI<ISingleChoiceParameterPr
 
   private IEvaluationEnvironment getTitleEnvironment() {
     return new EvaluationEnvironmentBuilder()
-      .withLiveVariable("name", viewer::getName)
+      .withLiveVariable("name", parameter.viewer::getName)
       .build();
   }
 }
