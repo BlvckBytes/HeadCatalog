@@ -6,4 +6,8 @@ public interface IAnvilSearchParameterProvider extends IPageableParameterProvide
 
   IItemBuildable getFilter();
 
+  IItemBuildable getSearchItem();
+
+  IItemBuildable getBack();
+
 }

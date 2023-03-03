@@ -23,7 +23,23 @@ anvilSearchUI:
       - '" "'
       - 'map(filters, (entry) => "&8➥ " & (if value(entry) then "&d" else "&7") & key(entry), "&cNo filters provided")'
       - '" "'
-      - '"&7Click to &dcycle &7through filters"'
+      - '"&8● &7Click to &dcycle &7through filters"'
+
+  back:
+    type: PLAYER_HEAD
+    textures$: 'lut["DOUBLE_ARROW_LEFT"]'
+    name: '&8» &dBack &8«'
+    lore:
+      - ' '
+      - '&8● &dExit &7from this screen'
+
+  searchItem:
+    type: PURPLE_TERRACOTTA
+    # The name should always be blank in order to allow for an empty input box
+    name: ' '
+    lore:
+      - ' '
+      - '&8● &7Type ahead to &dsearch &7for results'
 
   # Pagination Environment
   # current_page: Integer
@@ -79,6 +95,8 @@ anvilSearchUI:
     currentPage$: 'inventory_size + 31'
     nextPage$: 'inventory_size + 33'
     filter$: 'inventory_size + 35'
+    searchItem: 0
+    back: 1
     darkGlass$: |
       list_of(
         inventory_size + 27,
@@ -240,6 +258,7 @@ persistence:
 # Lookup table for this file, used to centralize and deduplicate constants
 lut:
   dateFormat: 'dd.MM.yyyy HH:mm:ss'
+  DOUBLE_ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTE4YTJkZDViZWYwYjA3M2IxMzI3MWE3ZWViOWNmZWE3YWZlODU5M2M1N2E5MzgyMWU0MzE3NTU3MjQ2MTgxMiJ9fX0='
   ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTE4YTJkZDViZWYwYjA3M2IxMzI3MWE3ZWViOWNmZWE3YWZlODU5M2M1N2E5MzgyMWU0MzE3NTU3MjQ2MTgxMiJ9fX0='
   ARROW_LEFT_RED: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWRmNWMyZjg5M2JkM2Y4OWNhNDA3MDNkZWQzZTQyZGQwZmJkYmE2ZjY3NjhjODc4OWFmZGZmMWZhNzhiZjYifX19'
   ARROW_RIGHT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDllY2NjNWMxYzc5YWE3ODI2YTE1YTdmNWYxMmZiNDAzMjgxNTdjNTI0MjE2NGJhMmFlZjQ3ZTVkZTlhNWNmYyJ9fX0='

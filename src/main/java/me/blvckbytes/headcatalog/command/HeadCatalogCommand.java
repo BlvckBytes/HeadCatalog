@@ -43,19 +43,15 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
 
   @Override
   protected void onPlayerExecution(Player player, String s, String[] strings) {
-//    if (this.headSlots == null) {
-//      player.sendMessage("§cHeads aren't ready yet");
-//      return;
-//    }
-//
-//    SingleChoiceUI singleChoiceUI = inventoryRegistry.createInventory(SingleChoiceUI.class, new SingleChoiceParameter(player));
-//    singleChoiceUI.show();
-//    singleChoiceUI.setPageableSlots(this.headSlots);
+    if (this.headSlots == null) {
+      player.sendMessage("§cHeads aren't ready yet");
+      return;
+    }
 
     AnvilSearchUI ui = inventoryRegistry.createInventory(AnvilSearchUI.class, new AnvilSearchParameter(player, HeadModelSearchFilter.HEAD_EVERYWHERE));
 //    SingleChoiceUI ui = inventoryRegistry.createInventory(SingleChoiceUI.class, new SingleChoiceParameter(player));
     ui.show();
-    ui.setPageableSlots(new ArrayList<>());
+    ui.setPageableSlots(this.headSlots);
   }
 
   @Override

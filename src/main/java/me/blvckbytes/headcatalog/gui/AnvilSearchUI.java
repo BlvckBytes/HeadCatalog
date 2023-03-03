@@ -2,21 +2,24 @@ package me.blvckbytes.headcatalog.gui;
 
 import me.blvckbytes.bbconfigmapper.ScalarType;
 import me.blvckbytes.bbreflect.packets.communicator.FakeSlotCommunicator;
-import me.blvckbytes.bukkitevaluable.BukkitEvaluable;
-import me.blvckbytes.bukkitevaluable.ItemBuilder;
 import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import me.blvckbytes.headcatalog.gui.config.IAnvilSearchParameterProvider;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 
-import java.util.*;
+import java.util.EnumSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class AnvilSearchUI extends PageableInventoryUI<IAnvilSearchParameterProvider, AnvilSearchParameter> {
 
-  private static final String KEY_FILTER = "filter";
+  private static final String
+    KEY_FILTER = "filter",
+    KEY_BACK = "back",
+    KEY_SEARCH_ITEM = "searchItem";
 
   private final Map<String, Boolean> filterStates;
   private ISearchFilterEnum<?> currentFilter;
@@ -32,21 +35,10 @@ public class AnvilSearchUI extends PageableInventoryUI<IAnvilSearchParameterProv
     this.setupFilterStates();
   }
 
-  private void setupFilterStates() {
-    for (ISearchFilterEnum<?> searchFilter : parameter.searchFilter.listValues())
-      filterStates.put(searchFilter.name(), searchFilter == currentFilter);
-  }
-
   @Override
   protected Inventory createInventory() {
     String title = parameterProvider.getTitle().asScalar(ScalarType.STRING, inventoryEnvironment);
     return Bukkit.createInventory(null, InventoryType.ANVIL, title);
-  }
-
-  @Override
-  protected void handleClose() {
-    fakeSlotCommunicator.unblockWindowItems(parameter.viewer);
-    super.handleClose();
   }
 
   @Override
@@ -62,6 +54,14 @@ public class AnvilSearchUI extends PageableInventoryUI<IAnvilSearchParameterProv
           slotContent = new UISlot(() -> parameterProvider.getFilter().build(filterEnvironment), this::handleFilterClick);
           break;
         }
+
+        case KEY_SEARCH_ITEM:
+          slotContent = new UISlot(() -> parameterProvider.getSearchItem().build(inventoryEnvironment));
+          break;
+
+        case KEY_BACK:
+          slotContent = new UISlot(() -> parameterProvider.getBack().build(inventoryEnvironment), this::handleBackClick);
+          break;
       }
 
       if (slotContent == null)
@@ -69,31 +69,12 @@ public class AnvilSearchUI extends PageableInventoryUI<IAnvilSearchParameterProv
 
       setSlots(slotContent, contentEntry.getValue());
     }
-
-    setSlot(0, new UISlot(() -> (
-      new ItemBuilder(Material.QUARTZ_BLOCK, 1)
-        .setName(BukkitEvaluable.of(" "))
-        .build()
-    )));
-
-    List<String> loreLines = new ArrayList<>();
-    loreLines.add("&8● &7This just shows you, what");
-    loreLines.add("&8● &7you've &dtyped &7into the anvil.");
-
-    setSlot(this.inventory.getSize() + 4, new UISlot(() -> (
-      new ItemBuilder(Material.DIAMOND_AXE, 1)
-        .setName(BukkitEvaluable.of("&8»&5" + this.searchText))
-        .overrideLore(BukkitEvaluable.of(loreLines))
-        .overrideFlags(BukkitEvaluable.of("HIDE_ATTRIBUTES"))
-        .build()
-    )));
   }
 
   @Override
   public void handleItemRename(String name) {
     super.handleItemRename(name);
     this.searchText = name;
-    drawSlot(this.inventory.getSize() + 4);
   }
 
   @Override
@@ -107,11 +88,27 @@ public class AnvilSearchUI extends PageableInventoryUI<IAnvilSearchParameterProv
     super.show();
   }
 
+  @Override
+  protected void handleClose() {
+    fakeSlotCommunicator.unblockWindowItems(parameter.viewer);
+    super.handleClose();
+  }
+
+  private void setupFilterStates() {
+    for (ISearchFilterEnum<?> searchFilter : parameter.searchFilter.listValues())
+      filterStates.put(searchFilter.name(), searchFilter == currentFilter);
+  }
+
   private EnumSet<EClickResultFlag> handleFilterClick(UIInteraction action) {
     this.filterStates.put(this.currentFilter.name(), false);
     this.currentFilter = this.currentFilter.nextValue();
     this.filterStates.put(this.currentFilter.name(), true);
     drawNamedSlot(KEY_FILTER);
+    return null;
+  }
+
+  private EnumSet<EClickResultFlag> handleBackClick(UIInteraction action) {
+    System.out.println("Back");
     return null;
   }
 

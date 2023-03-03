@@ -138,7 +138,7 @@ public abstract class PageableInventoryUI<T extends IPageableParameterProvider, 
   }
 
   private EnumSet<EClickResultFlag> handleNextPageClick(UIInteraction action) {
-    if (this.currentPage == numberOfPages - 1)
+    if (this.currentPage >= numberOfPages - 1)
       return null;
 
     if (action.clickType.isRightClick()) {
