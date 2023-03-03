@@ -23,6 +23,8 @@ import java.util.Map;
 
 public class InventoryRegistry implements IInitializable, ICleanable, Listener {
 
+  // FIXME: Whoops, totally forgot to unregister no longer used instances
+
   private final Map<Inventory, AInventoryUI<?, ?>> inventories;
   private final IAutoWirer autoWirer;
   private final IItemNameCommunicator itemNameCommunicator;
@@ -78,7 +80,6 @@ public class InventoryRegistry implements IInitializable, ICleanable, Listener {
 
     for (AInventoryUI<?, ?> inventory : inventories.values())
       inventory.close();
-    inventories.clear();
 
     if (this.tickerTask != null) {
       this.tickerTask.cancel();
@@ -93,7 +94,7 @@ public class InventoryRegistry implements IInitializable, ICleanable, Listener {
     if (inventoryUI == null)
       return;
 
-    Bukkit.getScheduler().runTask(plugin, inventoryUI::handleClose);
+    inventoryUI.handleClose();
   }
 
   @EventHandler

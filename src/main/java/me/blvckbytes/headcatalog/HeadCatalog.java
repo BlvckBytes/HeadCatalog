@@ -48,7 +48,7 @@ public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider {
       .addExistingSingleton(this)
       .addExistingSingleton(logger)
       .addSingleton(IReflectionHelper.class, dependencies -> {
-        IReflectionHelper helper = new ReflectionHelperFactory(getClassLoader()).makeHelper();
+        IReflectionHelper helper = new ReflectionHelperFactory(this).makeHelper();
         logger.log(ELogLevel.INFO, "Detected server version " + helper.getVersion());
         return helper;
       }, IReflectionHelper::cleanupInterception)

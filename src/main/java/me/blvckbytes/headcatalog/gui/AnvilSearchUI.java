@@ -45,6 +45,7 @@ public class AnvilSearchUI extends PageableInventoryUI<IAnvilSearchParameterProv
 
   @Override
   protected void handleClose() {
+    fakeSlotCommunicator.unblockWindowItems(parameter.viewer);
     super.handleClose();
   }
 
@@ -98,6 +99,12 @@ public class AnvilSearchUI extends PageableInventoryUI<IAnvilSearchParameterProv
   @Override
   protected boolean canInteractWithOwnInventory() {
     return false;
+  }
+
+  @Override
+  public void show() {
+    fakeSlotCommunicator.blockWindowItems(parameter.viewer, fakeSlotItemCache::get);
+    super.show();
   }
 
   private EnumSet<EClickResultFlag> handleFilterClick(UIInteraction action) {

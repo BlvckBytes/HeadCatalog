@@ -55,6 +55,7 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
     AnvilSearchUI ui = inventoryRegistry.createInventory(AnvilSearchUI.class, new AnvilSearchParameter(player, HeadModelSearchFilter.HEAD_EVERYWHERE));
 //    SingleChoiceUI ui = inventoryRegistry.createInventory(SingleChoiceUI.class, new SingleChoiceParameter(player));
     ui.show();
+    ui.setPageableSlots(new ArrayList<>());
   }
 
   @Override

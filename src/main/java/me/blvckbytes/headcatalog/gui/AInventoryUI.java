@@ -24,10 +24,10 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider, U ex
   protected final U parameter;
   protected final Map<String, Set<Integer>> slotContents;
   protected final IEvaluationEnvironment inventoryEnvironment;
+  protected final IFakeSlotCommunicator fakeSlotCommunicator;
 
   private final Map<Integer, UISlot> slots;
-  private final Map<Integer, ItemStack> fakeSlotItemCache;
-  private final IFakeSlotCommunicator fakeSlotCommunicator;
+  protected final Map<Integer, ItemStack> fakeSlotItemCache;
 
   public AInventoryUI(IFakeSlotCommunicator fakeSlotCommunicator, T parameterProvider, U parameter) {
     this.slots = new HashMap<>();
@@ -57,8 +57,8 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider, U ex
       slot >= inventorySize ||
       this.inventory.getType() == InventoryType.ANVIL
     ) {
-      this.fakeSlotCommunicator.setFakeSlot(slot, true, item, this.parameter.viewer, 0);
       this.fakeSlotItemCache.put(slot, item);
+      this.fakeSlotCommunicator.setFakeSlot(parameter.viewer, slot, true, fakeSlotItemCache.get(slot));
       return;
     }
 
@@ -88,8 +88,10 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider, U ex
   protected void drawSlot(int slot) {
     UISlot targetSlot = this.slots.get(slot);
 
-    if (targetSlot == null)
+    if (targetSlot == null) {
+      setItem(slot, null);
       return;
+    }
 
     setSuppliedItem(slot, targetSlot.itemSupplier);
   }
@@ -117,8 +119,8 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider, U ex
   }
 
   public void close() {
-    while (inventory.getViewers().size() > 0)
-      inventory.getViewers().remove(0).closeInventory();
+    parameter.viewer.closeInventory();
+    updatePlayerInventory();
   }
 
   protected void decorate() {
@@ -168,7 +170,34 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider, U ex
   }
 
   protected void handleClose() {
-    this.parameter.viewer.updateInventory();
+    updatePlayerInventory();
+  }
+
+  private void updatePlayerInventory() {
+    if (fakeSlotItemCache.size() == 0)
+      return;
+
+    // FIXME: Revise this...
+
+    Player viewer = parameter.viewer;
+    Inventory viewerInventory = viewer.getInventory();
+    int playerInventorySize = viewerInventory.getSize();
+    int inventorySize = inventory.getSize();
+
+    for (Integer fakeSlot : fakeSlotItemCache.keySet()) {
+      int inventorySlot = fakeSlot - inventorySize + 9;
+
+      if (inventorySlot < 9 || inventorySlot >= playerInventorySize + 9)
+        continue;
+
+      ItemStack realItem;
+      if (inventorySlot >= 36)
+        realItem = viewerInventory.getItem(inventorySlot - 36);
+      else
+        realItem = viewerInventory.getItem(inventorySlot);
+
+      fakeSlotCommunicator.setFakeSlot(parameter.viewer, inventorySlot, false, realItem);
+    }
   }
 
   protected abstract boolean canInteractWithOwnInventory();
@@ -192,14 +221,8 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider, U ex
 
     // Re-send fake items on interaction, as they could disappear otherwise
     // Fake slots also always need to be cancelled
-    for (Map.Entry<Integer, ItemStack> fakeItemEntry : fakeSlotItemCache.entrySet()) {
-      int fakeSlot = fakeItemEntry.getKey();
-
-      if (slot == fakeSlot)
-        interaction.cancel.run();
-
-      this.fakeSlotCommunicator.setFakeSlot(fakeItemEntry.getKey(), true, fakeItemEntry.getValue(), this.parameter.viewer, 1);
-    }
+    if (fakeSlotItemCache.containsKey(slot))
+      interaction.cancel.run();
 
     UISlot targetSlot = slots.get(slot);
     if (targetSlot == null || targetSlot.interactionHandler == null) {
