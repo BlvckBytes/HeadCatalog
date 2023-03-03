@@ -48,7 +48,7 @@ public class InventoryAnimatorTests {
 
     Map<Integer, ItemStack> setterBuffer = new HashMap<>();
 
-    InventoryAnimator animator = new InventoryAnimator(null, setterBuffer::put);
+    InventoryAnimator animator = new InventoryAnimator(setterBuffer::put);
 
     animator.saveLayout(inventoryA);
     animator.animateTo(animationType, generateFullSlotMask(inventoryB), inventoryB);

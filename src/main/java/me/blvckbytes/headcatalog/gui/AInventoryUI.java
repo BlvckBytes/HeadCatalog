@@ -219,10 +219,14 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider, U ex
   public void handleInteraction(UIInteraction interaction) {
     int slot = interaction.slot;
 
-    // Re-send fake items on interaction, as they could disappear otherwise
+    // Re-send fake items on interaction, as they could disappear otherwise (seldom,
+    // but still). Happens if the server only clears the cursor but doesn't re-send the slot
     // Fake slots also always need to be cancelled
-    if (fakeSlotItemCache.containsKey(slot))
+    ItemStack fakeItem = fakeSlotItemCache.get(slot);
+    if (fakeItem != null) {
       interaction.cancel.run();
+      fakeSlotCommunicator.setFakeSlot(parameter.viewer, slot, true, fakeItem);
+    }
 
     UISlot targetSlot = slots.get(slot);
     if (targetSlot == null || targetSlot.interactionHandler == null) {
