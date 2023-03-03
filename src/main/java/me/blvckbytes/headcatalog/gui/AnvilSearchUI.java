@@ -11,7 +11,7 @@ import org.bukkit.inventory.Inventory;
 
 import java.util.*;
 
-public class AnvilSearchUI<T extends IItemSupplier> extends PageableInventoryUI<IAnvilSearchParameterProvider, AnvilSearchParameter<T>> {
+public class AnvilSearchUI<DataType> extends PageableInventoryUI<IAnvilSearchParameterProvider, AnvilSearchParameter<DataType>, DataType> {
 
   private static final String
     KEY_FILTER = "filter",
@@ -19,10 +19,10 @@ public class AnvilSearchUI<T extends IItemSupplier> extends PageableInventoryUI<
     KEY_SEARCH_ITEM = "searchItem";
 
   private final Map<String, Boolean> filterStates;
-  private ISearchFilterEnum<?, T> currentFilter;
+  private ISearchFilterEnum<?, DataType> currentFilter;
   private String searchText;
 
-  public AnvilSearchUI(FakeSlotCommunicator fakeSlotCommunicator, IAnvilSearchParameterProvider parameterProvider, AnvilSearchParameter<T> parameter) {
+  public AnvilSearchUI(FakeSlotCommunicator fakeSlotCommunicator, IAnvilSearchParameterProvider parameterProvider, AnvilSearchParameter<DataType> parameter) {
     super(fakeSlotCommunicator, parameterProvider, parameter);
 
     this.searchText = " ";
@@ -71,14 +71,7 @@ public class AnvilSearchUI<T extends IItemSupplier> extends PageableInventoryUI<
   }
 
   private void invokeFilterFunctionAndUpdatePageSlots() {
-    List<T> items = parameter.filterFunction.applyFilter(currentFilter, searchText);
-    List<UISlot> slots = new ArrayList<>();
-
-    // FIXME: Allocating new slots all the time really isn't ideal...
-    // TODO: Bind interactions to an external callback function
-    for (T item : items)
-      slots.add(new UISlot(item::getItem));
-
+    List<DataBoundUISlot<DataType>> slots = parameter.filterFunction.applyFilter(currentFilter, searchText);
     setPageableSlots(slots);
   }
 
@@ -107,7 +100,7 @@ public class AnvilSearchUI<T extends IItemSupplier> extends PageableInventoryUI<
   }
 
   private void setupFilterStates() {
-    for (ISearchFilterEnum<?, T> searchFilter : parameter.searchFilter.listValues())
+    for (ISearchFilterEnum<?, DataType> searchFilter : parameter.searchFilter.listValues())
       filterStates.put(searchFilter.name(), searchFilter == currentFilter);
   }
 

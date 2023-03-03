@@ -17,7 +17,7 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
   private final InventoryRegistry inventoryRegistry;
   private final IHeadManager headManager;
 
-  private List<Head> heads;
+  private List<DataBoundUISlot<Head>> headSlots;
 
   public HeadCatalogCommand(
     HeadCatalogCommandSection commandSection,
@@ -31,7 +31,7 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
 
   @Override
   protected void onPlayerExecution(Player player, String s, String[] strings) {
-    if (this.heads == null) {
+    if (this.headSlots == null) {
       player.sendMessage("§cHeads aren't ready yet");
       return;
     }
@@ -43,19 +43,19 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
 //    ui.setPageableSlots(this.headSlots);
   }
 
-  private List<Head> applyHeadsFilter(ISearchFilterEnum<?, Head> searchFilter, String text) {
-    if (this.heads == null)
+  private List<DataBoundUISlot<Head>> applyHeadsFilter(ISearchFilterEnum<?, Head> searchFilter, String text) {
+    if (this.headSlots == null)
       return new ArrayList<>();
 
-    Map<Head, Integer> results = new HashMap<>();
     String[] searchWords = text.toLowerCase(Locale.ROOT).split(" ");
+    Map<DataBoundUISlot<Head>, Integer> results = new HashMap<>();
 
-    for (Head head : this.heads) {
-      String[] texts = searchFilter.getTexts().apply(head);
+    for (DataBoundUISlot<Head> headSlot : this.headSlots) {
+      String[] texts = searchFilter.getTexts().apply(headSlot.data);
       int diff = calculateDifference(searchWords, texts);
 
       if (diff >= 0)
-        results.put(head, diff);
+        results.put(headSlot, diff);
     }
 
     return results.entrySet().stream()
@@ -122,7 +122,15 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
 
   private void updateHeads(Collection<Head> heads) {
     // TODO: Notify UIs to update their items also
-    this.heads = new ArrayList<>(heads);
+    this.headSlots = new ArrayList<>();
+
+    for (Head head : heads) {
+      headSlots.add(new DataBoundUISlot<>(() -> head.item, interaction -> {
+        interaction.ui.getViewer().getInventory().addItem(head.item);
+        interaction.ui.close();
+        return null;
+      }, head));
+    }
   }
 
   @Override

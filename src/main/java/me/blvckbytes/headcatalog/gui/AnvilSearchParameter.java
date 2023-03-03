@@ -3,7 +3,7 @@ package me.blvckbytes.headcatalog.gui;
 import me.blvckbytes.headcatalog.gui.config.AUIParameter;
 import org.bukkit.entity.Player;
 
-public class AnvilSearchParameter<T extends IItemSupplier> extends AUIParameter {
+public class AnvilSearchParameter<T> extends AUIParameter {
 
   public final ISearchFilterEnum<?, T> searchFilter;
   public final FAnvilItemsFilter<T> filterFunction;

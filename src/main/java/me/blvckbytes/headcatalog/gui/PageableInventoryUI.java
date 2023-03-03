@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public abstract class PageableInventoryUI<T extends IPageableParameterProvider, U extends AUIParameter> extends AInventoryUI<T, U> {
+public abstract class PageableInventoryUI<ParameterProvider extends IPageableParameterProvider, Parameter extends AUIParameter, PaginationDataType> extends AInventoryUI<ParameterProvider, Parameter> {
 
   private static final String
     KEY_PREVIOUS_PAGE = "previousPage",
@@ -20,14 +20,14 @@ public abstract class PageableInventoryUI<T extends IPageableParameterProvider, 
   private final int pageSize;
   private final long animationPeriod;
 
-  private List<UISlot> pageableSlots;
+  private List<DataBoundUISlot<PaginationDataType>> pageableSlots;
   private int numberOfPageables;
   private boolean isFirstPageRender;
 
   private int currentPage;
   private int numberOfPages;
 
-  public PageableInventoryUI(IFakeSlotCommunicator fakeSlotCommunicator, T pageableParameters, U parameter) {
+  public PageableInventoryUI(IFakeSlotCommunicator fakeSlotCommunicator, ParameterProvider pageableParameters, Parameter parameter) {
     super(fakeSlotCommunicator, pageableParameters, parameter);
     this.pageableSlots = new ArrayList<>();
     this.paginationSlotIndices = parameterProvider.getPaginationSlots(inventoryEnvironment);
@@ -67,7 +67,7 @@ public abstract class PageableInventoryUI<T extends IPageableParameterProvider, 
     }
   }
 
-  public void setPageableSlots(Collection<UISlot> items) {
+  public void setPageableSlots(Collection<DataBoundUISlot<PaginationDataType>> items) {
     this.pageableSlots = new ArrayList<>(items);
     this.numberOfPageables = this.pageableSlots.size();
 

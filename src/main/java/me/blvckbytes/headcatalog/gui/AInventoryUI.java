@@ -16,12 +16,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Supplier;
 
-public abstract class AInventoryUI<T extends IInventoryUIParameterProvider, U extends AUIParameter> implements IReadonlyInventory {
+public abstract class AInventoryUI<ParameterProvider extends IInventoryUIParameterProvider, Parameter extends AUIParameter> implements IReadonlyInventory {
 
   protected final Inventory inventory;
   protected final InventoryAnimator animator;
-  protected final T parameterProvider;
-  protected final U parameter;
+  protected final ParameterProvider parameterProvider;
+  protected final Parameter parameter;
   protected final Map<String, Set<Integer>> slotContents;
   protected final IEvaluationEnvironment inventoryEnvironment;
   protected final IFakeSlotCommunicator fakeSlotCommunicator;
@@ -29,7 +29,7 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider, U ex
   private final Map<Integer, UISlot> slots;
   protected final Map<Integer, ItemStack> fakeSlotItemCache;
 
-  public AInventoryUI(IFakeSlotCommunicator fakeSlotCommunicator, T parameterProvider, U parameter) {
+  public AInventoryUI(IFakeSlotCommunicator fakeSlotCommunicator, ParameterProvider parameterProvider, Parameter parameter) {
     this.slots = new HashMap<>();
     this.fakeSlotCommunicator = fakeSlotCommunicator;
     this.parameter = parameter;

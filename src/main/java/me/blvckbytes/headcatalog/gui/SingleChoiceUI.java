@@ -12,7 +12,7 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 
-public class SingleChoiceUI extends PageableInventoryUI<ISingleChoiceParameterProvider, SingleChoiceParameter> {
+public class SingleChoiceUI<DataType> extends PageableInventoryUI<ISingleChoiceParameterProvider, SingleChoiceParameter, DataType> {
 
   // TODO: Updatable inventory names would be useful
 
