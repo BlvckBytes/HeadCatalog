@@ -6,6 +6,7 @@ import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import me.blvckbytes.headcatalog.gui.config.ISingleChoiceParameterProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Map;
@@ -14,14 +15,10 @@ import java.util.Set;
 public abstract class SingleChoiceUI<DataType> extends PageableInventoryUI<ISingleChoiceParameterProvider, SingleChoiceParameter<DataType>, DataType> {
 
   private static final String KEY_SEARCH = "search";
-  private final AnvilSearchUI<DataType> searchUI;
+  private @Nullable AnvilSearchUI<DataType> searchUI;
 
   public SingleChoiceUI(IInventoryRegistry registry, SingleChoiceParameter<DataType> parameter) {
     super(registry, parameter);
-
-    this.searchUI = new AnvilSearchUI<>(
-      registry, parameter.makeAnvilSearchParameter(ui -> this.show())
-    );
   }
 
   @Override
@@ -34,6 +31,14 @@ public abstract class SingleChoiceUI<DataType> extends PageableInventoryUI<ISing
       switch (contentEntry.getKey()) {
         case KEY_SEARCH:
           slotContent = new UISlot(() -> parameter.provider.getSearch().build(), interaction -> {
+
+            // Create the search UI on demand
+            if (this.searchUI == null) {
+              this.searchUI = new AnvilSearchUI<>(
+                registry, parameter.makeAnvilSearchParameter(ui -> this.show())
+              );
+            }
+
             this.searchUI.show();
             return null;
           });
@@ -68,7 +73,8 @@ public abstract class SingleChoiceUI<DataType> extends PageableInventoryUI<ISing
   public void setPageableSlots(Collection<DataBoundUISlot<DataType>> items) {
     super.setPageableSlots(items);
 
-    if (this.searchUI.isRegistered())
+    // Only invoke the update if the search UI is actually active
+    if (this.searchUI != null && this.searchUI.isRegistered())
       this.searchUI.invokeFilterFunctionAndUpdatePageSlots();
   }
 
