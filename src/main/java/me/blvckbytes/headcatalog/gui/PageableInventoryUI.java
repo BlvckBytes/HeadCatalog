@@ -106,7 +106,8 @@ public abstract class PageableInventoryUI<Provider extends IPageableParameterPro
   }
 
   private void drawPagination(@Nullable EAnimationType animationType) {
-    animator.saveLayout(this);
+    int inventorySize = inventory.getSize();
+    animator.saveLayout(inventorySize, this::getItem);
 
     this.drawCurrentPage();
     this.drawNamedSlot(KEY_PREVIOUS_PAGE);
@@ -114,7 +115,7 @@ public abstract class PageableInventoryUI<Provider extends IPageableParameterPro
     this.drawNamedSlot(KEY_NEXT_PAGE);
 
     if (!isFirstPageRender && animationType != null && parameter.provider.isAnimating())
-      animator.animateTo(animationType, paginationSlotIndices, this);
+      animator.animateTo(animationType, paginationSlotIndices, inventorySize, this::getItem);
 
     isFirstPageRender = false;
   }

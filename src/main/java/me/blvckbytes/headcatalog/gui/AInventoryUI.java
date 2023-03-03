@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Supplier;
 
-public abstract class AInventoryUI<Provider extends IInventoryUIParameterProvider, Parameter extends AUIParameter<Provider>> implements IReadonlyInventory {
+public abstract class AInventoryUI<Provider extends IInventoryUIParameterProvider, Parameter extends AUIParameter<Provider>> {
 
   protected final Inventory inventory;
   protected final InventoryAnimator animator;
@@ -143,13 +143,7 @@ public abstract class AInventoryUI<Provider extends IInventoryUIParameterProvide
     return this.inventory;
   }
 
-  @Override
-  public int getSize() {
-    return this.inventory.getSize();
-  }
-
-  @Override
-  public ItemStack getItem(int slot) {
+  protected ItemStack getItem(int slot) {
     if (slot < 0)
       return null;
 

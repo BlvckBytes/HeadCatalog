@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 public class InventoryAnimator {
 
@@ -21,17 +22,15 @@ public class InventoryAnimator {
     this.setter = setter;
   }
 
-  public void animateTo(EAnimationType animationType, List<Integer> mask, IReadonlyInventory inventory) {
-    int inventorySize = inventory.getSize();
-
+  public void animateTo(EAnimationType animationType, List<Integer> mask, int inventorySize, Function<Integer, ItemStack> itemGetter) {
     if (inventorySize % 9 != 0)
       return;
 
-    if (this.toLayout == null || this.toLayout.length >= inventory.getSize())
+    if (this.toLayout == null || this.toLayout.length >= inventorySize)
       this.toLayout = new ItemStack[inventorySize];
 
     for (int i = 0; i < inventorySize; i++)
-      this.toLayout[i] = inventory.getItem(i);
+      this.toLayout[i] = itemGetter.apply(i);
 
     this.animationType = animationType;
     this.mask = mask;
@@ -48,13 +47,12 @@ public class InventoryAnimator {
     this.animationType = null;
   }
 
-  public void saveLayout(IReadonlyInventory inventory) {
-    int inventorySize = inventory.getSize();
-    if (this.fromLayout == null || this.fromLayout.length >= inventory.getSize())
+  public void saveLayout(int inventorySize, Function<Integer, ItemStack> itemGetter) {
+    if (this.fromLayout == null || this.fromLayout.length >= inventorySize)
       this.fromLayout = new ItemStack[inventorySize];
 
     for (int i = 0; i < inventorySize; i++)
-      this.fromLayout[i] = inventory.getItem(i);
+      this.fromLayout[i] = itemGetter.apply(i);
   }
 
   public boolean tick() {
