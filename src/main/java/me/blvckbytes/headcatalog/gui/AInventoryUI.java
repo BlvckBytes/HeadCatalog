@@ -16,11 +16,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Supplier;
 
-public abstract class AInventoryUI<ParameterProvider extends IInventoryUIParameterProvider, Parameter extends AUIParameter> implements IReadonlyInventory {
+public abstract class AInventoryUI<Provider extends IInventoryUIParameterProvider, Parameter extends AUIParameter<Provider>> implements IReadonlyInventory {
 
   protected final Inventory inventory;
   protected final InventoryAnimator animator;
-  protected final ParameterProvider parameterProvider;
   protected final Parameter parameter;
   protected final Map<String, Set<Integer>> slotContents;
   protected final IEvaluationEnvironment inventoryEnvironment;
@@ -29,16 +28,15 @@ public abstract class AInventoryUI<ParameterProvider extends IInventoryUIParamet
   private final Map<Integer, ItemStack> fakeSlotItemCache;
   private final Map<Integer, UISlot> slots;
 
-  public AInventoryUI(IFakeSlotCommunicator fakeSlotCommunicator, ParameterProvider parameterProvider, Parameter parameter) {
+  public AInventoryUI(IFakeSlotCommunicator fakeSlotCommunicator, Parameter parameter) {
     this.slots = new HashMap<>();
     this.fakeSlotCommunicator = fakeSlotCommunicator;
     this.parameter = parameter;
-    this.parameterProvider = parameterProvider;
     this.inventory = createInventory();
     this.fakeSlotItemCache = new HashMap<>();
     this.animator = new InventoryAnimator(this::setItem);
     this.inventoryEnvironment = getInventoryEnvironment();
-    this.slotContents = parameterProvider.getSlotContents(this.inventoryEnvironment);
+    this.slotContents = parameter.provider.getSlotContents(this.inventoryEnvironment);
   }
 
   private IEvaluationEnvironment getInventoryEnvironment() {
@@ -124,7 +122,7 @@ public abstract class AInventoryUI<ParameterProvider extends IInventoryUIParamet
   }
 
   protected void decorate() {
-    for (Map.Entry<String, IItemBuildable> customItemEntry : this.parameterProvider.getCustomItems().entrySet()) {
+    for (Map.Entry<String, IItemBuildable> customItemEntry : parameter.provider.getCustomItems().entrySet()) {
       String customItemName = customItemEntry.getKey();
       Set<Integer> customItemSlots = slotContents.get(customItemName);
 

@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public abstract class PageableInventoryUI<ParameterProvider extends IPageableParameterProvider, Parameter extends AUIParameter, PaginationDataType> extends AInventoryUI<ParameterProvider, Parameter> {
+public abstract class PageableInventoryUI<Provider extends IPageableParameterProvider, Parameter extends AUIParameter<Provider>, PaginationDataType> extends AInventoryUI<Provider, Parameter> {
 
   private static final String
     KEY_PREVIOUS_PAGE = "previousPage",
@@ -27,11 +27,11 @@ public abstract class PageableInventoryUI<ParameterProvider extends IPageablePar
   private int currentPage;
   private int numberOfPages;
 
-  public PageableInventoryUI(IFakeSlotCommunicator fakeSlotCommunicator, ParameterProvider pageableParameters, Parameter parameter) {
-    super(fakeSlotCommunicator, pageableParameters, parameter);
+  public PageableInventoryUI(IFakeSlotCommunicator fakeSlotCommunicator, Parameter parameter) {
+    super(fakeSlotCommunicator, parameter);
     this.pageableSlots = new ArrayList<>();
-    this.paginationSlotIndices = parameterProvider.getPaginationSlots(inventoryEnvironment);
-    this.animationPeriod = parameterProvider.getAnimationPeriod();
+    this.paginationSlotIndices = parameter.provider.getPaginationSlots(inventoryEnvironment);
+    this.animationPeriod = parameter.provider.getAnimationPeriod();
     this.pageSize = this.paginationSlotIndices.size();
     this.isFirstPageRender = true;
   }
@@ -48,15 +48,15 @@ public abstract class PageableInventoryUI<ParameterProvider extends IPageablePar
 
       switch (contentEntry.getKey()) {
         case KEY_PREVIOUS_PAGE:
-          slotContent = new UISlot(() -> parameterProvider.getPreviousPage().build(paginationEnvironment), this::handlePreviousPageClick);
+          slotContent = new UISlot(() -> parameter.provider.getPreviousPage().build(paginationEnvironment), this::handlePreviousPageClick);
           break;
 
         case KEY_NEXT_PAGE:
-          slotContent = new UISlot(() -> parameterProvider.getNextPage().build(paginationEnvironment), this::handleNextPageClick);
+          slotContent = new UISlot(() -> parameter.provider.getNextPage().build(paginationEnvironment), this::handleNextPageClick);
           break;
 
         case KEY_CURRENT_PAGE:
-          slotContent = new UISlot(() -> parameterProvider.getCurrentPage().build(paginationEnvironment));
+          slotContent = new UISlot(() -> parameter.provider.getCurrentPage().build(paginationEnvironment));
           break;
       }
 
@@ -113,7 +113,7 @@ public abstract class PageableInventoryUI<ParameterProvider extends IPageablePar
     this.drawNamedSlot(KEY_CURRENT_PAGE);
     this.drawNamedSlot(KEY_NEXT_PAGE);
 
-    if (!isFirstPageRender && animationType != null && parameterProvider.isAnimating())
+    if (!isFirstPageRender && animationType != null && parameter.provider.isAnimating())
       animator.animateTo(animationType, paginationSlotIndices, this);
 
     isFirstPageRender = false;

@@ -5,6 +5,7 @@ import me.blvckbytes.autowirer.IInitializable;
 import me.blvckbytes.bukkitboilerplate.PlayerCommand;
 import me.blvckbytes.headcatalog.config.HeadCatalogCommandSection;
 import me.blvckbytes.headcatalog.gui.*;
+import me.blvckbytes.headcatalog.gui.config.IAnvilSearchParameterProvider;
 import me.blvckbytes.headcatalog.heads.Head;
 import me.blvckbytes.headcatalog.heads.IHeadManager;
 import org.bukkit.entity.Player;
@@ -18,15 +19,18 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
   private final IHeadManager headManager;
 
   private List<DataBoundUISlot<Head>> headSlots;
+  private final IAnvilSearchParameterProvider anvilSearchProvider;
 
   public HeadCatalogCommand(
     HeadCatalogCommandSection commandSection,
     IHeadManager headManager,
-    InventoryRegistry inventoryRegistry
+    InventoryRegistry inventoryRegistry,
+    IAnvilSearchParameterProvider anvilSearchProvider
   ) {
     super(commandSection);
     this.inventoryRegistry = inventoryRegistry;
     this.headManager = headManager;
+    this.anvilSearchProvider = anvilSearchProvider;
   }
 
   @Override
@@ -37,7 +41,7 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
     }
 
     // FIXME: This generics warning SUCKS
-    AnvilSearchUI<Head> ui = inventoryRegistry.createInventory(AnvilSearchUI.class, new AnvilSearchParameter<>(player, this::applyHeadsFilter, HeadModelSearchFilter.HEAD_EVERYWHERE));
+    AnvilSearchUI<Head> ui = inventoryRegistry.createInventory(AnvilSearchUI.class, new AnvilSearchParameter<>(anvilSearchProvider, player, this::applyHeadsFilter, HeadModelSearchFilter.HEAD_EVERYWHERE));
 //    SingleChoiceUI ui = inventoryRegistry.createInventory(SingleChoiceUI.class, new SingleChoiceParameter(player));
     ui.show();
 //    ui.setPageableSlots(this.headSlots);

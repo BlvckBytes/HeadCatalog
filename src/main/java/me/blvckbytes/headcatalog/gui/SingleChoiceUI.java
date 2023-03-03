@@ -18,8 +18,8 @@ public class SingleChoiceUI<DataType> extends PageableInventoryUI<ISingleChoiceP
 
   private static final String KEY_SEARCH = "search";
 
-  public SingleChoiceUI(IFakeSlotCommunicator fakeSlotCommunicator, ISingleChoiceParameterProvider singleChoiceParameters, SingleChoiceParameter parameter) {
-    super(fakeSlotCommunicator, singleChoiceParameters, parameter);
+  public SingleChoiceUI(IFakeSlotCommunicator fakeSlotCommunicator, SingleChoiceParameter parameter) {
+    super(fakeSlotCommunicator, parameter);
   }
 
   @Override
@@ -31,7 +31,7 @@ public class SingleChoiceUI<DataType> extends PageableInventoryUI<ISingleChoiceP
 
       switch (contentEntry.getKey()) {
         case KEY_SEARCH:
-          slotContent = new UISlot(() -> parameterProvider.getSearch().build(), this::handleSearchClick);
+          slotContent = new UISlot(() -> parameter.provider.getSearch().build(), this::handleSearchClick);
           break;
       }
 
@@ -50,8 +50,8 @@ public class SingleChoiceUI<DataType> extends PageableInventoryUI<ISingleChoiceP
   @Override
   protected Inventory createInventory() {
     IEvaluationEnvironment titleEnvironment = getTitleEnvironment();
-    String title = parameterProvider.getTitle().asScalar(ScalarType.STRING, titleEnvironment);
-    return Bukkit.createInventory(null, parameterProvider.getNumberOfRows() * 9, title);
+    String title = parameter.provider.getTitle().asScalar(ScalarType.STRING, titleEnvironment);
+    return Bukkit.createInventory(null, parameter.provider.getNumberOfRows() * 9, title);
   }
 
   @Override

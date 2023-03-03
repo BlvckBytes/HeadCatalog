@@ -22,11 +22,10 @@ public class AnvilSearchUI<DataType> extends PageableInventoryUI<IAnvilSearchPar
   private ISearchFilterEnum<?, DataType> currentFilter;
   private String searchText;
 
-  public AnvilSearchUI(FakeSlotCommunicator fakeSlotCommunicator, IAnvilSearchParameterProvider parameterProvider, AnvilSearchParameter<DataType> parameter) {
-    super(fakeSlotCommunicator, parameterProvider, parameter);
+  public AnvilSearchUI(FakeSlotCommunicator fakeSlotCommunicator, AnvilSearchParameter<DataType> parameter) {
+    super(fakeSlotCommunicator, parameter);
 
     this.searchText = " ";
-
     this.filterStates = new LinkedHashMap<>();
     this.currentFilter = parameter.searchFilter;
     this.setupFilterStates();
@@ -34,7 +33,7 @@ public class AnvilSearchUI<DataType> extends PageableInventoryUI<IAnvilSearchPar
 
   @Override
   protected Inventory createInventory() {
-    String title = parameterProvider.getTitle().asScalar(ScalarType.STRING, inventoryEnvironment);
+    String title = parameter.provider.getTitle().asScalar(ScalarType.STRING, inventoryEnvironment);
     return Bukkit.createInventory(null, InventoryType.ANVIL, title);
   }
 
@@ -48,16 +47,16 @@ public class AnvilSearchUI<DataType> extends PageableInventoryUI<IAnvilSearchPar
       switch (contentEntry.getKey()) {
         case KEY_FILTER: {
           IEvaluationEnvironment filterEnvironment = getFilterEnvironment();
-          slotContent = new UISlot(() -> parameterProvider.getFilter().build(filterEnvironment), this::handleFilterClick);
+          slotContent = new UISlot(() -> parameter.provider.getFilter().build(filterEnvironment), this::handleFilterClick);
           break;
         }
 
         case KEY_SEARCH_ITEM:
-          slotContent = new UISlot(() -> parameterProvider.getSearchItem().build(inventoryEnvironment));
+          slotContent = new UISlot(() -> parameter.provider.getSearchItem().build(inventoryEnvironment));
           break;
 
         case KEY_BACK:
-          slotContent = new UISlot(() -> parameterProvider.getBack().build(inventoryEnvironment), this::handleBackClick);
+          slotContent = new UISlot(() -> parameter.provider.getBack().build(inventoryEnvironment), this::handleBackClick);
           break;
       }
 
