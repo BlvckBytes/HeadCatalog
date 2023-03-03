@@ -71,21 +71,12 @@ public abstract class PageableInventoryUI<Provider extends IPageableParameterPro
     this.pageableSlots = new ArrayList<>(items);
     this.numberOfPageables = this.pageableSlots.size();
 
-    if (this.pageSize == 0) {
+    if (this.pageSize == 0)
       this.numberOfPages = 0;
-      setCurrentPage(0, null);
-      return;
-    }
-
-    int oldNumberOfPages = this.numberOfPages;
-    this.numberOfPages = (int) Math.ceil(this.numberOfPageables / (float) this.pageSize);
-
-    // Try to keep the current page, if possible, only reset if it would be out of bounds
-    if (this.numberOfPages < oldNumberOfPages)
-      setCurrentPage(0, null);
-
     else
-      this.drawPagination(null);
+      this.numberOfPages = (int) Math.ceil(this.numberOfPageables / (float) this.pageSize);
+
+    setCurrentPage(0, null);
   }
 
   private void drawCurrentPage() {

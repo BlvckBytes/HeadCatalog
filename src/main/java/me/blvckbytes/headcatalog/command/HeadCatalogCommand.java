@@ -8,6 +8,7 @@ import me.blvckbytes.headcatalog.gui.*;
 import me.blvckbytes.headcatalog.gui.config.IAnvilSearchParameterProvider;
 import me.blvckbytes.headcatalog.heads.Head;
 import me.blvckbytes.headcatalog.heads.IHeadManager;
+import me.blvckbytes.utilitytypes.EIterationDecision;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -42,10 +43,14 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
 
     AnvilSearchParameter<Head> parameter = new AnvilSearchParameter<>(
       anvilSearchProvider, player,
-      this::applyHeadsFilter, HeadModelSearchFilter.HEAD_EVERYWHERE
+      this::applyHeadsFilter, HeadModelSearchFilter.HEAD_EVERYWHERE,
+      ui -> {
+        player.sendMessage("Going back");
+        ui.close();
+      }
     );
 
-    AInventoryUI<?, ?> ui = new AnvilSearchUI<>(inventoryRegistry, parameter);
+    AInventoryUI<?, ?> ui = new HeadSearchUI(inventoryRegistry, parameter);
     ui.show();
   }
 
@@ -127,7 +132,6 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
   }
 
   private void updateHeads(Collection<Head> heads) {
-    // TODO: Notify UIs to update their items also
     this.headSlots = new ArrayList<>();
 
     for (Head head : heads) {
@@ -137,6 +141,11 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
         return null;
       }, head));
     }
+
+    inventoryRegistry.forEachRegisteredOfType(HeadSearchUI.class, ui -> {
+      ui.invokeFilterFunctionAndUpdatePageSlots();
+      return EIterationDecision.CONTINUE;
+    });
   }
 
   @Override

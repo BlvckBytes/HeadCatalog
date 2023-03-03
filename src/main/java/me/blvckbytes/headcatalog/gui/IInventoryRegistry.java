@@ -1,6 +1,9 @@
 package me.blvckbytes.headcatalog.gui;
 
 import me.blvckbytes.bbreflect.packets.communicator.IFakeSlotCommunicator;
+import me.blvckbytes.utilitytypes.EIterationDecision;
+
+import java.util.function.Function;
 
 public interface IInventoryRegistry {
 
@@ -9,5 +12,7 @@ public interface IInventoryRegistry {
   void unregister(AInventoryUI<?, ?> ui);
 
   IFakeSlotCommunicator getFakeSlotCommunicator();
+
+  <T extends AInventoryUI<?, ?>> void forEachRegisteredOfType(Class<T> type, Function<T, EIterationDecision> consumer);
 
 }

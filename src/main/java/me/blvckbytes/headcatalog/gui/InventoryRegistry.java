@@ -4,6 +4,7 @@ import me.blvckbytes.autowirer.ICleanable;
 import me.blvckbytes.autowirer.IInitializable;
 import me.blvckbytes.bbreflect.packets.communicator.IFakeSlotCommunicator;
 import me.blvckbytes.bbreflect.packets.communicator.IItemNameCommunicator;
+import me.blvckbytes.utilitytypes.EIterationDecision;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -18,17 +19,18 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 public class InventoryRegistry implements IInventoryRegistry, IInitializable, ICleanable, Listener {
 
-  private final Map<Inventory, AInventoryUI<?, ?>> inventories;
+  private final Map<Inventory, AInventoryUI<?, ?>> uiByInventory;
   private final IItemNameCommunicator itemNameCommunicator;
   private final IFakeSlotCommunicator fakeSlotCommunicator;
   private final Plugin plugin;
   private @Nullable BukkitTask tickerTask;
 
   public InventoryRegistry(Plugin plugin, IFakeSlotCommunicator fakeSlotCommunicator, IItemNameCommunicator itemNameCommunicator) {
-    this.inventories = new HashMap<>();
+    this.uiByInventory = new HashMap<>();
     this.fakeSlotCommunicator = fakeSlotCommunicator;
     this.itemNameCommunicator = itemNameCommunicator;
     this.plugin = plugin;
@@ -38,7 +40,7 @@ public class InventoryRegistry implements IInventoryRegistry, IInitializable, IC
   public void cleanup() {
     this.itemNameCommunicator.unregisterReceiver(this::onAnvilItemRename);
 
-    for (AInventoryUI<?, ?> inventory : inventories.values())
+    for (AInventoryUI<?, ?> inventory : uiByInventory.values())
       inventory.close();
 
     if (this.tickerTask != null) {
@@ -49,7 +51,7 @@ public class InventoryRegistry implements IInventoryRegistry, IInitializable, IC
 
   @EventHandler
   public void onClose(InventoryCloseEvent event) {
-    AInventoryUI<?, ?> inventoryUI = inventories.get(event.getInventory());
+    AInventoryUI<?, ?> inventoryUI = uiByInventory.get(event.getInventory());
 
     if (inventoryUI == null)
       return;
@@ -60,7 +62,7 @@ public class InventoryRegistry implements IInventoryRegistry, IInitializable, IC
   @EventHandler
   public void onDrag(InventoryDragEvent event) {
     Inventory topInventory = event.getView().getTopInventory();
-    AInventoryUI<?, ?> inventoryUI = inventories.get(topInventory);
+    AInventoryUI<?, ?> inventoryUI = uiByInventory.get(topInventory);
 
     if (inventoryUI == null)
       return;
@@ -81,7 +83,7 @@ public class InventoryRegistry implements IInventoryRegistry, IInitializable, IC
       return;
 
     Inventory topInventory = event.getView().getTopInventory();
-    AInventoryUI<?, ?> inventoryUI = inventories.get(topInventory);
+    AInventoryUI<?, ?> inventoryUI = uiByInventory.get(topInventory);
 
     if (inventoryUI == null)
       return;
@@ -91,7 +93,7 @@ public class InventoryRegistry implements IInventoryRegistry, IInitializable, IC
 
   private void onAnvilItemRename(Player player, String name) {
     Inventory topInventory = player.getOpenInventory().getTopInventory();
-    AInventoryUI<?, ?> inventoryUI = inventories.get(topInventory);
+    AInventoryUI<?, ?> inventoryUI = uiByInventory.get(topInventory);
 
     if (inventoryUI == null)
       return;
@@ -109,7 +111,7 @@ public class InventoryRegistry implements IInventoryRegistry, IInitializable, IC
 
       @Override
       public void run() {
-        for (AInventoryUI<?, ?> inventory : inventories.values())
+        for (AInventoryUI<?, ?> inventory : uiByInventory.values())
           inventory.handleTick(time);
         ++time;
       }
@@ -118,16 +120,27 @@ public class InventoryRegistry implements IInventoryRegistry, IInitializable, IC
 
   @Override
   public void register(AInventoryUI<?, ?> ui) {
-    this.inventories.put(ui.getInventory(), ui);
+    this.uiByInventory.put(ui.getInventory(), ui);
   }
 
   @Override
   public void unregister(AInventoryUI<?, ?> ui) {
-    this.inventories.remove(ui.getInventory());
+    this.uiByInventory.remove(ui.getInventory());
   }
 
   @Override
   public IFakeSlotCommunicator getFakeSlotCommunicator() {
     return this.fakeSlotCommunicator;
+  }
+
+  @Override
+  public <T extends AInventoryUI<?, ?>> void forEachRegisteredOfType(Class<T> type, Function<T, EIterationDecision> consumer) {
+    for (AInventoryUI<?, ?> ui : this.uiByInventory.values()) {
+      if (!type.isInstance(ui))
+        continue;
+
+      if (consumer.apply(type.cast(ui)) == EIterationDecision.BREAK)
+        break;
+    }
   }
 }

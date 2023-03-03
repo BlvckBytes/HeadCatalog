@@ -10,7 +10,7 @@ import org.bukkit.inventory.Inventory;
 
 import java.util.*;
 
-public class AnvilSearchUI<DataType> extends PageableInventoryUI<IAnvilSearchParameterProvider, AnvilSearchParameter<DataType>, DataType> {
+public abstract class AnvilSearchUI<DataType> extends PageableInventoryUI<IAnvilSearchParameterProvider, AnvilSearchParameter<DataType>, DataType> {
 
   private static final String
     KEY_FILTER = "filter",
@@ -60,7 +60,11 @@ public class AnvilSearchUI<DataType> extends PageableInventoryUI<IAnvilSearchPar
           break;
 
         case KEY_BACK:
-          slotContent = new UISlot(() -> parameter.provider.getBack().build(inventoryEnvironment), this::handleBackClick);
+          if (parameter.backHandler != null)
+            slotContent = new UISlot(() -> parameter.provider.getBack().build(inventoryEnvironment), interaction -> {
+              parameter.backHandler.accept(this);
+              return null;
+            });
           break;
       }
 
@@ -73,7 +77,7 @@ public class AnvilSearchUI<DataType> extends PageableInventoryUI<IAnvilSearchPar
     invokeFilterFunctionAndUpdatePageSlots();
   }
 
-  private void invokeFilterFunctionAndUpdatePageSlots() {
+  public void invokeFilterFunctionAndUpdatePageSlots() {
     List<DataBoundUISlot<DataType>> slots = parameter.filterFunction.applyFilter(currentFilter, searchText);
     setPageableSlots(slots);
   }
@@ -132,11 +136,6 @@ public class AnvilSearchUI<DataType> extends PageableInventoryUI<IAnvilSearchPar
     synchronized (this) {
       searchTextUpdate = System.currentTimeMillis();
     }
-    return null;
-  }
-
-  private EnumSet<EClickResultFlag> handleBackClick(UIInteraction action) {
-    System.out.println("Back");
     return null;
   }
 
