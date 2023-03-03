@@ -38,6 +38,8 @@ public abstract class PageableInventoryUI<T extends IPageableParameterProvider> 
 
   @Override
   protected void decorate() {
+    super.decorate();
+
     IEvaluationEnvironment paginationEnvironment = getPaginationEnvironment();
 
     for (Map.Entry<String, Set<Integer>> contentEntry : slotContents.entrySet()) {

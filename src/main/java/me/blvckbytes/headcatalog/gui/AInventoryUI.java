@@ -1,6 +1,7 @@
 package me.blvckbytes.headcatalog.gui;
 
 import me.blvckbytes.bbreflect.packets.communicator.IFakeSlotCommunicator;
+import me.blvckbytes.bukkitevaluable.IItemBuildable;
 import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import me.blvckbytes.headcatalog.gui.config.IInventoryUIParameterProvider;
@@ -42,6 +43,7 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider> impl
   private IEvaluationEnvironment getInventoryEnvironment() {
     return new EvaluationEnvironmentBuilder()
       .withStaticVariable("inventory_size", this.inventory.getSize())
+      .withStaticVariable("viewer_name", this.viewer.getName())
       .build();
   }
 
@@ -118,7 +120,21 @@ public abstract class AInventoryUI<T extends IInventoryUIParameterProvider> impl
       inventory.getViewers().remove(0).closeInventory();
   }
 
-  protected abstract void decorate();
+  protected void decorate() {
+    for (Map.Entry<String, IItemBuildable> customItemEntry : this.parameterProvider.getCustomItems().entrySet()) {
+      String customItemName = customItemEntry.getKey();
+      Set<Integer> customItemSlots = slotContents.get(customItemName);
+
+      if (customItemSlots == null)
+        continue;
+
+      ItemStack customItem = customItemEntry.getValue().build(this.inventoryEnvironment);
+      UISlot customItemSlot = new UISlot(() -> customItem);
+
+      for (int slot : customItemSlots)
+        setSlot(slot, customItemSlot);
+    }
+  }
 
   protected abstract Inventory createInventory();
 

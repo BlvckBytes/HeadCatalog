@@ -60,10 +60,24 @@ anvilSearchUI:
 
   paginationSlots$: 'range(inventory_size + 0, inventory_size + 26)'
 
+  customItems:
+    darkGlass:
+      type: BLACK_STAINED_GLASS_PANE
+      name: ' '
+
   slotContents:
     previousPage$: 'inventory_size + 29'
     currentPage$: 'inventory_size + 31'
     nextPage$: 'inventory_size + 33'
+    darkGlass$: |
+      list_of(
+        inventory_size + 27,
+        inventory_size + 28,
+        inventory_size + 30,
+        inventory_size + 32,
+        inventory_size + 34,
+        inventory_size + 35
+      )
 
 singleChoiceUI:
   animating: true
@@ -131,11 +145,22 @@ singleChoiceUI:
   border:
     type: BLACK_STAINED_GLASS_PANE
 
+  customItems:
+    darkGlass:
+      type: BLACK_STAINED_GLASS_PANE
+      name: ' '
+
   slotContents:
     previousPage: 38
     currentPage: 40
     nextPage: 42
     search: 44
+    darkGlass$: |
+      flatten(
+        range(0, 8),
+        list_of(9, 18, 27, 17, 26, 35),
+        range(36, 44)
+      )
 
 gui:
   representative:

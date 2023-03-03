@@ -1,6 +1,7 @@
 package me.blvckbytes.headcatalog.gui.config;
 
 import me.blvckbytes.bbconfigmapper.IEvaluable;
+import me.blvckbytes.bukkitevaluable.IItemBuildable;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 
 import java.util.Map;
@@ -17,5 +18,7 @@ public interface IInventoryUIParameterProvider {
   int getAnimationPeriod();
 
   Map<String, Set<Integer>> getSlotContents(IEvaluationEnvironment environment);
+
+  Map<String, IItemBuildable> getCustomItems();
 
 }

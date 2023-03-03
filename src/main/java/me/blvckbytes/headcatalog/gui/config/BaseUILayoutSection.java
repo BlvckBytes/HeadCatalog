@@ -30,8 +30,7 @@ public class BaseUILayoutSection implements IConfigSection, IInventoryUIParamete
 
   private int numberOfRows;
 
-  @CSAlways
-  private BukkitEvaluable title;
+  private @CSAlways BukkitEvaluable title;
 
   private @Nullable IItemBuildable fill;
   private @Nullable IItemBuildable border;
@@ -40,8 +39,9 @@ public class BaseUILayoutSection implements IConfigSection, IInventoryUIParamete
 
   private int animationPeriod;
 
-  @CSAlways
-  private Map<String, IEvaluable> slotContents;
+  private @CSAlways Map<String, IEvaluable> slotContents;
+
+  private @CSAlways Map<String, IItemBuildable> customItems;
 
   @Override
   public void afterParsing(List<Field> fields) throws Exception {
@@ -90,5 +90,10 @@ public class BaseUILayoutSection implements IConfigSection, IInventoryUIParamete
     }
 
     return evaluatedSlotContents;
+  }
+
+  @Override
+  public Map<String, IItemBuildable> getCustomItems() {
+    return this.customItems;
   }
 }

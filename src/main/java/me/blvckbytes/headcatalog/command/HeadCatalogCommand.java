@@ -50,7 +50,8 @@ public class HeadCatalogCommand extends PlayerCommand {
 //    singleChoiceUI.show();
 //    singleChoiceUI.setPageableSlots(this.headSlots);
 
-    AnvilSearchUI searchUI = inventoryRegistry.createInventory(AnvilSearchUI.class, new AnvilSearchParameter(player));
-    searchUI.show();
+//    AnvilSearchUI ui = inventoryRegistry.createInventory(AnvilSearchUI.class, new AnvilSearchParameter(player));
+    SingleChoiceUI ui = inventoryRegistry.createInventory(SingleChoiceUI.class, new SingleChoiceParameter(player));
+    ui.show();
   }
 }
