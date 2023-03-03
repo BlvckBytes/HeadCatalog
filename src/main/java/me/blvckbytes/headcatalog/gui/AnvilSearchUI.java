@@ -89,13 +89,13 @@ public class AnvilSearchUI<DataType> extends PageableInventoryUI<IAnvilSearchPar
 
   @Override
   public void show() {
-    fakeSlotCommunicator.blockWindowItems(parameter.viewer, fakeSlotItemCache::get);
+    blockWindowItems();
     super.show();
   }
 
   @Override
   protected void handleClose() {
-    fakeSlotCommunicator.unblockWindowItems(parameter.viewer);
+    unblockWindowItems();
     super.handleClose();
   }
 

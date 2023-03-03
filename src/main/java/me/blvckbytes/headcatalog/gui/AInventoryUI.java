@@ -24,10 +24,10 @@ public abstract class AInventoryUI<ParameterProvider extends IInventoryUIParamet
   protected final Parameter parameter;
   protected final Map<String, Set<Integer>> slotContents;
   protected final IEvaluationEnvironment inventoryEnvironment;
-  protected final IFakeSlotCommunicator fakeSlotCommunicator;
 
+  private final IFakeSlotCommunicator fakeSlotCommunicator;
+  private final Map<Integer, ItemStack> fakeSlotItemCache;
   private final Map<Integer, UISlot> slots;
-  protected final Map<Integer, ItemStack> fakeSlotItemCache;
 
   public AInventoryUI(IFakeSlotCommunicator fakeSlotCommunicator, ParameterProvider parameterProvider, Parameter parameter) {
     this.slots = new HashMap<>();
@@ -215,6 +215,18 @@ public abstract class AInventoryUI<ParameterProvider extends IInventoryUIParamet
   }
 
   public void handleItemRename(String name) {}
+
+  protected @Nullable ItemStack getFakeSlotItem(int slot) {
+    return this.fakeSlotItemCache.get(slot);
+  }
+
+  protected void blockWindowItems() {
+    fakeSlotCommunicator.blockWindowItems(parameter.viewer, this::getFakeSlotItem);
+  }
+
+  protected void unblockWindowItems() {
+    fakeSlotCommunicator.unblockWindowItems(parameter.viewer);
+  }
 
   public void handleInteraction(UIInteraction interaction) {
     int slot = interaction.slot;
