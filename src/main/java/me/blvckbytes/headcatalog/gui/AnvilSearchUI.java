@@ -9,12 +9,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 
-import java.util.EnumSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-public class AnvilSearchUI extends PageableInventoryUI<IAnvilSearchParameterProvider, AnvilSearchParameter> {
+public class AnvilSearchUI<T extends IItemSupplier> extends PageableInventoryUI<IAnvilSearchParameterProvider, AnvilSearchParameter<T>> {
 
   private static final String
     KEY_FILTER = "filter",
@@ -22,10 +19,10 @@ public class AnvilSearchUI extends PageableInventoryUI<IAnvilSearchParameterProv
     KEY_SEARCH_ITEM = "searchItem";
 
   private final Map<String, Boolean> filterStates;
-  private ISearchFilterEnum<?> currentFilter;
+  private ISearchFilterEnum<?, T> currentFilter;
   private String searchText;
 
-  public AnvilSearchUI(FakeSlotCommunicator fakeSlotCommunicator, IAnvilSearchParameterProvider parameterProvider, AnvilSearchParameter parameter) {
+  public AnvilSearchUI(FakeSlotCommunicator fakeSlotCommunicator, IAnvilSearchParameterProvider parameterProvider, AnvilSearchParameter<T> parameter) {
     super(fakeSlotCommunicator, parameterProvider, parameter);
 
     this.searchText = " ";
@@ -69,12 +66,27 @@ public class AnvilSearchUI extends PageableInventoryUI<IAnvilSearchParameterProv
 
       setSlots(slotContent, contentEntry.getValue());
     }
+
+    invokeFilterFunctionAndUpdatePageSlots();
+  }
+
+  private void invokeFilterFunctionAndUpdatePageSlots() {
+    List<T> items = parameter.filterFunction.applyFilter(currentFilter, searchText);
+    List<UISlot> slots = new ArrayList<>();
+
+    // FIXME: Allocating new slots all the time really isn't ideal...
+    // TODO: Bind interactions to an external callback function
+    for (T item : items)
+      slots.add(new UISlot(item::getItem));
+
+    setPageableSlots(slots);
   }
 
   @Override
   public void handleItemRename(String name) {
     super.handleItemRename(name);
     this.searchText = name;
+    invokeFilterFunctionAndUpdatePageSlots();
   }
 
   @Override
@@ -95,7 +107,7 @@ public class AnvilSearchUI extends PageableInventoryUI<IAnvilSearchParameterProv
   }
 
   private void setupFilterStates() {
-    for (ISearchFilterEnum<?> searchFilter : parameter.searchFilter.listValues())
+    for (ISearchFilterEnum<?, T> searchFilter : parameter.searchFilter.listValues())
       filterStates.put(searchFilter.name(), searchFilter == currentFilter);
   }
 

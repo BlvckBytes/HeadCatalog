@@ -1,37 +1,37 @@
 package me.blvckbytes.headcatalog.gui;
 
-import me.blvckbytes.headcatalog.apis.HeadModel;
+import me.blvckbytes.headcatalog.heads.Head;
 import me.blvckbytes.utilitytypes.FUnsafeFunction;
 
 import java.util.function.Function;
 
-public enum HeadModelSearchFilter implements ISearchFilterEnum<HeadModelSearchFilter> {
+public enum HeadModelSearchFilter implements ISearchFilterEnum<HeadModelSearchFilter, Head> {
 
-  HEAD_EVERYWHERE(model -> new String[] {
-    model.name, model.categoriesString, model.tagsString
+  HEAD_EVERYWHERE(head -> new String[] {
+    head.model.name, head.model.categoriesString, head.model.tagsString
   }),
 
-  HEAD_NAME(model -> new String[] {
-    model.name
+  HEAD_NAME(head -> new String[] {
+    head.model.name
   }),
 
-  HEAD_CATEGORIES(model -> new String[] {
-    model.categoriesString
+  HEAD_CATEGORIES(head -> new String[] {
+    head.model.categoriesString
   }),
 
-  HEAD_TAGS(model -> new String[] {
-    model.tagsString
+  HEAD_TAGS(head -> new String[] {
+    head.model.tagsString
   }),
   ;
 
   private static final HeadModelSearchFilter[] values = values();
 
-  private final Function<Object, String[]> texts;
+  private final Function<Head, String[]> texts;
 
-  HeadModelSearchFilter(FUnsafeFunction<HeadModel, String[], Exception> texts) {
+  HeadModelSearchFilter(FUnsafeFunction<Head, String[], Exception> texts) {
     this.texts = o -> {
       try {
-        return texts.apply((HeadModel) o);
+        return texts.apply(o);
       } catch (Exception e) {
         e.printStackTrace();
         return new String[0];
@@ -40,12 +40,12 @@ public enum HeadModelSearchFilter implements ISearchFilterEnum<HeadModelSearchFi
   }
 
   @Override
-  public ISearchFilterEnum<HeadModelSearchFilter>[] listValues() {
+  public ISearchFilterEnum<HeadModelSearchFilter, Head>[] listValues() {
     return values;
   }
 
   @Override
-  public Function<Object, String[]> getTexts() {
+  public Function<Head, String[]> getTexts() {
     return this.texts;
   }
 }
