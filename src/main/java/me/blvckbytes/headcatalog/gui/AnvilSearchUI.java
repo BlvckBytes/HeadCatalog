@@ -1,7 +1,6 @@
 package me.blvckbytes.headcatalog.gui;
 
 import me.blvckbytes.bbconfigmapper.ScalarType;
-import me.blvckbytes.bbreflect.packets.communicator.FakeSlotCommunicator;
 import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import me.blvckbytes.headcatalog.gui.config.IAnvilSearchParameterProvider;
@@ -22,8 +21,8 @@ public class AnvilSearchUI<DataType> extends PageableInventoryUI<IAnvilSearchPar
   private ISearchFilterEnum<?, DataType> currentFilter;
   private String searchText;
 
-  public AnvilSearchUI(FakeSlotCommunicator fakeSlotCommunicator, AnvilSearchParameter<DataType> parameter) {
-    super(fakeSlotCommunicator, parameter);
+  public AnvilSearchUI(IInventoryRegistry inventoryRegistry, AnvilSearchParameter<DataType> parameter) {
+    super(inventoryRegistry, parameter);
 
     this.searchText = " ";
     this.filterStates = new LinkedHashMap<>();

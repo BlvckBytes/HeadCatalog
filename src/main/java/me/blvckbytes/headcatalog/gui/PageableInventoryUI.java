@@ -1,6 +1,5 @@
 package me.blvckbytes.headcatalog.gui;
 
-import me.blvckbytes.bbreflect.packets.communicator.IFakeSlotCommunicator;
 import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import me.blvckbytes.headcatalog.gui.config.AUIParameter;
@@ -27,8 +26,9 @@ public abstract class PageableInventoryUI<Provider extends IPageableParameterPro
   private int currentPage;
   private int numberOfPages;
 
-  public PageableInventoryUI(IFakeSlotCommunicator fakeSlotCommunicator, Parameter parameter) {
-    super(fakeSlotCommunicator, parameter);
+  public PageableInventoryUI(IInventoryRegistry registry, Parameter parameter) {
+    super(registry, parameter);
+
     this.pageableSlots = new ArrayList<>();
     this.paginationSlotIndices = parameter.provider.getPaginationSlots(inventoryEnvironment);
     this.animationPeriod = parameter.provider.getAnimationPeriod();

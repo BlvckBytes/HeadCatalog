@@ -18,8 +18,8 @@ public class SingleChoiceUI<DataType> extends PageableInventoryUI<ISingleChoiceP
 
   private static final String KEY_SEARCH = "search";
 
-  public SingleChoiceUI(IFakeSlotCommunicator fakeSlotCommunicator, SingleChoiceParameter parameter) {
-    super(fakeSlotCommunicator, parameter);
+  public SingleChoiceUI(IInventoryRegistry registry, SingleChoiceParameter parameter) {
+    super(registry, parameter);
   }
 
   @Override

@@ -1,10 +1,9 @@
 package me.blvckbytes.headcatalog.gui;
 
-import me.blvckbytes.autowirer.IAutoWirer;
 import me.blvckbytes.autowirer.ICleanable;
 import me.blvckbytes.autowirer.IInitializable;
+import me.blvckbytes.bbreflect.packets.communicator.IFakeSlotCommunicator;
 import me.blvckbytes.bbreflect.packets.communicator.IItemNameCommunicator;
-import me.blvckbytes.headcatalog.gui.config.AUIParameter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,61 +16,22 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 
-public class InventoryRegistry implements IInitializable, ICleanable, Listener {
-
-  // FIXME: Whoops, totally forgot to unregister no longer used instances
+public class InventoryRegistry implements IInventoryRegistry, IInitializable, ICleanable, Listener {
 
   private final Map<Inventory, AInventoryUI<?, ?>> inventories;
-  private final IAutoWirer autoWirer;
   private final IItemNameCommunicator itemNameCommunicator;
+  private final IFakeSlotCommunicator fakeSlotCommunicator;
   private final Plugin plugin;
   private @Nullable BukkitTask tickerTask;
 
-  public InventoryRegistry(Plugin plugin, IAutoWirer autoWirer, IItemNameCommunicator itemNameCommunicator) {
+  public InventoryRegistry(Plugin plugin, IFakeSlotCommunicator fakeSlotCommunicator, IItemNameCommunicator itemNameCommunicator) {
     this.inventories = new HashMap<>();
-    this.autoWirer = autoWirer;
+    this.fakeSlotCommunicator = fakeSlotCommunicator;
     this.itemNameCommunicator = itemNameCommunicator;
     this.plugin = plugin;
-  }
-
-  @SuppressWarnings("unchecked")
-  public <T extends AInventoryUI<?, ?>> T createInventory(Class<T> inventoryType, AUIParameter parameter) {
-    Constructor<?>[] constructors = inventoryType.getConstructors();
-
-    if (constructors.length != 1)
-      throw new IllegalStateException("Inventories need to have exactly one public constructor");
-
-    Constructor<?> constructor = inventoryType.getConstructors()[0];
-    Class<?>[] argumentTypes = constructor.getParameterTypes();
-    Object[] argumentValues = new Object[argumentTypes.length];
-
-    for (int i = 0; i < argumentTypes.length; i++) {
-      Class<?> argumentType = argumentTypes[i];
-
-      if (AUIParameter.class.isAssignableFrom(argumentType)) {
-        argumentValues[i] = parameter;
-        continue;
-      }
-
-      Object parameterValue = autoWirer.findInstance(argumentType);
-
-      if (parameterValue == null)
-        throw new IllegalStateException("Constructor requested unknown type: " + argumentType);
-
-      argumentValues[i] = parameterValue;
-    }
-
-    try {
-      T inventoryInstance = (T) constructor.newInstance(argumentValues);
-      inventories.put(inventoryInstance.getInventory(), inventoryInstance);
-      return inventoryInstance;
-    } catch (Exception e) {
-      throw new IllegalStateException(e);
-    }
   }
 
   @Override
@@ -154,5 +114,20 @@ public class InventoryRegistry implements IInitializable, ICleanable, Listener {
         ++time;
       }
     }, 0L, 0L);
+  }
+
+  @Override
+  public void register(AInventoryUI<?, ?> ui) {
+    this.inventories.put(ui.getInventory(), ui);
+  }
+
+  @Override
+  public void unregister(AInventoryUI<?, ?> ui) {
+    this.inventories.remove(ui.getInventory());
+  }
+
+  @Override
+  public IFakeSlotCommunicator getFakeSlotCommunicator() {
+    return this.fakeSlotCommunicator;
   }
 }

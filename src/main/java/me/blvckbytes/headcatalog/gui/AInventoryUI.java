@@ -24,13 +24,18 @@ public abstract class AInventoryUI<Provider extends IInventoryUIParameterProvide
   protected final Map<String, Set<Integer>> slotContents;
   protected final IEvaluationEnvironment inventoryEnvironment;
 
+  private final IInventoryRegistry registry;
   private final IFakeSlotCommunicator fakeSlotCommunicator;
+
   private final Map<Integer, ItemStack> fakeSlotItemCache;
   private final Map<Integer, UISlot> slots;
 
-  public AInventoryUI(IFakeSlotCommunicator fakeSlotCommunicator, Parameter parameter) {
+  public AInventoryUI(IInventoryRegistry registry, Parameter parameter) {
     this.slots = new HashMap<>();
-    this.fakeSlotCommunicator = fakeSlotCommunicator;
+
+    this.registry = registry;
+    this.fakeSlotCommunicator = registry.getFakeSlotCommunicator();
+
     this.parameter = parameter;
     this.inventory = createInventory();
     this.fakeSlotItemCache = new HashMap<>();
@@ -109,6 +114,8 @@ public abstract class AInventoryUI<Provider extends IInventoryUIParameterProvide
   }
 
   public void show() {
+    this.registry.register(this);
+
     // Open the inventory before decorating, so that the fake slot
     // communicator takes effect (has a target window ID), if applicable
     this.parameter.viewer.openInventory(this.inventory);
@@ -163,6 +170,7 @@ public abstract class AInventoryUI<Provider extends IInventoryUIParameterProvide
 
   protected void handleClose() {
     updatePlayerInventory();
+    this.registry.unregister(this);
   }
 
   private void updatePlayerInventory() {

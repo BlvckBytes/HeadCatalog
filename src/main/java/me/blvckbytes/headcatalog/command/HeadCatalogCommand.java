@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 public class HeadCatalogCommand extends PlayerCommand implements IInitializable, ICleanable {
 
-  private final InventoryRegistry inventoryRegistry;
+  private final IInventoryRegistry inventoryRegistry;
   private final IHeadManager headManager;
 
   private List<DataBoundUISlot<Head>> headSlots;
@@ -24,7 +24,7 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
   public HeadCatalogCommand(
     HeadCatalogCommandSection commandSection,
     IHeadManager headManager,
-    InventoryRegistry inventoryRegistry,
+    IInventoryRegistry inventoryRegistry,
     IAnvilSearchParameterProvider anvilSearchProvider
   ) {
     super(commandSection);
@@ -39,12 +39,13 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
       player.sendMessage("§cHeads aren't ready yet");
       return;
     }
+    AnvilSearchParameter<Head> parameter = new AnvilSearchParameter<>(
+      anvilSearchProvider, player,
+      this::applyHeadsFilter, HeadModelSearchFilter.HEAD_EVERYWHERE
+    );
 
-    // FIXME: This generics warning SUCKS
-    AnvilSearchUI<Head> ui = inventoryRegistry.createInventory(AnvilSearchUI.class, new AnvilSearchParameter<>(anvilSearchProvider, player, this::applyHeadsFilter, HeadModelSearchFilter.HEAD_EVERYWHERE));
-//    SingleChoiceUI ui = inventoryRegistry.createInventory(SingleChoiceUI.class, new SingleChoiceParameter(player));
+    AInventoryUI<?, ?> ui = new AnvilSearchUI<>(inventoryRegistry, parameter);
     ui.show();
-//    ui.setPageableSlots(this.headSlots);
   }
 
   private List<DataBoundUISlot<Head>> applyHeadsFilter(ISearchFilterEnum<?, Head> searchFilter, String text) {
