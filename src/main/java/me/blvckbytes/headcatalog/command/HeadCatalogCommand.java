@@ -13,13 +13,15 @@ import me.blvckbytes.headcatalog.config.HeadCatalogCommandSection;
 import me.blvckbytes.headcatalog.ui.*;
 import me.blvckbytes.headcatalog.heads.Head;
 import me.blvckbytes.headcatalog.heads.IHeadManager;
-import me.blvckbytes.utilitytypes.EIterationDecision;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class HeadCatalogCommand extends PlayerCommand implements IInitializable, ICleanable {
+public class HeadCatalogCommand extends PlayerCommand implements IInitializable, ICleanable, Listener {
 
   private final IInventoryRegistry inventoryRegistry;
   private final IHeadManager headManager;
@@ -27,6 +29,8 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
   private List<DataBoundUISlot<Head>> headSlots;
   private final IAnvilSearchParameterProvider anvilSearchProvider;
   private final ISingleChoiceParameterProvider singleChoiceProvider;
+
+  private final Map<Player, HeadSingleChoiceUI> headUiByPlayer;
 
   public HeadCatalogCommand(
     HeadCatalogCommandSection commandSection,
@@ -40,6 +44,7 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
     this.headManager = headManager;
     this.anvilSearchProvider = anvilSearchProvider;
     this.singleChoiceProvider = singleChoiceProvider;
+    this.headUiByPlayer = new HashMap<>();
   }
 
   @Override
@@ -49,14 +54,24 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
       return;
     }
 
-    SingleChoiceParameter<Head> singleChoiceParameter = new SingleChoiceParameter<>(
-      singleChoiceProvider, player,
-      anvilSearchProvider, HeadModelSearchFilter.HEAD_EVERYWHERE, this::applyHeadsFilter
-    );
+    createOrGetHeadUI(player).show();
+  }
 
-    HeadSingleChoiceUI singleChoiceUI = new HeadSingleChoiceUI(inventoryRegistry, singleChoiceParameter);
-    singleChoiceUI.setPageableSlots(this.headSlots);
-    singleChoiceUI.show();
+  private HeadSingleChoiceUI createOrGetHeadUI(Player player) {
+    HeadSingleChoiceUI singleChoiceUI = headUiByPlayer.get(player);
+
+    if (singleChoiceUI == null) {
+      SingleChoiceParameter<Head> singleChoiceParameter = new SingleChoiceParameter<>(
+        singleChoiceProvider, player,
+        anvilSearchProvider, HeadModelSearchFilter.HEAD_EVERYWHERE, this::applyHeadsFilter
+      );
+
+      singleChoiceUI = new HeadSingleChoiceUI(inventoryRegistry, singleChoiceParameter);
+      singleChoiceUI.setPageableSlots(this.headSlots);
+      this.headUiByPlayer.put(player, singleChoiceUI);
+    }
+
+    return singleChoiceUI;
   }
 
   private List<DataBoundUISlot<Head>> applyHeadsFilter(ISearchFilterEnum<?, Head> searchFilter, String text) {
@@ -137,20 +152,18 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
   }
 
   private void updateHeads(Collection<Head> heads) {
-    this.headSlots = new ArrayList<>();
-
+    List<DataBoundUISlot<Head>> result = new ArrayList<>();
     for (Head head : heads) {
-      headSlots.add(new DataBoundUISlot<>(() -> head.item, interaction -> {
+      result.add(new DataBoundUISlot<>(() -> head.item, interaction -> {
         interaction.ui.getViewer().getInventory().addItem(head.item);
         interaction.ui.close();
         return null;
       }, head));
     }
 
-    inventoryRegistry.forEachRegisteredOfType(HeadSingleChoiceUI.class, ui -> {
+    this.headSlots = result;
+    for (HeadSingleChoiceUI ui : this.headUiByPlayer.values())
       ui.setPageableSlots(this.headSlots);
-      return EIterationDecision.CONTINUE;
-    });
   }
 
   @Override
@@ -161,5 +174,10 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
   @Override
   public void initialize() {
     this.headManager.registerUpdateCallback(this::updateHeads);
+  }
+
+  @EventHandler
+  public void onQuit(PlayerQuitEvent event) {
+    this.headUiByPlayer.remove(event.getPlayer());
   }
 }
