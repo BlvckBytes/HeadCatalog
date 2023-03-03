@@ -23,10 +23,9 @@ public abstract class AInventoryUI<Provider extends IInventoryUIParameterProvide
   protected final Parameter parameter;
   protected final Map<String, Set<Integer>> slotContents;
   protected final IEvaluationEnvironment inventoryEnvironment;
+  protected final IInventoryRegistry registry;
 
-  private final IInventoryRegistry registry;
   private final IFakeSlotCommunicator fakeSlotCommunicator;
-
   private final Map<Integer, ItemStack> fakeSlotItemCache;
   private final Map<Integer, UISlot> slots;
 

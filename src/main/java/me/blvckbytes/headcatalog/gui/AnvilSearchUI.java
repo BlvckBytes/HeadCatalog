@@ -18,15 +18,20 @@ public class AnvilSearchUI<DataType> extends PageableInventoryUI<IAnvilSearchPar
     KEY_SEARCH_ITEM = "searchItem";
 
   private final Map<String, Boolean> filterStates;
+  private final int searchDebounceMs;
+
   private ISearchFilterEnum<?, DataType> currentFilter;
+  private long searchTextUpdate;
   private String searchText;
 
-  public AnvilSearchUI(IInventoryRegistry inventoryRegistry, AnvilSearchParameter<DataType> parameter) {
-    super(inventoryRegistry, parameter);
+  public AnvilSearchUI(IInventoryRegistry registry, AnvilSearchParameter<DataType> parameter) {
+    super(registry, parameter);
 
     this.searchText = " ";
     this.filterStates = new LinkedHashMap<>();
     this.currentFilter = parameter.filterEnum;
+    this.searchDebounceMs = parameter.provider.getSearchDebounceTicks() / 20 * 1000;
+
     this.setupFilterStates();
   }
 
@@ -76,8 +81,11 @@ public class AnvilSearchUI<DataType> extends PageableInventoryUI<IAnvilSearchPar
   @Override
   public void handleItemRename(String name) {
     super.handleItemRename(name);
-    this.searchText = name;
-    invokeFilterFunctionAndUpdatePageSlots();
+
+    synchronized (this) {
+      this.searchText = name;
+      this.searchTextUpdate = System.currentTimeMillis();
+    }
   }
 
   @Override
@@ -97,6 +105,18 @@ public class AnvilSearchUI<DataType> extends PageableInventoryUI<IAnvilSearchPar
     super.handleClose();
   }
 
+  @Override
+  public void handleTick(long time) {
+    super.handleTick(time);
+
+    synchronized (this) {
+      if (searchTextUpdate > 0 && System.currentTimeMillis() - searchTextUpdate >= searchDebounceMs) {
+        invokeFilterFunctionAndUpdatePageSlots();
+        searchTextUpdate = 0;
+      }
+    }
+  }
+
   private void setupFilterStates() {
     for (ISearchFilterEnum<?, DataType> searchFilter : parameter.filterEnum.listValues())
       filterStates.put(searchFilter.name(), searchFilter == currentFilter);
@@ -106,7 +126,12 @@ public class AnvilSearchUI<DataType> extends PageableInventoryUI<IAnvilSearchPar
     this.filterStates.put(this.currentFilter.name(), false);
     this.currentFilter = this.currentFilter.nextValue();
     this.filterStates.put(this.currentFilter.name(), true);
+
     drawNamedSlot(KEY_FILTER);
+
+    synchronized (this) {
+      searchTextUpdate = System.currentTimeMillis();
+    }
     return null;
   }
 
