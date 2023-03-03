@@ -1,5 +1,8 @@
-package me.blvckbytes.headcatalog.gui;
+package me.blvckbytes.headcatalog.ui;
 
+import me.blvckbytes.bukkitinventoryui.IInventoryRegistry;
+import me.blvckbytes.bukkitinventoryui.singlechoice.SingleChoiceParameter;
+import me.blvckbytes.bukkitinventoryui.singlechoice.SingleChoiceUI;
 import me.blvckbytes.headcatalog.heads.Head;
 
 public class HeadSingleChoiceUI extends SingleChoiceUI<Head> {

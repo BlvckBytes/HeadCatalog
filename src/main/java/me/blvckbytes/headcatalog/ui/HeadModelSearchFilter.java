@@ -1,5 +1,6 @@
-package me.blvckbytes.headcatalog.gui;
+package me.blvckbytes.headcatalog.ui;
 
+import me.blvckbytes.bukkitinventoryui.anvilsearch.ISearchFilterEnum;
 import me.blvckbytes.headcatalog.heads.Head;
 import me.blvckbytes.utilitytypes.FUnsafeFunction;
 

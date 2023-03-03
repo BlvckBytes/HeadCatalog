@@ -42,6 +42,7 @@
                             <include>me.blvckbytes:GPEEE</include>
                             <include>me.blvckbytes:BukkitEvaluable</include>
                             <include>me.blvckbytes:BBConfigMapper</include>
+                            <include>me.blvckbytes:BukkitInventoryUI</include>
                             <include>org.yaml:snakeyaml</include>
                             <include>com.github.cryptomorin:XSeries</include>
                         </includes>
@@ -170,6 +171,11 @@
         <dependency>
             <groupId>me.blvckbytes</groupId>
             <artifactId>BukkitEvaluable</artifactId>
+            <version>0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>me.blvckbytes</groupId>
+            <artifactId>BukkitInventoryUI</artifactId>
             <version>0.1</version>
         </dependency>
         <dependency>
