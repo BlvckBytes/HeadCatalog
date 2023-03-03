@@ -1,5 +1,7 @@
 package me.blvckbytes.headcatalog.heads;
 
+import me.blvckbytes.autowirer.ICleanable;
+import me.blvckbytes.autowirer.IInitializable;
 import me.blvckbytes.bukkitevaluable.IItemBuildable;
 import me.blvckbytes.gpeee.functions.AExpressionFunction;
 import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
@@ -13,11 +15,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class HeadManager implements IHeadManager {
+public class HeadManager implements IHeadManager, IInitializable, ICleanable {
 
-  private final List<Consumer<Collection<Head>>> updateConsumers;
+  private final Set<Consumer<Collection<Head>>> updateConsumers;
   private final IItemBuildable representativeItem;
   private final AExpressionFunction skinUrlToBase64Function;
+  private final IHeadApisManager apisManager;
 
   private @Nullable Collection<Head> headsUnmodifiable;
 
@@ -25,10 +28,10 @@ public class HeadManager implements IHeadManager {
     IHeadApisManager apisManager,
     IRepresentativeProvider representativeProvider
   ) {
-    this.updateConsumers = new ArrayList<>();
+    this.updateConsumers = new HashSet<>();
+    this.apisManager = apisManager;
     this.representativeItem = representativeProvider.getRepresentative().asItem();
     this.skinUrlToBase64Function = new SkinUrlToBase64Function();
-    apisManager.registerUpdateCallback(this::onHeadModelsUpdate);
   }
 
   @Override
@@ -39,6 +42,11 @@ public class HeadManager implements IHeadManager {
   @Override
   public void registerUpdateCallback(Consumer<Collection<Head>> consumer) {
     updateConsumers.add(consumer);
+  }
+
+  @Override
+  public void unregisterUpdateCallback(Consumer<Collection<Head>> consumer) {
+    updateConsumers.remove(consumer);
   }
 
   private void notifyUpdateConsumers() {
@@ -65,5 +73,15 @@ public class HeadManager implements IHeadManager {
 
     headsUnmodifiable = Collections.unmodifiableCollection(heads);
     notifyUpdateConsumers();
+  }
+
+  @Override
+  public void cleanup() {
+    this.apisManager.unregisterUpdateCallback(this::onHeadModelsUpdate);
+  }
+
+  @Override
+  public void initialize() {
+    this.apisManager.registerUpdateCallback(this::onHeadModelsUpdate);
   }
 }

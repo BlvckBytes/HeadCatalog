@@ -11,4 +11,6 @@ public interface IHeadManager {
 
   void registerUpdateCallback(Consumer<Collection<Head>> consumer);
 
+  void unregisterUpdateCallback(Consumer<Collection<Head>> consumer);
+
 }

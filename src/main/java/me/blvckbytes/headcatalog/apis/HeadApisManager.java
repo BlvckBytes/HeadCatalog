@@ -41,7 +41,7 @@ public class HeadApisManager implements IHeadApisManager, IInitializable, IClean
   private final ILogger logger;
   private final IPersistence persistence;
 
-  private final List<Consumer<Collection<HeadModel>>> updateConsumers;
+  private final Set<Consumer<Collection<HeadModel>>> updateConsumers;
 
   private @Nullable BukkitTask updateTask;
   private final long updatePeriod;
@@ -60,7 +60,7 @@ public class HeadApisManager implements IHeadApisManager, IInitializable, IClean
     this.plugin = plugin;
     this.logger = logger;
 
-    this.updateConsumers = new ArrayList<>();
+    this.updateConsumers = new HashSet<>();
     this.jsonParser = new JsonParser();
     this.makeHeadFunction = new MakeHeadFunction(logger);
     this.base64ToSkinUrlFunction = new Base64ToSkinUrlFunction();
@@ -274,5 +274,10 @@ public class HeadApisManager implements IHeadApisManager, IInitializable, IClean
   @Override
   public void registerUpdateCallback(Consumer<Collection<HeadModel>> consumer) {
     this.updateConsumers.add(consumer);
+  }
+
+  @Override
+  public void unregisterUpdateCallback(Consumer<Collection<HeadModel>> consumer) {
+    this.updateConsumers.remove(consumer);
   }
 }

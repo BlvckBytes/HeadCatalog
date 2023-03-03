@@ -1,5 +1,7 @@
 package me.blvckbytes.headcatalog.command;
 
+import me.blvckbytes.autowirer.ICleanable;
+import me.blvckbytes.autowirer.IInitializable;
 import me.blvckbytes.bukkitboilerplate.PlayerCommand;
 import me.blvckbytes.headcatalog.config.HeadCatalogCommandSection;
 import me.blvckbytes.headcatalog.gui.*;
@@ -11,9 +13,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class HeadCatalogCommand extends PlayerCommand {
+public class HeadCatalogCommand extends PlayerCommand implements IInitializable, ICleanable {
 
   private final InventoryRegistry inventoryRegistry;
+  private final IHeadManager headManager;
 
   private List<UISlot> headSlots;
 
@@ -24,8 +27,7 @@ public class HeadCatalogCommand extends PlayerCommand {
   ) {
     super(commandSection);
     this.inventoryRegistry = inventoryRegistry;
-
-    headManager.registerUpdateCallback(this::mapHeadsToUISlots);
+    this.headManager = headManager;
   }
 
   private void mapHeadsToUISlots(Collection<Head> heads) {
@@ -53,5 +55,15 @@ public class HeadCatalogCommand extends PlayerCommand {
     AnvilSearchUI ui = inventoryRegistry.createInventory(AnvilSearchUI.class, new AnvilSearchParameter(player, HeadModelSearchFilter.HEAD_EVERYWHERE));
 //    SingleChoiceUI ui = inventoryRegistry.createInventory(SingleChoiceUI.class, new SingleChoiceParameter(player));
     ui.show();
+  }
+
+  @Override
+  public void cleanup() {
+    this.headManager.unregisterUpdateCallback(this::mapHeadsToUISlots);
+  }
+
+  @Override
+  public void initialize() {
+    this.headManager.registerUpdateCallback(this::mapHeadsToUISlots);
   }
 }
