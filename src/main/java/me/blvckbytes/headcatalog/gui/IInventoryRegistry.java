@@ -11,6 +11,8 @@ public interface IInventoryRegistry {
 
   void unregister(AInventoryUI<?, ?> ui);
 
+  boolean isRegistered(AInventoryUI<?, ?> ui);
+
   IFakeSlotCommunicator getFakeSlotCommunicator();
 
   <T extends AInventoryUI<?, ?>> void forEachRegisteredOfType(Class<T> type, Function<T, EIterationDecision> consumer);

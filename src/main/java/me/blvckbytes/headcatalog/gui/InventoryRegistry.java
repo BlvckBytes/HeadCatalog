@@ -129,6 +129,11 @@ public class InventoryRegistry implements IInventoryRegistry, IInitializable, IC
   }
 
   @Override
+  public boolean isRegistered(AInventoryUI<?, ?> ui) {
+    return this.uiByInventory.containsKey(ui.getInventory());
+  }
+
+  @Override
   public IFakeSlotCommunicator getFakeSlotCommunicator() {
     return this.fakeSlotCommunicator;
   }

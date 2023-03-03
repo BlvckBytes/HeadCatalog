@@ -6,6 +6,7 @@ import me.blvckbytes.bukkitboilerplate.PlayerCommand;
 import me.blvckbytes.headcatalog.config.HeadCatalogCommandSection;
 import me.blvckbytes.headcatalog.gui.*;
 import me.blvckbytes.headcatalog.gui.config.IAnvilSearchParameterProvider;
+import me.blvckbytes.headcatalog.gui.config.ISingleChoiceParameterProvider;
 import me.blvckbytes.headcatalog.heads.Head;
 import me.blvckbytes.headcatalog.heads.IHeadManager;
 import me.blvckbytes.utilitytypes.EIterationDecision;
@@ -21,17 +22,20 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
 
   private List<DataBoundUISlot<Head>> headSlots;
   private final IAnvilSearchParameterProvider anvilSearchProvider;
+  private final ISingleChoiceParameterProvider singleChoiceProvider;
 
   public HeadCatalogCommand(
     HeadCatalogCommandSection commandSection,
     IHeadManager headManager,
     IInventoryRegistry inventoryRegistry,
-    IAnvilSearchParameterProvider anvilSearchProvider
+    IAnvilSearchParameterProvider anvilSearchProvider,
+    ISingleChoiceParameterProvider singleChoiceProvider
   ) {
     super(commandSection);
     this.inventoryRegistry = inventoryRegistry;
     this.headManager = headManager;
     this.anvilSearchProvider = anvilSearchProvider;
+    this.singleChoiceProvider = singleChoiceProvider;
   }
 
   @Override
@@ -41,17 +45,14 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
       return;
     }
 
-    AnvilSearchParameter<Head> parameter = new AnvilSearchParameter<>(
-      anvilSearchProvider, player,
-      this::applyHeadsFilter, HeadModelSearchFilter.HEAD_EVERYWHERE,
-      ui -> {
-        player.sendMessage("Going back");
-        ui.close();
-      }
+    SingleChoiceParameter<Head> singleChoiceParameter = new SingleChoiceParameter<>(
+      singleChoiceProvider, player,
+      anvilSearchProvider, HeadModelSearchFilter.HEAD_EVERYWHERE, this::applyHeadsFilter
     );
 
-    AInventoryUI<?, ?> ui = new HeadSearchUI(inventoryRegistry, parameter);
-    ui.show();
+    HeadSingleChoiceUI singleChoiceUI = new HeadSingleChoiceUI(inventoryRegistry, singleChoiceParameter);
+    singleChoiceUI.setPageableSlots(this.headSlots);
+    singleChoiceUI.show();
   }
 
   private List<DataBoundUISlot<Head>> applyHeadsFilter(ISearchFilterEnum<?, Head> searchFilter, String text) {
@@ -61,12 +62,12 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
     String[] searchWords = text.toLowerCase(Locale.ROOT).split(" ");
     Map<DataBoundUISlot<Head>, Integer> results = new HashMap<>();
 
-    for (DataBoundUISlot<Head> headSlot : this.headSlots) {
-      String[] texts = searchFilter.getTexts().apply(headSlot.data);
+    for (DataBoundUISlot<Head> slotItem : this.headSlots) {
+      String[] texts = searchFilter.getTexts().apply(slotItem.data);
       int diff = calculateDifference(searchWords, texts);
 
       if (diff >= 0)
-        results.put(headSlot, diff);
+        results.put(slotItem, diff);
     }
 
     return results.entrySet().stream()
@@ -142,8 +143,8 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
       }, head));
     }
 
-    inventoryRegistry.forEachRegisteredOfType(HeadSearchUI.class, ui -> {
-      ui.invokeFilterFunctionAndUpdatePageSlots();
+    inventoryRegistry.forEachRegisteredOfType(HeadSingleChoiceUI.class, ui -> {
+      ui.setPageableSlots(this.headSlots);
       return EIterationDecision.CONTINUE;
     });
   }

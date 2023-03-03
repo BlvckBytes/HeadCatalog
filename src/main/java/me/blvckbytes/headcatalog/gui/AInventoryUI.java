@@ -67,6 +67,9 @@ public abstract class AInventoryUI<Provider extends IInventoryUIParameterProvide
     this.inventory.setItem(slot, item);
   }
 
+  public boolean isRegistered() {
+    return registry.isRegistered(this);
+  }
 
   private void setSuppliedItem(int slot, Supplier<ItemStack> item) {
     this.setItem(slot, item.get());

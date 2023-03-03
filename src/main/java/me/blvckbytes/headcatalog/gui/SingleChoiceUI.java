@@ -1,25 +1,27 @@
 package me.blvckbytes.headcatalog.gui;
 
 import me.blvckbytes.bbconfigmapper.ScalarType;
-import me.blvckbytes.bbreflect.packets.communicator.IFakeSlotCommunicator;
 import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import me.blvckbytes.headcatalog.gui.config.ISingleChoiceParameterProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 
-import java.util.EnumSet;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-public class SingleChoiceUI<DataType> extends PageableInventoryUI<ISingleChoiceParameterProvider, SingleChoiceParameter, DataType> {
-
-  // TODO: Updatable inventory names would be useful
+public abstract class SingleChoiceUI<DataType> extends PageableInventoryUI<ISingleChoiceParameterProvider, SingleChoiceParameter<DataType>, DataType> {
 
   private static final String KEY_SEARCH = "search";
+  private final AnvilSearchUI<DataType> searchUI;
 
-  public SingleChoiceUI(IInventoryRegistry registry, SingleChoiceParameter parameter) {
+  public SingleChoiceUI(IInventoryRegistry registry, SingleChoiceParameter<DataType> parameter) {
     super(registry, parameter);
+
+    this.searchUI = new AnvilSearchUI<>(
+      registry, parameter.makeAnvilSearchParameter(ui -> this.show())
+    );
   }
 
   @Override
@@ -31,7 +33,10 @@ public class SingleChoiceUI<DataType> extends PageableInventoryUI<ISingleChoiceP
 
       switch (contentEntry.getKey()) {
         case KEY_SEARCH:
-          slotContent = new UISlot(() -> parameter.provider.getSearch().build(), this::handleSearchClick);
+          slotContent = new UISlot(() -> parameter.provider.getSearch().build(), interaction -> {
+            this.searchUI.show();
+            return null;
+          });
           break;
       }
 
@@ -40,11 +45,6 @@ public class SingleChoiceUI<DataType> extends PageableInventoryUI<ISingleChoiceP
 
       setSlots(slotContent, contentEntry.getValue());
     }
-  }
-
-  private EnumSet<EClickResultFlag> handleSearchClick(UIInteraction action) {
-    System.out.println("Clicked search");
-    return null;
   }
 
   @Override
@@ -57,12 +57,19 @@ public class SingleChoiceUI<DataType> extends PageableInventoryUI<ISingleChoiceP
   @Override
   protected void handleClose() {
     super.handleClose();
-    System.out.println("Closed");
   }
 
   @Override
   protected boolean canInteractWithOwnInventory() {
     return true;
+  }
+
+  @Override
+  public void setPageableSlots(Collection<DataBoundUISlot<DataType>> items) {
+    super.setPageableSlots(items);
+
+    if (this.searchUI.isRegistered())
+      this.searchUI.invokeFilterFunctionAndUpdatePageSlots();
   }
 
   private IEvaluationEnvironment getTitleEnvironment() {

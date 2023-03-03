@@ -10,7 +10,7 @@ import org.bukkit.inventory.Inventory;
 
 import java.util.*;
 
-public abstract class AnvilSearchUI<DataType> extends PageableInventoryUI<IAnvilSearchParameterProvider, AnvilSearchParameter<DataType>, DataType> {
+public class AnvilSearchUI<DataType> extends PageableInventoryUI<IAnvilSearchParameterProvider, AnvilSearchParameter<DataType>, DataType> {
 
   private static final String
     KEY_FILTER = "filter",
@@ -60,11 +60,12 @@ public abstract class AnvilSearchUI<DataType> extends PageableInventoryUI<IAnvil
           break;
 
         case KEY_BACK:
-          if (parameter.backHandler != null)
+          if (parameter.backHandler != null) {
             slotContent = new UISlot(() -> parameter.provider.getBack().build(inventoryEnvironment), interaction -> {
               parameter.backHandler.accept(this);
               return null;
             });
+          }
           break;
       }
 
