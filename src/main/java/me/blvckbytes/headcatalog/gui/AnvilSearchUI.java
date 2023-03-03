@@ -26,7 +26,7 @@ public class AnvilSearchUI<DataType> extends PageableInventoryUI<IAnvilSearchPar
 
     this.searchText = " ";
     this.filterStates = new LinkedHashMap<>();
-    this.currentFilter = parameter.searchFilter;
+    this.currentFilter = parameter.filterEnum;
     this.setupFilterStates();
   }
 
@@ -98,7 +98,7 @@ public class AnvilSearchUI<DataType> extends PageableInventoryUI<IAnvilSearchPar
   }
 
   private void setupFilterStates() {
-    for (ISearchFilterEnum<?, DataType> searchFilter : parameter.searchFilter.listValues())
+    for (ISearchFilterEnum<?, DataType> searchFilter : parameter.filterEnum.listValues())
       filterStates.put(searchFilter.name(), searchFilter == currentFilter);
   }
 

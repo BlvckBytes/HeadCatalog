@@ -39,6 +39,7 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
       player.sendMessage("§cHeads aren't ready yet");
       return;
     }
+
     AnvilSearchParameter<Head> parameter = new AnvilSearchParameter<>(
       anvilSearchProvider, player,
       this::applyHeadsFilter, HeadModelSearchFilter.HEAD_EVERYWHERE
