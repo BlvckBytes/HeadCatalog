@@ -1,12 +1,12 @@
 package me.blvckbytes.headcatalog.gui;
 
 import me.blvckbytes.bbconfigmapper.ScalarType;
+import me.blvckbytes.bbreflect.packets.communicator.FakeSlotCommunicator;
 import me.blvckbytes.bukkitevaluable.BukkitEvaluable;
 import me.blvckbytes.bukkitevaluable.ItemBuilder;
 import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import me.blvckbytes.headcatalog.gui.config.IAnvilSearchParameterProvider;
-import me.blvckbytes.headcatalog.gui.reflect.FakeSlotCommunicator;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryType;

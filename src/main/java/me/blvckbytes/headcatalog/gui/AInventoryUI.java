@@ -1,8 +1,8 @@
 package me.blvckbytes.headcatalog.gui;
 
+import me.blvckbytes.bbreflect.packets.communicator.IFakeSlotCommunicator;
 import me.blvckbytes.bukkitevaluable.IItemBuildable;
 import me.blvckbytes.headcatalog.gui.config.IInventoryUIParameterProvider;
-import me.blvckbytes.headcatalog.gui.reflect.IFakeSlotCommunicator;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryAction;

@@ -1,10 +1,10 @@
 package me.blvckbytes.headcatalog.gui;
 
 import me.blvckbytes.bbconfigmapper.ScalarType;
+import me.blvckbytes.bbreflect.packets.communicator.IFakeSlotCommunicator;
 import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import me.blvckbytes.headcatalog.gui.config.ISingleChoiceParameterProvider;
-import me.blvckbytes.headcatalog.gui.reflect.IFakeSlotCommunicator;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 

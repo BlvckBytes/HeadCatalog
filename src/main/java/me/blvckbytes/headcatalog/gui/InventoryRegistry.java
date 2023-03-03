@@ -3,8 +3,8 @@ package me.blvckbytes.headcatalog.gui;
 import me.blvckbytes.autowirer.IAutoWirer;
 import me.blvckbytes.autowirer.ICleanable;
 import me.blvckbytes.autowirer.IInitializable;
+import me.blvckbytes.bbreflect.packets.communicator.IItemNameCommunicator;
 import me.blvckbytes.headcatalog.gui.config.AUIParameter;
-import me.blvckbytes.headcatalog.gui.reflect.IItemNameWatcher;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -25,14 +25,14 @@ public class InventoryRegistry implements IInitializable, ICleanable, Listener {
 
   private final Map<Inventory, AInventoryUI<?>> inventories;
   private final IAutoWirer autoWirer;
-  private final IItemNameWatcher itemNameWatcher;
+  private final IItemNameCommunicator itemNameCommunicator;
   private final Plugin plugin;
   private @Nullable BukkitTask tickerTask;
 
-  public InventoryRegistry(Plugin plugin, IAutoWirer autoWirer, IItemNameWatcher itemNameWatcher) {
+  public InventoryRegistry(Plugin plugin, IAutoWirer autoWirer, IItemNameCommunicator itemNameCommunicator) {
     this.inventories = new HashMap<>();
     this.autoWirer = autoWirer;
-    this.itemNameWatcher = itemNameWatcher;
+    this.itemNameCommunicator = itemNameCommunicator;
     this.plugin = plugin;
   }
 
@@ -74,7 +74,7 @@ public class InventoryRegistry implements IInitializable, ICleanable, Listener {
 
   @Override
   public void cleanup() {
-    this.itemNameWatcher.unregisterReceiver(this::onAnvilItemRename);
+    this.itemNameCommunicator.unregisterReceiver(this::onAnvilItemRename);
 
     for (AInventoryUI<?> inventory : inventories.values())
       inventory.close();
@@ -140,7 +140,7 @@ public class InventoryRegistry implements IInitializable, ICleanable, Listener {
 
   @Override
   public void initialize() {
-    this.itemNameWatcher.registerReceiver(this::onAnvilItemRename);
+    this.itemNameCommunicator.registerReceiver(this::onAnvilItemRename);
 
     tickerTask = Bukkit.getScheduler().runTaskTimer(plugin, new Runnable() {
 

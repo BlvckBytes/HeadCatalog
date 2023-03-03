@@ -1,9 +1,9 @@
 package me.blvckbytes.headcatalog.gui;
 
+import me.blvckbytes.bbreflect.packets.communicator.IFakeSlotCommunicator;
 import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import me.blvckbytes.headcatalog.gui.config.IPageableParameterProvider;
-import me.blvckbytes.headcatalog.gui.reflect.IFakeSlotCommunicator;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
