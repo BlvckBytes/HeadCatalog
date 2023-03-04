@@ -85,7 +85,6 @@ public class HeadApisManager implements IHeadApisManager, IInitializable, IClean
     // The database holds newer values then currently loaded into memory
     if (headModelsUnmodifiable == null || lastFetchedLastStoreStamp < lastStoreStamp) {
       headModelsUnmodifiable = Collections.unmodifiableCollection(persistence.loadHeadModels());
-      logger.log(ELogLevel.INFO, "Loaded " + headModelsUnmodifiable.size() + " heads from DB");
       lastFetchedLastStoreStamp = lastStoreStamp;
       notifyUpdateConsumers();
     }

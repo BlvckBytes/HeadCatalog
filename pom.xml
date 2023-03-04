@@ -44,7 +44,6 @@
                             <include>me.blvckbytes:BBConfigMapper</include>
                             <include>me.blvckbytes:BukkitInventoryUI</include>
                             <include>com.github.cryptomorin:XSeries</include>
-                            <include>com.mysql:mysql-connector-j</include>
                         </includes>
                     </artifactSet>
 
@@ -58,10 +57,6 @@
                         <relocation>
                             <pattern>com.cryptomorin.xseries</pattern>
                             <shadedPattern>me.blvckbytes.${package.name}.com.cryptomorin.xseries</shadedPattern>
-                        </relocation>
-                        <relocation>
-                            <pattern>com.mysql</pattern>
-                            <shadedPattern>me.blvckbytes.${package.name}.com.mysql</shadedPattern>
                         </relocation>
                     </relocations>
 
@@ -177,17 +172,6 @@
             <groupId>me.blvckbytes</groupId>
             <artifactId>BukkitInventoryUI</artifactId>
             <version>0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.9.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
-            <version>8.0.32</version>
         </dependency>
     </dependencies>
 </project>
