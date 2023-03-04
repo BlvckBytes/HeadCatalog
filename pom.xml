@@ -82,6 +82,33 @@
                 </configuration>
             </plugin>
 
+            <!-- Shrinking the shaded jar by removing dead code and unused java files -->
+            <plugin>
+                <groupId>com.github.wvengen</groupId>
+                <artifactId>proguard-maven-plugin</artifactId>
+                <version>2.6.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals><goal>proguard</goal></goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- Take the shaded artifact as an input -->
+                    <injar>${project.build.finalName}-shaded.jar</injar>
+                    <outputDirectory>${project.build.directory}</outputDirectory>
+                    <proguardInclude>${basedir}/proguard.conf</proguardInclude>
+                    <libs>
+                        <lib>${java.home}/jmods/java.base.jmod</lib>
+                    </libs>
+
+                    <!-- Create another artifact with this classifier as the result -->
+                    <attach>true</attach>
+                    <attachArtifactClassifier>shrunk</attachArtifactClassifier>
+                    <appendClassifier>true</appendClassifier>
+                </configuration>
+            </plugin>
+
             <!-- Install the final jar into the specified output path -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -102,7 +129,7 @@
                                     <version>${project.version}</version>
 
                                     <!-- Use the final shaded and shrunk artifact -->
-                                    <classifier>shaded</classifier>
+                                    <classifier>shrunk</classifier>
                                     <type>jar</type>
 
                                     <!-- Overwrite if already present -->
@@ -136,37 +163,7 @@
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot</artifactId>
             <version>1.17-R0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>me.blvckbytes</groupId>
-            <artifactId>AutoWirer</artifactId>
-            <version>0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>me.blvckbytes</groupId>
-            <artifactId>BukkitBoilerplate</artifactId>
-            <version>0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>me.blvckbytes</groupId>
-            <artifactId>BBReflect</artifactId>
-            <version>0.1</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.spigotmc</groupId>
-                    <artifactId>spigot</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>me.blvckbytes</groupId>
-            <artifactId>BBConfigMapper</artifactId>
-            <version>0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>me.blvckbytes</groupId>
-            <artifactId>BukkitEvaluable</artifactId>
-            <version>0.1</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>me.blvckbytes</groupId>
