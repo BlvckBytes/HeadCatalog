@@ -43,7 +43,6 @@
                             <include>me.blvckbytes:BukkitEvaluable</include>
                             <include>me.blvckbytes:BBConfigMapper</include>
                             <include>me.blvckbytes:BukkitInventoryUI</include>
-                            <include>org.yaml:snakeyaml</include>
                             <include>com.github.cryptomorin:XSeries</include>
                             <include>com.mysql:mysql-connector-j</include>
                         </includes>
@@ -55,10 +54,6 @@
                             <pattern>me/blvckbytes/(?!${package.name})(.*)</pattern>
                             <shadedPattern>me/blvckbytes/${package.name}/$1</shadedPattern>
                             <rawString>true</rawString>
-                        </relocation>
-                        <relocation>
-                            <pattern>org.yaml.snakeyaml</pattern>
-                            <shadedPattern>me.blvckbytes.${package.name}.org.yaml.snakeyaml</shadedPattern>
                         </relocation>
                         <relocation>
                             <pattern>com.cryptomorin.xseries</pattern>
