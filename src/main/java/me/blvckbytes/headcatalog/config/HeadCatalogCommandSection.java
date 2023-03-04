@@ -19,6 +19,10 @@ public class HeadCatalogCommandSection implements IConfigSection, ICommandConfig
   public @Nullable Object defaultFor(Field field) {
     if (field.getName().equals("name"))
       return "headcatalog";
+
+    if (field.getType() == String.class)
+      return "";
+
     return null;
   }
 
