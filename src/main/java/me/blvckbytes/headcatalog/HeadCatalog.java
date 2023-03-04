@@ -5,6 +5,7 @@ import me.blvckbytes.bbreflect.CommandRegisterer;
 import me.blvckbytes.bbreflect.IReflectionHelper;
 import me.blvckbytes.bbreflect.ReflectionHelperFactory;
 import me.blvckbytes.bbreflect.packets.PacketInterceptorRegistry;
+import me.blvckbytes.bbreflect.packets.communicator.CustomPayloadCommunicator;
 import me.blvckbytes.bbreflect.packets.communicator.FakeSlotCommunicator;
 import me.blvckbytes.bbreflect.packets.communicator.ItemNameCommunicator;
 import me.blvckbytes.bbreflect.packets.communicator.WindowOpenCommunicator;
@@ -66,6 +67,7 @@ public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider {
       .addSingleton(PacketInterceptorRegistry.class)
       .addSingleton(ItemNameCommunicator.class)
       .addSingleton(WindowOpenCommunicator.class)
+      .addSingleton(CustomPayloadCommunicator.class)
       .addSingleton(HeadCatalogCommandSection.class, dependencies -> {
         IConfigManager configManager = (IConfigManager) dependencies[0];
         return configManager.getMapper("config.yml").mapSection("command", HeadCatalogCommandSection.class);

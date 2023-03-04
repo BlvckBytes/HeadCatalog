@@ -5,11 +5,9 @@ import me.blvckbytes.bukkitboilerplate.ELogLevel;
 import me.blvckbytes.bukkitboilerplate.ILogger;
 import me.blvckbytes.headcatalog.apis.HeadModel;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 public class MySQLPersistence implements IPersistence, ICleanable {
 
@@ -128,7 +126,8 @@ public class MySQLPersistence implements IPersistence, ICleanable {
   }
 
   protected void connect() throws Exception {
-    Class.forName("com.mysql.jdbc.Driver");
+    Class.forName("com/mysql/cj/jdbc/Driver".replace('/', '.'));
+
     this.connection = DriverManager.getConnection(
       buildConnectionString(),
       this.credentialsProvider.getUsername(),

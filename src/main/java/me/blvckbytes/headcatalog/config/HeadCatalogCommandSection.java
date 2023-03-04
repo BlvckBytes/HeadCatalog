@@ -3,6 +3,7 @@ package me.blvckbytes.headcatalog.config;
 import me.blvckbytes.bbconfigmapper.sections.CSAlways;
 import me.blvckbytes.bbconfigmapper.sections.IConfigSection;
 import me.blvckbytes.bukkitboilerplate.ICommandConfigProvider;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
@@ -27,22 +28,22 @@ public class HeadCatalogCommandSection implements IConfigSection, ICommandConfig
   }
 
   @Override
-  public String getName() {
+  public @NotNull String getName() {
     return this.name;
   }
 
   @Override
-  public List<String> getAliases() {
+  public @NotNull List<String> getAliases() {
     return this.aliases;
   }
 
   @Override
-  public String getDescription() {
+  public @NotNull String getDescription() {
     return this.description;
   }
 
   @Override
-  public String getUsage() {
+  public @NotNull String getUsage() {
     return this.usage;
   }
 }
