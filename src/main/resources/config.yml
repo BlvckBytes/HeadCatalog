@@ -13,12 +13,66 @@ command:
     - hc
   description: Opens the head catalog
 
+# Items which are common to multiple UIs that are defined once
+# and then linked by making use of YAML anchors
+# See: https://support.atlassian.com/bitbucket-cloud/docs/yaml-anchors/
+commonItems:
+
+  # viewer_name: String - Name of the player viewing the inventory
+  # current_page: Integer - Current page index
+  # page_size: Integer - Size of a page in slots
+  # number_of_pages: Integer - Number of total pages available
+  # number_of_pageables: Integer - Number of items to page through
+
+  previousPage: &previousPage
+    type: PLAYER_HEAD
+    textures$: 'lut[if current_page > 1 then "ARROW_LEFT" else "ARROW_LEFT_RED"]'
+    name$: '"&8» " & (if current_page > 1 then "&dPrevious Page" else "&cNo Previous Page") & " &8«"'
+    lore$:
+      - '" "'
+      - |
+        if current_page > 1 then list_of(
+          "&8● &7Left click: &dPrevious Page",
+          "&8● &7Right click: &dFirst Page"
+        ) else list_of(
+          "&8● &7Already on the &cfirst &7page"
+        )
+
+  currentPage: &currentPage
+    type: PAPER
+    name$: '"&8» &dPage &5" & current_page & "&7/&5" & max(1, number_of_pages) & " &8«"'
+    lore$:
+      - '" "'
+      - '"&8● &7Page size: &d" & page_size'
+      - '"&8● &7Items total: &d" & number_of_pageables'
+
+  nextPage: &nextPage
+    type: PLAYER_HEAD
+    textures$: 'lut[if current_page < number_of_pages then "ARROW_RIGHT" else "ARROW_RIGHT_RED"]'
+    name$: '"&8» " & (if current_page < number_of_pages then "&dNext Page" else "&cNo Next Page") & " &8«"'
+    lore$:
+      - '" "'
+      - |
+        if current_page < number_of_pages then list_of(
+          "&8● &7Left click: &dNext Page",
+          "&8● &7Right click: &dLast Page"
+        ) else list_of(
+          "&8● &7Already on the &clast &7page"
+        )
+
+# Shown when the viewer wants to search through items of a single choice UI
 anvilSearchUI:
   animating: true
+
+  # Time in ticks which have to elapse after a key press in order to update the
+  # results. This debounces keystrokes and helps to avoid calculating unnecessary
+  # intermediate results which are overridden by the next keystroke anyways.
   searchDebounceTicks: 5
 
-  title: '&5Search UI'
+  # previous_title: String - Title of the previous inventory that initiated searching
+  title$: '"&5Search " & previous_title'
 
+  # filters: Map<String, Boolean> - Map of filter names to their active state
   filter:
     type: HOPPER
     name: '&8» &dFilter &8«'
@@ -47,47 +101,9 @@ anvilSearchUI:
       - ' '
       - '&8● &7Type ahead to &dsearch &7for results'
 
-  # Pagination Environment
-  # current_page: Integer
-  # pageSize: Integer
-  # numberOfPages: Integer
-  # numberOfPageables: Integer
-
-  previousPage:
-    type: PLAYER_HEAD
-    textures$: 'lut[if current_page > 1 then "ARROW_LEFT" else "ARROW_LEFT_RED"]'
-    name$: '"&8» " & (if current_page > 1 then "&dPrevious Page" else "&cNo Previous Page") & " &8«"'
-    lore$:
-      - '" "'
-      - |
-        if current_page > 1 then list_of(
-          "&8● &7Left click: &dPrevious Page",
-          "&8● &7Right click: &dFirst Page"
-        ) else list_of(
-          "&8● &7Already on the &cfirst &7page"
-        )
-
-  currentPage:
-    type: PAPER
-    name$: '"&8» &dPage &5" & current_page & "&7/&5" & max(1, number_of_pages) & " &8«"'
-    lore$:
-      - '" "'
-      - '"&8● &7Page size: &d" & page_size'
-      - '"&8● &7Items total: &d" & number_of_pageables'
-
-  nextPage:
-    type: PLAYER_HEAD
-    textures$: 'lut[if current_page < number_of_pages then "ARROW_RIGHT" else "ARROW_RIGHT_RED"]'
-    name$: '"&8» " & (if current_page < number_of_pages then "&dNext Page" else "&cNo Next Page") & " &8«"'
-    lore$:
-      - '" "'
-      - |
-        if current_page < number_of_pages then list_of(
-          "&8● &7Left click: &dNext Page",
-          "&8● &7Right click: &dLast Page"
-        ) else list_of(
-          "&8● &7Already on the &clast &7page"
-        )
+  previousPage: *previousPage
+  currentPage: *currentPage
+  nextPage: *nextPage
 
   paginationSlots$: 'range(inventory_size, inventory_size + 26)'
 
@@ -123,47 +139,9 @@ singleChoiceUI:
       - ' '
       - '&8● &7Search through items in &drealtime'
 
-  # Pagination Environment
-  # current_page: Integer
-  # pageSize: Integer
-  # numberOfPages: Integer
-  # numberOfPageables: Integer
-
-  previousPage:
-    type: PLAYER_HEAD
-    textures$: 'lut[if current_page > 1 then "ARROW_LEFT" else "ARROW_LEFT_RED"]'
-    name$: '"&8» " & (if current_page > 1 then "&dPrevious Page" else "&cNo Previous Page") & " &8«"'
-    lore$:
-      - '" "'
-      - |
-        if current_page > 1 then list_of(
-          "&8● &7Left click: &dPrevious Page",
-          "&8● &7Right click: &dFirst Page"
-        ) else list_of(
-          "&8● &7Already on the &cfirst &7page"
-        )
-
-  currentPage:
-    type: PAPER
-    name$: '"&8» &dPage &5" & current_page & "&7/&5" & max(1, number_of_pages) & " &8«"'
-    lore$:
-      - '" "'
-      - '"&8● &7Page size: &d" & page_size'
-      - '"&8● &7Items total: &d" & number_of_pageables'
-
-  nextPage:
-    type: PLAYER_HEAD
-    textures$: 'lut[if current_page < number_of_pages then "ARROW_RIGHT" else "ARROW_RIGHT_RED"]'
-    name$: '"&8» " & (if current_page < number_of_pages then "&dNext Page" else "&cNo Next Page") & " &8«"'
-    lore$:
-      - '" "'
-      - |
-        if current_page < number_of_pages then list_of(
-          "&8● &7Left click: &dNext Page",
-          "&8● &7Right click: &dLast Page"
-        ) else list_of(
-          "&8● &7Already on the &clast &7page"
-        )
+  previousPage: *previousPage
+  currentPage: *currentPage
+  nextPage: *nextPage
 
   paginationSlots$: |
     flatten(
@@ -174,7 +152,7 @@ singleChoiceUI:
 
   numberOfRows: 5
 
-  title$: '"&6" & name & "\ss Inventory"'
+  title: '&5HeadCatalog'
 
   border:
     type: BLACK_STAINED_GLASS_PANE
