@@ -3,6 +3,7 @@ package me.blvckbytes.headcatalog.persistence;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import me.blvckbytes.bukkitboilerplate.IFileHandler;
+import me.blvckbytes.headcatalog.NanoTimer;
 import me.blvckbytes.headcatalog.apis.HeadModel;
 import me.blvckbytes.utilitytypes.FUnsafeConsumer;
 import org.jetbrains.annotations.Nullable;
@@ -69,8 +70,10 @@ public class JsonFilePersistence implements IPersistence {
         try (
           InputStreamReader streamReader = new InputStreamReader(inputStream);
         ) {
-          this.lastProcessedWrapper = this.gson.fromJson(streamReader, PersistenceDataWrapper.class);
-          this.logger.log(Level.INFO, "Read " + this.lastProcessedWrapper.heads.size() + " heads from file");
+          double duration = NanoTimer.timeExecutionMs(() -> {
+            this.lastProcessedWrapper = this.gson.fromJson(streamReader, PersistenceDataWrapper.class);
+          });
+          this.logger.log(Level.INFO, "Read " + this.lastProcessedWrapper.heads.size() + " heads from file (" + duration + "ms)");
         }
       });
     } catch (Exception e) {
