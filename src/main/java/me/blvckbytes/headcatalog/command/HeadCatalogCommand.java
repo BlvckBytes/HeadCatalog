@@ -2,7 +2,7 @@ package me.blvckbytes.headcatalog.command;
 
 import me.blvckbytes.autowirer.ICleanable;
 import me.blvckbytes.autowirer.IInitializable;
-import me.blvckbytes.bukkitboilerplate.PlayerCommand;
+import me.blvckbytes.bukkitcommands.PlayerCommand;
 import me.blvckbytes.bukkitinventoryui.IInventoryRegistry;
 import me.blvckbytes.bukkitinventoryui.anvilsearch.IAnvilSearchParameterProvider;
 import me.blvckbytes.bukkitinventoryui.anvilsearch.ISearchFilterEnum;
@@ -13,6 +13,7 @@ import me.blvckbytes.headcatalog.config.HeadCatalogCommandSection;
 import me.blvckbytes.headcatalog.ui.*;
 import me.blvckbytes.headcatalog.heads.Head;
 import me.blvckbytes.headcatalog.heads.IHeadManager;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -48,7 +49,12 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
   }
 
   @Override
-  protected void onPlayerExecution(Player player, String s, String[] strings) {
+  protected List<String> onTabComplete(CommandSender commandSender, String s, String[] strings) {
+    return EMPTY_STRING_LIST;
+  }
+
+  @Override
+  protected void onPlayerInvocation(Player player, String alias, String[] args) {
     if (this.headSlots == null) {
       player.sendMessage("§cHeads aren't ready yet");
       return;

@@ -43,6 +43,7 @@
                             <include>me.blvckbytes:BukkitEvaluable</include>
                             <include>me.blvckbytes:BBConfigMapper</include>
                             <include>me.blvckbytes:BukkitInventoryUI</include>
+                            <include>me.blvckbytes:BukkitCommands</include>
                             <include>org.yaml:snakeyaml</include>
                             <include>com.github.cryptomorin:XSeries</include>
                         </includes>
@@ -169,6 +170,11 @@
             <artifactId>spigot</artifactId>
             <version>1.17-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>me.blvckbytes</groupId>
+            <artifactId>BukkitCommands</artifactId>
+            <version>0.1</version>
         </dependency>
         <dependency>
             <groupId>me.blvckbytes</groupId>

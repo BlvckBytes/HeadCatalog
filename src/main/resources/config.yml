@@ -7,11 +7,35 @@
 # HeadCatalog - Developed by BlvckBytes <blvckbytes@gmail.com>
 # (ascii-art: https://patorjk.com/software/taag/#p=display&f=Speed&t=HeadCatalog)
 
+# Error messages used when a command failed to execute
+commandErrorMessages: &commandErrorMessages
+  malformedDouble$: '"&7The value &c" & value & " &7is not a valid &cdouble"'
+  malformedFloat$: '"&7The value &c" & value & " &7is not a valid &cfloat"'
+  malformedLong$: '"&7The value &c" & value & " &7is not a valid &clong"'
+  malformedInteger$: '"&7The value &c" & value & " &7is not a valid &cinteger"'
+  malformedUuid$: '"&7The value &c" & value & " &7is not a valid &cUUID"'
+
+  # constants: List<String> - Enumeration constant names available
+  malformedEnum$: |
+    "&7The value &c" & value & " &7is not one of (" &
+    iter_cat(constant_names, (constant_name) => "&c" & constant_name, "&7, ", "&cNo values available") &
+    "&7)"
+
+  notAPlayer: '&7This command can only be executed as a &cplayer'
+  playerUnknown$: '"&7The player &c" & value & " &7has &cnot played &7on this server before"'
+  playerNotOnline$: '"&7The player &c" & value & " &7is &cnot online"'
+
+  # permission: String - Missing permission value
+  missingPermission$: '"&7You\sre lacking the permission &c" & permission'
+
+  internalError: '&4An internal error occurred'
+
 command:
   name: "headcatalog"
   aliases:
     - hc
   description: Opens the head catalog
+  errorMessages: *commandErrorMessages
 
 # Items which are common to multiple UIs that are defined once
 # and then linked by making use of YAML anchors

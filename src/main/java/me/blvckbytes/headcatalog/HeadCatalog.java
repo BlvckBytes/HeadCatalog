@@ -41,6 +41,7 @@ public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider {
     long beginStamp = System.nanoTime();
 
     logger = getLogger();
+    logger.setLevel(Level.INFO);
 
     wirer = new AutoWirer()
       .addExistingSingleton(this)
