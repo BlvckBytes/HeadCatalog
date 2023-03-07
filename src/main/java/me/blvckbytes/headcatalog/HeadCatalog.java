@@ -9,12 +9,8 @@ import me.blvckbytes.bbreflect.packets.communicator.CustomPayloadCommunicator;
 import me.blvckbytes.bbreflect.packets.communicator.FakeSlotCommunicator;
 import me.blvckbytes.bbreflect.packets.communicator.ItemNameCommunicator;
 import me.blvckbytes.bbreflect.packets.communicator.WindowOpenCommunicator;
-import me.blvckbytes.bukkitboilerplate.ConsoleSenderLogger;
-import me.blvckbytes.bukkitboilerplate.ELogLevel;
-import me.blvckbytes.bukkitboilerplate.ILogger;
 import me.blvckbytes.bukkitboilerplate.PluginFileHandler;
 import me.blvckbytes.bukkitevaluable.ConfigManager;
-import me.blvckbytes.bukkitevaluable.GPEEELogRedirect;
 import me.blvckbytes.bukkitevaluable.IConfigManager;
 import me.blvckbytes.bukkitevaluable.IConfigPathsProvider;
 import me.blvckbytes.bukkitinventoryui.InventoryRegistry;
@@ -32,28 +28,30 @@ import org.bukkit.command.Command;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider {
 
   private AutoWirer wirer;
-  private ILogger logger;
+  private Logger logger;
 
   @Override
   public void onEnable() {
     long beginStamp = System.nanoTime();
 
-    logger = new ConsoleSenderLogger(this);
+    logger = getLogger();
 
     wirer = new AutoWirer()
       .addExistingSingleton(this)
       .addExistingSingleton(logger)
       .addSingleton(IReflectionHelper.class, dependencies -> {
         IReflectionHelper helper = new ReflectionHelperFactory(this).makeHelper();
-        logger.log(ELogLevel.INFO, "Detected server version " + helper.getVersion());
+        logger.log(Level.INFO, "Detected server version " + helper.getVersion());
         return helper;
       }, IReflectionHelper::cleanupInterception)
       .addSingleton(HeadCatalogCommand.class)
       .addSingleton(ConfigManager.class)
-      .addSingleton(GPEEELogRedirect.class)
       .addSingleton(ConfigManager.class)
       .addSingleton(CommandRegisterer.class)
       .addSingleton(HeadApisManager.class)
@@ -93,12 +91,11 @@ public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider {
         ((CommandRegisterer) dependencies[0]).register(command);
       }, CommandRegisterer.class)
       .onException(e -> {
-        this.logger.log(ELogLevel.ERROR, "An error occurred while setting up the plugin:");
-        this.logger.logError(e);
+        this.logger.log(Level.SEVERE, e, () -> "An error occurred while setting up the plugin:");
         Bukkit.getServer().getPluginManager().disablePlugin(this);
       })
       .wire(wirer -> {
-        this.logger.log(ELogLevel.INFO, "Successfully loaded " + wirer.getInstancesCount() + " classes (" + ((System.nanoTime() - beginStamp) / 1000 / 1000) + "ms)");
+        this.logger.log(Level.INFO, "Successfully loaded " + wirer.getInstancesCount() + " classes (" + ((System.nanoTime() - beginStamp) / 1000 / 1000) + "ms)");
       });
   }
 
@@ -108,7 +105,7 @@ public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider {
       if (wirer != null)
         wirer.cleanup();
     } catch (Exception e) {
-      this.logger.logError(e);
+      this.logger.log(Level.SEVERE, e, () -> "An error occurred while cleaning up");
     }
   }
 

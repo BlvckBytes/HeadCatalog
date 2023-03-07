@@ -2,9 +2,7 @@ package me.blvckbytes.headcatalog.persistence;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import me.blvckbytes.bukkitboilerplate.ELogLevel;
 import me.blvckbytes.bukkitboilerplate.IFileHandler;
-import me.blvckbytes.bukkitboilerplate.ILogger;
 import me.blvckbytes.headcatalog.apis.HeadModel;
 import me.blvckbytes.utilitytypes.FUnsafeConsumer;
 import org.jetbrains.annotations.Nullable;
@@ -15,6 +13,8 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class JsonFilePersistence implements IPersistence {
 
@@ -22,11 +22,11 @@ public class JsonFilePersistence implements IPersistence {
 
   private final Gson gson;
   private final IFileHandler fileHandler;
-  private final ILogger logger;
+  private final Logger logger;
 
   private @Nullable PersistenceDataWrapper lastProcessedWrapper;
 
-  public JsonFilePersistence(IFileHandler fileHandler, ILogger logger) {
+  public JsonFilePersistence(IFileHandler fileHandler, Logger logger) {
     this.gson = new GsonBuilder().setPrettyPrinting().create();
     this.fileHandler = fileHandler;
     this.logger = logger;
@@ -41,8 +41,7 @@ public class JsonFilePersistence implements IPersistence {
         outputStream.write(json.getBytes(StandardCharsets.UTF_8));
       });
     } catch (Exception e) {
-      this.logger.log(ELogLevel.ERROR, "An error occurred while trying to store head models to file:");
-      this.logger.logError(e);
+      this.logger.log(Level.SEVERE, e, () -> "An error occurred while trying to store head models to file:");
     }
   }
 
@@ -71,12 +70,11 @@ public class JsonFilePersistence implements IPersistence {
           InputStreamReader streamReader = new InputStreamReader(inputStream);
         ) {
           this.lastProcessedWrapper = this.gson.fromJson(streamReader, PersistenceDataWrapper.class);
-          this.logger.log(ELogLevel.INFO, "Read " + this.lastProcessedWrapper.heads.size() + " heads from file");
+          this.logger.log(Level.INFO, "Read " + this.lastProcessedWrapper.heads.size() + " heads from file");
         }
       });
     } catch (Exception e) {
-      this.logger.log(ELogLevel.ERROR, "An error occurred while trying to read head models from file:");
-      this.logger.logError(e);
+      this.logger.log(Level.SEVERE, e, () -> "An error occurred while trying to read head models from file:");
     }
 
     if (this.lastProcessedWrapper == null)

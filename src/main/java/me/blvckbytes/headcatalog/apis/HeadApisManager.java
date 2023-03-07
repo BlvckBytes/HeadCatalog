@@ -3,8 +3,6 @@ package me.blvckbytes.headcatalog.apis;
 import com.google.gson.*;
 import me.blvckbytes.autowirer.ICleanable;
 import me.blvckbytes.autowirer.IInitializable;
-import me.blvckbytes.bukkitboilerplate.ELogLevel;
-import me.blvckbytes.bukkitboilerplate.ILogger;
 import me.blvckbytes.gpeee.GPEEE;
 import me.blvckbytes.gpeee.functions.AExpressionFunction;
 import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
@@ -25,6 +23,8 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class HeadApisManager implements IHeadApisManager, IInitializable, ICleanable {
@@ -38,7 +38,7 @@ public class HeadApisManager implements IHeadApisManager, IInitializable, IClean
   private final IHeadApisProvider headSourceProvider;
   private final JsonParser jsonParser;
   private final Plugin plugin;
-  private final ILogger logger;
+  private final Logger logger;
   private final IPersistence persistence;
 
   private final Set<Consumer<Collection<HeadModel>>> updateConsumers;
@@ -50,7 +50,7 @@ public class HeadApisManager implements IHeadApisManager, IInitializable, IClean
   private long lastFetchedLastStoreStamp;
 
   public HeadApisManager(
-    ILogger logger,
+    Logger logger,
     Plugin plugin,
     IHeadApisProvider headSourceProvider,
     IPersistence persistence
@@ -74,7 +74,7 @@ public class HeadApisManager implements IHeadApisManager, IInitializable, IClean
     if (System.currentTimeMillis() - lastStoreStamp >= updatePeriod * 1000) {
       fetchHeadApis(result -> {
         headModelsUnmodifiable = Collections.unmodifiableCollection(result);
-        logger.log(ELogLevel.INFO, "Fetched " + result.size() + " heads from APIs");
+        logger.log(Level.INFO, "Fetched " + result.size() + " heads from APIs");
         persistence.storeHeadModels(result);
         notifyUpdateConsumers();
       });
@@ -151,7 +151,7 @@ public class HeadApisManager implements IHeadApisManager, IInitializable, IClean
 
       return parseHeadApiResult(headApi, urlString, result.b);
     } catch (Exception e) {
-      this.logger.logError(e);
+      this.logger.log(Level.SEVERE, e, () -> "Could not fetch heads from API url");
       return null;
     }
   }
@@ -217,7 +217,7 @@ public class HeadApisManager implements IHeadApisManager, IInitializable, IClean
     Object extractedArray = api.getArrayExtractor().asRawObject(extractorEnvironment);
 
     if (!(extractedArray instanceof Collection)) {
-      logger.log(ELogLevel.ERROR, "The array extractor of " + urlString + " didn't yield a collection");
+      logger.log(Level.SEVERE, "The array extractor of " + urlString + " didn't yield a collection");
       return null;
     }
 
@@ -227,7 +227,7 @@ public class HeadApisManager implements IHeadApisManager, IInitializable, IClean
       Object mappedItem = api.getItemMapper().asRawObject(mapperEnvironment);
 
       if (!(mappedItem instanceof HeadModel)) {
-        logger.log(ELogLevel.ERROR, "The item mapper of " + urlString + " didn't yield a HeadModel");
+        logger.log(Level.SEVERE, "The item mapper of " + urlString + " didn't yield a HeadModel");
         return null;
       }
 

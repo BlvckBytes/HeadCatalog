@@ -1,7 +1,5 @@
 package me.blvckbytes.headcatalog.config;
 
-import me.blvckbytes.bukkitboilerplate.ELogLevel;
-import me.blvckbytes.bukkitboilerplate.ILogger;
 import me.blvckbytes.gpeee.functions.AExpressionFunction;
 import me.blvckbytes.gpeee.functions.ExpressionFunctionArgument;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
@@ -9,12 +7,14 @@ import me.blvckbytes.headcatalog.apis.HeadModel;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class MakeHeadFunction extends AExpressionFunction {
 
-  private final ILogger logger;
+  private final Logger logger;
 
-  public MakeHeadFunction(ILogger logger) {
+  public MakeHeadFunction(Logger logger) {
     this.logger = logger;
   }
 
@@ -49,9 +49,8 @@ public class MakeHeadFunction extends AExpressionFunction {
     try {
       return UUID.fromString(uuidString);
     } catch (Exception e) {
-      this.logger.log(ELogLevel.ERROR, "Could not parse the following UUID in the MakeHeadFunction: " + uuidString);
-      this.logger.log(ELogLevel.ERROR, "Generated a random UUID in order to keep operating");
-      this.logger.logError(e);
+      this.logger.log(Level.SEVERE, e, () -> "Could not parse the following UUID in the MakeHeadFunction: " + uuidString);
+      this.logger.log(Level.SEVERE, "Generated a random UUID in order to keep operating");
       return UUID.randomUUID();
     }
   }
