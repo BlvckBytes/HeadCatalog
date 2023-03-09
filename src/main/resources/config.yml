@@ -125,6 +125,13 @@ anvilSearchUI:
       - ' '
       - '&8● &7Type ahead to &dsearch &7for results'
 
+  resultItem:
+    type: PURPLE_TERRACOTTA
+    name: '&8» &dSearch Query &8«'
+    lore$:
+      - '" "'
+      - '"&8● &7Your query: &d" & search_text'
+
   previousPage: *previousPage
   currentPage: *currentPage
   nextPage: *nextPage
@@ -143,6 +150,7 @@ anvilSearchUI:
     filter$: 'inventory_size + 35'
     searchItem: 0
     back: 1
+    resultItem: 2
     darkGlass$: |
       list_of(
         inventory_size + 27,
