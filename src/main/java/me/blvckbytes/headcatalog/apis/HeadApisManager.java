@@ -7,7 +7,6 @@ import me.blvckbytes.gpeee.GPEEE;
 import me.blvckbytes.gpeee.functions.AExpressionFunction;
 import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
-import me.blvckbytes.headcatalog.config.Base64ToSkinUrlFunction;
 import me.blvckbytes.headcatalog.config.MakeHeadFunction;
 import me.blvckbytes.headcatalog.persistence.IPersistence;
 import me.blvckbytes.utilitytypes.Tuple;
@@ -34,7 +33,7 @@ public class HeadApisManager implements IHeadApisManager, IInitializable, IClean
   // Smallest update period we'll allow is going to be 24 hours
   private static final long API_UPDATE_PERIOD_S_MIN = 60 * 60 * 24;
 
-  private final AExpressionFunction makeHeadFunction, base64ToSkinUrlFunction;
+  private final AExpressionFunction makeHeadFunction;
   private final IHeadApisProvider headSourceProvider;
   private final JsonParser jsonParser;
   private final Plugin plugin;
@@ -63,7 +62,6 @@ public class HeadApisManager implements IHeadApisManager, IInitializable, IClean
     this.updateConsumers = new HashSet<>();
     this.jsonParser = new JsonParser();
     this.makeHeadFunction = new MakeHeadFunction(logger);
-    this.base64ToSkinUrlFunction = new Base64ToSkinUrlFunction();
     this.updatePeriod = Math.max(API_UPDATE_PERIOD_S_MIN, this.headSourceProvider.getUpdatePeriodSeconds());
   }
 
@@ -248,7 +246,6 @@ public class HeadApisManager implements IHeadApisManager, IInitializable, IClean
       .withStaticVariable("item", item)
       .withStaticVariable("url", url)
       .withFunction("make_head", makeHeadFunction)
-      .withFunction("base64_to_skin_url", base64ToSkinUrlFunction)
       .build();
   }
 
