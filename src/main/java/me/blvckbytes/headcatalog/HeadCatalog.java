@@ -4,6 +4,8 @@ import me.blvckbytes.autowirer.AutoWirer;
 import me.blvckbytes.bbreflect.CommandRegisterer;
 import me.blvckbytes.bbreflect.IReflectionHelper;
 import me.blvckbytes.bbreflect.ReflectionHelperFactory;
+import me.blvckbytes.bbreflect.packets.EInterceptorFeature;
+import me.blvckbytes.bbreflect.packets.IInterceptorFeatureProvider;
 import me.blvckbytes.bbreflect.packets.PacketInterceptorRegistry;
 import me.blvckbytes.bbreflect.packets.communicator.CustomPayloadCommunicator;
 import me.blvckbytes.bbreflect.packets.communicator.FakeSlotCommunicator;
@@ -28,10 +30,11 @@ import org.bukkit.command.Command;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.EnumSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider {
+public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider, IInterceptorFeatureProvider {
 
   private AutoWirer wirer;
   private Logger logger;
@@ -47,7 +50,7 @@ public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider {
       .addExistingSingleton(this)
       .addExistingSingleton(logger)
       .addSingleton(IReflectionHelper.class, dependencies -> {
-        IReflectionHelper helper = new ReflectionHelperFactory(this).makeHelper();
+        IReflectionHelper helper = new ReflectionHelperFactory(logger, this).makeHelper();
         logger.log(Level.INFO, "Detected server version " + helper.getVersion());
         return helper;
       }, IReflectionHelper::cleanupInterception)
@@ -113,5 +116,10 @@ public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider {
   @Override
   public String[] getConfigPaths() {
     return new String[] { "config.yml" };
+  }
+
+  @Override
+  public EnumSet<EInterceptorFeature> getInterceptorFeatures() {
+    return EnumSet.of(EInterceptorFeature.PACKET_INTERCEPTION, EInterceptorFeature.BYTES_INTERCEPTION);
   }
 }

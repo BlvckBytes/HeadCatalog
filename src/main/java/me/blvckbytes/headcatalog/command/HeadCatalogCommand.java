@@ -9,6 +9,7 @@ import me.blvckbytes.bukkitinventoryui.anvilsearch.ISearchFilterEnum;
 import me.blvckbytes.bukkitinventoryui.base.DataBoundUISlot;
 import me.blvckbytes.bukkitinventoryui.singlechoice.ISingleChoiceParameterProvider;
 import me.blvckbytes.bukkitinventoryui.singlechoice.SingleChoiceParameter;
+import me.blvckbytes.bukkitinventoryui.singlechoice.SingleChoiceUI;
 import me.blvckbytes.headcatalog.config.HeadCatalogCommandSection;
 import me.blvckbytes.headcatalog.ui.*;
 import me.blvckbytes.headcatalog.heads.Head;
@@ -31,7 +32,7 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
   private final IAnvilSearchParameterProvider anvilSearchProvider;
   private final ISingleChoiceParameterProvider singleChoiceProvider;
 
-  private final Map<Player, HeadSingleChoiceUI> headUiByPlayer;
+  private final Map<Player, SingleChoiceUI<Head>> headUiByPlayer;
 
   public HeadCatalogCommand(
     HeadCatalogCommandSection commandSection,
@@ -63,8 +64,8 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
     createOrGetHeadUI(player).show();
   }
 
-  private HeadSingleChoiceUI createOrGetHeadUI(Player player) {
-    HeadSingleChoiceUI singleChoiceUI = headUiByPlayer.get(player);
+  private SingleChoiceUI<Head> createOrGetHeadUI(Player player) {
+    SingleChoiceUI<Head> singleChoiceUI = headUiByPlayer.get(player);
 
     if (singleChoiceUI == null) {
       SingleChoiceParameter<Head> singleChoiceParameter = new SingleChoiceParameter<>(
@@ -72,7 +73,7 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
         anvilSearchProvider, HeadModelSearchFilter.HEAD_EVERYWHERE, this::applyHeadsFilter
       );
 
-      singleChoiceUI = new HeadSingleChoiceUI(inventoryRegistry, singleChoiceParameter);
+      singleChoiceUI = new SingleChoiceUI<>(singleChoiceParameter, inventoryRegistry);
       singleChoiceUI.setPageableSlots(this.headSlots);
       this.headUiByPlayer.put(player, singleChoiceUI);
     }
@@ -81,6 +82,7 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
   }
 
   private List<DataBoundUISlot<Head>> applyHeadsFilter(ISearchFilterEnum<?, Head> searchFilter, String text) {
+    // FIXME: This routine is way too slow
     if (this.headSlots == null)
       return new ArrayList<>();
 
@@ -168,7 +170,7 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
     }
 
     this.headSlots = result;
-    for (HeadSingleChoiceUI ui : this.headUiByPlayer.values())
+    for (SingleChoiceUI<Head> ui : this.headUiByPlayer.values())
       ui.setPageableSlots(this.headSlots);
   }
 

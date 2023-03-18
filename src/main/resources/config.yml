@@ -94,7 +94,7 @@ anvilSearchUI:
   searchDebounceTicks: 5
 
   # previous_title: String - Title of the previous inventory that initiated searching
-  title$: '"&5Search " & previous_title'
+  title: '&5Search HeadCatalog'
 
   # filters: Map<String, Boolean> - Map of filter names to their active state
   filter:
