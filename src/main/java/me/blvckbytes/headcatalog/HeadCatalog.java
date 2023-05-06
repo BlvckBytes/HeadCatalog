@@ -3,14 +3,13 @@ package me.blvckbytes.headcatalog;
 import me.blvckbytes.autowirer.AutoWirer;
 import me.blvckbytes.bbreflect.CommandRegisterer;
 import me.blvckbytes.bbreflect.IReflectionHelper;
-import me.blvckbytes.bbreflect.ReflectionHelperFactory;
-import me.blvckbytes.bbreflect.packets.EInterceptorFeature;
-import me.blvckbytes.bbreflect.packets.IInterceptorFeatureProvider;
+import me.blvckbytes.bbreflect.ReflectionHelper;
 import me.blvckbytes.bbreflect.packets.PacketInterceptorRegistry;
 import me.blvckbytes.bbreflect.packets.communicator.CustomPayloadCommunicator;
 import me.blvckbytes.bbreflect.packets.communicator.FakeSlotCommunicator;
 import me.blvckbytes.bbreflect.packets.communicator.ItemNameCommunicator;
 import me.blvckbytes.bbreflect.packets.communicator.WindowOpenCommunicator;
+import me.blvckbytes.bbreflect.version.ServerVersion;
 import me.blvckbytes.bukkitboilerplate.PluginFileHandler;
 import me.blvckbytes.bukkitevaluable.ConfigManager;
 import me.blvckbytes.bukkitevaluable.IConfigManager;
@@ -34,7 +33,7 @@ import java.util.EnumSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider, IInterceptorFeatureProvider {
+public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider {
 
   private AutoWirer wirer;
   private Logger logger;
@@ -50,10 +49,11 @@ public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider, IIn
       .addExistingSingleton(this)
       .addExistingSingleton(logger)
       .addSingleton(IReflectionHelper.class, dependencies -> {
-        IReflectionHelper helper = new ReflectionHelperFactory(logger, this).makeHelper();
+        ServerVersion version = ServerVersion.current();
+        IReflectionHelper helper = new ReflectionHelper(version);
         logger.log(Level.INFO, "Detected server version " + helper.getVersion());
         return helper;
-      }, IReflectionHelper::cleanupInterception)
+      }, null)
       .addSingleton(HeadCatalogCommand.class)
       .addSingleton(ConfigManager.class)
       .addSingleton(ConfigManager.class)
@@ -116,10 +116,5 @@ public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider, IIn
   @Override
   public String[] getConfigPaths() {
     return new String[] { "config.yml" };
-  }
-
-  @Override
-  public EnumSet<EInterceptorFeature> getInterceptorFeatures() {
-    return EnumSet.of(EInterceptorFeature.PACKET_INTERCEPTION, EInterceptorFeature.BYTES_INTERCEPTION);
   }
 }
