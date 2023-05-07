@@ -71,8 +71,14 @@ public class JsonFilePersistence implements IPersistence {
           InputStreamReader streamReader = new InputStreamReader(inputStream);
         ) {
           double duration = NanoTimer.timeExecutionMs(() -> {
-            this.lastProcessedWrapper = this.gson.fromJson(streamReader, PersistenceDataWrapper.class);
+            PersistenceDataWrapper loadedData = this.gson.fromJson(streamReader, PersistenceDataWrapper.class);
+
+            if (loadedData == null)
+              loadedData = new PersistenceDataWrapper(new ArrayList<>(), 0);
+
+            this.lastProcessedWrapper = loadedData;
           });
+
           this.logger.log(Level.INFO, "Read " + this.lastProcessedWrapper.heads.size() + " heads from file (" + duration + "ms)");
         }
       });
