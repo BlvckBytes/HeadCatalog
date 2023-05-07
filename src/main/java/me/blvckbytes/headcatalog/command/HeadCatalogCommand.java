@@ -86,7 +86,7 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
     if (this.headSlots == null)
       return new ArrayList<>();
 
-    String[] searchWords = text.toLowerCase(Locale.ROOT).split(" ");
+    String[] searchWords = text.trim().toLowerCase(Locale.ROOT).split(" ");
     Map<DataBoundUISlot<Head>, Integer> results = new HashMap<>();
 
     for (DataBoundUISlot<Head> slotItem : this.headSlots) {
