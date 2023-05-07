@@ -142,7 +142,7 @@ public class HeadApisManager implements IHeadApisManager, IInitializable, IClean
   private @Nullable List<HeadModel> fetchHeadApiUrl(IHeadApi headApi, String urlString) {
     try {
       URL url = new URL(urlString);
-      Tuple<Integer, @Nullable String> result = performGetRequest(url);
+      Tuple<Integer, @Nullable String> result = performGetRequest(url, headApi.getUserAgent());
 
       if (result.b == null)
         throw new IllegalStateException("API request to " + url + " failed (" + result.a + ")!");
@@ -249,9 +249,10 @@ public class HeadApisManager implements IHeadApisManager, IInitializable, IClean
       .build();
   }
 
-  private Tuple<Integer, @Nullable String> performGetRequest(URL url) throws Exception {
+  private Tuple<Integer, @Nullable String> performGetRequest(URL url, String userAgent) throws Exception {
     HttpURLConnection connection = (HttpURLConnection)url.openConnection();
     connection.setRequestMethod("GET");
+    connection.setRequestProperty("User-Agent", userAgent);
     connection.connect();
 
     int code = connection.getResponseCode();

@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface IHeadApi {
 
+  String getUserAgent();
+
   List<String> getUrls();
 
   BukkitEvaluable getDataType();

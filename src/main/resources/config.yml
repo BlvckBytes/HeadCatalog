@@ -241,6 +241,9 @@ source:
         - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=monsters'
         - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=plants'
 
+      # The user agent header to apply when performing requests
+      userAgent: 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11'
+
       # Endpoint type, currently supported: JSON
       dataType: JSON
 
