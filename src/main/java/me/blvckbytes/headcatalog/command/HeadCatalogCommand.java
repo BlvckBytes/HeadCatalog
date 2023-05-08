@@ -5,7 +5,6 @@ import me.blvckbytes.autowirer.IInitializable;
 import me.blvckbytes.bukkitcommands.PlayerCommand;
 import me.blvckbytes.bukkitinventoryui.IInventoryRegistry;
 import me.blvckbytes.bukkitinventoryui.anvilsearch.IAnvilSearchParameterProvider;
-import me.blvckbytes.bukkitinventoryui.anvilsearch.ISearchFilterEnum;
 import me.blvckbytes.bukkitinventoryui.base.DataBoundUISlot;
 import me.blvckbytes.bukkitinventoryui.singlechoice.ISingleChoiceParameterProvider;
 import me.blvckbytes.bukkitinventoryui.singlechoice.SingleChoiceParameter;
@@ -21,7 +20,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class HeadCatalogCommand extends PlayerCommand implements IInitializable, ICleanable, Listener {
 
@@ -71,7 +69,7 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
     if (singleChoiceUI == null) {
       SingleChoiceParameter<Head> singleChoiceParameter = new SingleChoiceParameter<>(
         singleChoiceProvider, player,
-        anvilSearchProvider, HeadModelSearchFilter.HEAD_EVERYWHERE, this::applyHeadsFilter
+        anvilSearchProvider, HeadModelSearchFilter.HEAD_EVERYWHERE, this.headSlots
       );
 
       singleChoiceUI = new SingleChoiceUI<>(singleChoiceParameter, inventoryRegistry);
@@ -80,93 +78,6 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
     }
 
     return singleChoiceUI;
-  }
-
-  private List<DataBoundUISlot<Head>> applyHeadsFilter(ISearchFilterEnum<?, Head> searchFilter, String text) {
-    if (this.headSlots == null)
-      return new ArrayList<>();
-
-    String[] searchWords = text.trim().toLowerCase(Locale.ROOT).split(" ");
-    Map<DataBoundUISlot<Head>, Integer> results = new HashMap<>();
-
-    for (DataBoundUISlot<Head> slotItem : this.headSlots) {
-      String[] words = searchFilter.getWords().apply(slotItem.data);
-      int diff = calculateDifference(searchWords, words);
-
-      if (diff >= 0)
-        results.put(slotItem, diff);
-    }
-
-    return results.entrySet().stream()
-      .sorted(this::filterResultsComparator)
-      .map(Map.Entry::getKey)
-      .collect(Collectors.toList());
-  }
-
-  private int filterResultsComparator(Map.Entry<DataBoundUISlot<Head>, Integer> a, Map.Entry<DataBoundUISlot<Head>, Integer> b) {
-    int result;
-
-    if ((result = a.getValue().compareTo(b.getValue())) != 0)
-      return result;
-
-    return a.getKey().data.model.compareTo(b.getKey().data.model);
-  }
-
-  /**
-   * Calculates a number which represents the difference between all available words
-   * within the list of texts and the search words, where every text word may only match once.
-   * @param searchWords Words to match
-   * @param words Words to search in
-   * @return Difference, < 0 if there was no match for all words
-   */
-  private int calculateDifference(String[] searchWords, String[] words) {
-    // Create a copy to remove matched words from
-    int[] matchedWordFlags = new int[words.length / Integer.SIZE + 1];
-
-    // Iterate all words and count sum the total diff
-    int totalDiff = 0;
-    for (String word : searchWords) {
-
-      // Find the best match for the current word in all remaining words
-      int bestMatchDiff = Integer.MAX_VALUE;
-      int bestMatchFlagsIndex = -1;
-      int bestMatchFlagsMask = 0;
-
-      for (int wordIndex = 0; wordIndex < words.length; wordIndex++) {
-        int matchedFlagsIndex = wordIndex / Integer.SIZE;
-        int matchedFlagsMask = 1 << (wordIndex % Integer.SIZE);
-
-        if ((matchedWordFlags[matchedFlagsIndex] & matchedFlagsMask) != 0)
-          continue;
-
-        String availWord = words[wordIndex];
-
-        // Not containing the target word
-        int index = availWord.indexOf(word.toLowerCase());
-        if (index < 0)
-          continue;
-
-        // The difference is determined by how many other chars are padding the search word
-        int diff = availWord.length() - word.length();
-
-        // Compare and update the local best match
-        if (diff < bestMatchDiff) {
-          bestMatchDiff = diff;
-          bestMatchFlagsIndex = matchedFlagsIndex;
-          bestMatchFlagsMask = matchedFlagsMask;
-        }
-      }
-
-      // No match found for the current word, all words need to match, thus cancel
-      if (bestMatchFlagsIndex < 0)
-        return -1;
-
-      // Remove the matching word from the list and add it's difference to the total
-      matchedWordFlags[bestMatchFlagsIndex] |= bestMatchFlagsMask;
-      totalDiff += bestMatchDiff;
-    }
-
-    return totalDiff;
   }
 
   private void updateHeads(Collection<Head> heads) {

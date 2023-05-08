@@ -2,8 +2,9 @@ package me.blvckbytes.headcatalog.heads;
 
 import me.blvckbytes.headcatalog.apis.HeadModel;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
-public class Head {
+public class Head implements Comparable<Head> {
 
   public final HeadModel model;
   public final ItemStack item;
@@ -11,5 +12,10 @@ public class Head {
   public Head(HeadModel model, ItemStack item) {
     this.model = model;
     this.item = item;
+  }
+
+  @Override
+  public int compareTo(@NotNull Head o) {
+    return model.compareTo(o.model);
   }
 }
