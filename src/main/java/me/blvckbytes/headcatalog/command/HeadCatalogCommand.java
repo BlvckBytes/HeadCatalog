@@ -57,6 +57,7 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
   @Override
   protected void onPlayerInvocation(Player player, String alias, String[] args) {
     if (this.headSlots == null) {
+      // TODO: Add message to config
       player.sendMessage("§cHeads aren't ready yet");
       return;
     }
@@ -82,7 +83,6 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
   }
 
   private List<DataBoundUISlot<Head>> applyHeadsFilter(ISearchFilterEnum<?, Head> searchFilter, String text) {
-    // FIXME: This routine is way too slow
     if (this.headSlots == null)
       return new ArrayList<>();
 
@@ -90,47 +90,56 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
     Map<DataBoundUISlot<Head>, Integer> results = new HashMap<>();
 
     for (DataBoundUISlot<Head> slotItem : this.headSlots) {
-      String[] texts = searchFilter.getTexts().apply(slotItem.data);
-      int diff = calculateDifference(searchWords, texts);
+      String[] words = searchFilter.getWords().apply(slotItem.data);
+      int diff = calculateDifference(searchWords, words);
 
       if (diff >= 0)
         results.put(slotItem, diff);
     }
 
     return results.entrySet().stream()
-      .sorted(Comparator.comparingInt(Map.Entry::getValue))
+      .sorted(this::filterResultsComparator)
       .map(Map.Entry::getKey)
       .collect(Collectors.toList());
+  }
+
+  private int filterResultsComparator(Map.Entry<DataBoundUISlot<Head>, Integer> a, Map.Entry<DataBoundUISlot<Head>, Integer> b) {
+    int result;
+
+    if ((result = a.getValue().compareTo(b.getValue())) != 0)
+      return result;
+
+    return a.getKey().data.model.compareTo(b.getKey().data.model);
   }
 
   /**
    * Calculates a number which represents the difference between all available words
    * within the list of texts and the search words, where every text word may only match once.
-   * @param words Words to match
-   * @param texts Texts to search in
+   * @param searchWords Words to match
+   * @param words Words to search in
    * @return Difference, < 0 if there was no match for all words
    */
-  private int calculateDifference(String[] words, String... texts) {
-    // Create a list of unique words which all of the texts contain
-    Set<String> availWords = new HashSet<>();
-    for (String text : texts) {
-
-      // Account for provider errors
-      if (text == null)
-        continue;
-
-      for (String textWord : text.split(" "))
-        availWords.add(textWord.toLowerCase());
-    }
+  private int calculateDifference(String[] searchWords, String[] words) {
+    // Create a copy to remove matched words from
+    int[] matchedWordFlags = new int[words.length / Integer.SIZE + 1];
 
     // Iterate all words and count sum the total diff
     int totalDiff = 0;
-    for (String word : words) {
+    for (String word : searchWords) {
 
       // Find the best match for the current word in all remaining words
-      String bestMatch = null;
       int bestMatchDiff = Integer.MAX_VALUE;
-      for (String availWord : availWords) {
+      int bestMatchFlagsIndex = -1;
+      int bestMatchFlagsMask = 0;
+
+      for (int wordIndex = 0; wordIndex < words.length; wordIndex++) {
+        int matchedFlagsIndex = wordIndex / Integer.SIZE;
+        int matchedFlagsMask = 1 << (wordIndex % Integer.SIZE);
+
+        if ((matchedWordFlags[matchedFlagsIndex] & matchedFlagsMask) != 0)
+          continue;
+
+        String availWord = words[wordIndex];
 
         // Not containing the target word
         int index = availWord.indexOf(word.toLowerCase());
@@ -143,16 +152,17 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
         // Compare and update the local best match
         if (diff < bestMatchDiff) {
           bestMatchDiff = diff;
-          bestMatch = availWord;
+          bestMatchFlagsIndex = matchedFlagsIndex;
+          bestMatchFlagsMask = matchedFlagsMask;
         }
       }
 
       // No match found for the current word, all words need to match, thus cancel
-      if (bestMatch == null)
+      if (bestMatchFlagsIndex < 0)
         return -1;
 
       // Remove the matching word from the list and add it's difference to the total
-      availWords.remove(bestMatch);
+      matchedWordFlags[bestMatchFlagsIndex] |= bestMatchFlagsMask;
       totalDiff += bestMatchDiff;
     }
 

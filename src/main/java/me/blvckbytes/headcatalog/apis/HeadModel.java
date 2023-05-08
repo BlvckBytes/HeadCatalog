@@ -1,8 +1,10 @@
 package me.blvckbytes.headcatalog.apis;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.*;
 
-public class HeadModel {
+public class HeadModel implements Comparable<HeadModel> {
 
   public final String name;
   public final String skinUrl;
@@ -53,5 +55,18 @@ public class HeadModel {
       "  tags='" + tags + "',\n" +
       "  lastUpdate='" + lastUpdate + "'\n" +
     '}';
+  }
+
+  @Override
+  public int compareTo(@NotNull HeadModel o) {
+    int result;
+
+    if ((result = name.compareTo(o.name)) != 0)
+      return result;
+
+    if ((result = categoriesString.compareTo(o.categoriesString)) != 0)
+      return result;
+
+    return tagsString.compareTo(o.tagsString);
   }
 }
