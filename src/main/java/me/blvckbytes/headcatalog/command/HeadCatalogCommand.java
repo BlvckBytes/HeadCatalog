@@ -10,6 +10,7 @@ import me.blvckbytes.bukkitinventoryui.singlechoice.ISingleChoiceParameterProvid
 import me.blvckbytes.bukkitinventoryui.singlechoice.SingleChoiceParameter;
 import me.blvckbytes.bukkitinventoryui.singlechoice.SingleChoiceUI;
 import me.blvckbytes.headcatalog.config.HeadCatalogCommandSection;
+import me.blvckbytes.headcatalog.config.MessagesSection;
 import me.blvckbytes.headcatalog.ui.*;
 import me.blvckbytes.headcatalog.heads.Head;
 import me.blvckbytes.headcatalog.heads.IHeadManager;
@@ -25,6 +26,7 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
 
   private final IInventoryRegistry inventoryRegistry;
   private final IHeadManager headManager;
+  private final MessagesSection messagesSection;
 
   private List<DataBoundUISlot<Head>> headSlots;
   private final IAnvilSearchParameterProvider anvilSearchProvider;
@@ -35,12 +37,14 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
   public HeadCatalogCommand(
     HeadCatalogCommandSection commandSection,
     IHeadManager headManager,
+    MessagesSection messagesSection,
     IInventoryRegistry inventoryRegistry,
     IAnvilSearchParameterProvider anvilSearchProvider,
     ISingleChoiceParameterProvider singleChoiceProvider
   ) {
     super(commandSection);
     this.inventoryRegistry = inventoryRegistry;
+    this.messagesSection = messagesSection;
     this.headManager = headManager;
     this.anvilSearchProvider = anvilSearchProvider;
     this.singleChoiceProvider = singleChoiceProvider;
@@ -55,8 +59,7 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
   @Override
   protected void onPlayerInvocation(Player player, String alias, String[] args) {
     if (this.headSlots == null) {
-      // TODO: Add message to config
-      player.sendMessage("§cHeads aren't ready yet");
+      player.sendMessage(this.messagesSection.getPrefix().stringify(this.messagesSection.getHeadsNotReadyYet()));
       return;
     }
 

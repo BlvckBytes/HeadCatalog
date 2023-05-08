@@ -37,6 +37,11 @@ command:
   description: Opens the head catalog
   errorMessages: *commandErrorMessages
 
+# Chat messages which are possibly sent to the user
+messages:
+  prefix: '&5&lHC &8| '
+  headsNotReadyYet: '&cThe heads are still loading...'
+
 # Items which are common to multiple UIs that are defined once
 # and then linked by making use of YAML anchors
 # See: https://support.atlassian.com/bitbucket-cloud/docs/yaml-anchors/

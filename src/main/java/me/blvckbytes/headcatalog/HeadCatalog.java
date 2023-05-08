@@ -18,6 +18,7 @@ import me.blvckbytes.bukkitinventoryui.InventoryRegistry;
 import me.blvckbytes.bukkitinventoryui.anvilsearch.AnvilSearchUISection;
 import me.blvckbytes.bukkitinventoryui.singlechoice.SingleChoiceUISection;
 import me.blvckbytes.headcatalog.config.GuiSection;
+import me.blvckbytes.headcatalog.config.MessagesSection;
 import me.blvckbytes.headcatalog.heads.HeadManager;
 import me.blvckbytes.headcatalog.apis.HeadApisManager;
 import me.blvckbytes.headcatalog.command.HeadCatalogCommand;
@@ -29,7 +30,6 @@ import org.bukkit.command.Command;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.EnumSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -68,6 +68,10 @@ public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider {
       .addSingleton(ItemNameCommunicator.class)
       .addSingleton(WindowOpenCommunicator.class)
       .addSingleton(CustomPayloadCommunicator.class)
+      .addSingleton(MessagesSection.class, dependencies -> {
+        IConfigManager configManager = (IConfigManager) dependencies[0];
+        return configManager.getMapper("config.yml").mapSection("messages", MessagesSection.class);
+      }, null, IConfigManager.class)
       .addSingleton(HeadCatalogCommandSection.class, dependencies -> {
         IConfigManager configManager = (IConfigManager) dependencies[0];
         return configManager.getMapper("config.yml").mapSection("command", HeadCatalogCommandSection.class);
