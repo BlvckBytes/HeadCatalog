@@ -8,8 +8,7 @@ A simple-to-use catalog for browsing through massive amounts of heads in an effi
 
 ![Live Browser](readme_images/live_browser.png)
 
-## Table of Contents
-- [Libraries](#libraries)
+<!-- #toc -->
 
 ## Libraries
 
