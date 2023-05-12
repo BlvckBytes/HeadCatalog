@@ -9,6 +9,7 @@ import me.blvckbytes.bukkitinventoryui.base.DataBoundUISlot;
 import me.blvckbytes.bukkitinventoryui.singlechoice.ISingleChoiceParameterProvider;
 import me.blvckbytes.bukkitinventoryui.singlechoice.SingleChoiceParameter;
 import me.blvckbytes.bukkitinventoryui.singlechoice.SingleChoiceUI;
+import me.blvckbytes.headcatalog.EPermissionNode;
 import me.blvckbytes.headcatalog.config.HeadCatalogCommandSection;
 import me.blvckbytes.headcatalog.config.MessagesSection;
 import me.blvckbytes.headcatalog.ui.*;
@@ -58,6 +59,8 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
 
   @Override
   protected void onPlayerInvocation(Player player, String alias, String[] args) {
+    ensurePermission(player, EPermissionNode.OPEN);
+
     if (this.headSlots == null) {
       player.sendMessage(this.messagesSection.getHeadsNotReadyYet().stringify());
       return;

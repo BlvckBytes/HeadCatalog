@@ -36,6 +36,8 @@ command:
     - hc
   description: Opens the head catalog
   errorMessages: *commandErrorMessages
+  permissionNodes:
+    open: headcatalog.open
 
 # Chat messages which are possibly sent to the user
 messages:
