@@ -15,9 +15,11 @@ public class HeadModel implements Comparable<HeadModel> {
   public final Set<String> tags;
   public final String tagsString;
 
+  public final double price;
+
   public Date lastUpdate;
 
-  public HeadModel(String name, String skinUrl, Set<String> categories, UUID uuid, Set<String> tags, Date lastUpdate) {
+  public HeadModel(String name, String skinUrl, Set<String> categories, UUID uuid, Set<String> tags, double price, Date lastUpdate) {
     this.name = name;
     this.skinUrl = skinUrl;
 
@@ -29,11 +31,13 @@ public class HeadModel implements Comparable<HeadModel> {
     this.tags = Collections.unmodifiableSet(tags);
     this.tagsString = String.join(" ", this.tags);
 
+    this.price = price;
+
     this.lastUpdate = lastUpdate;
   }
 
-  public HeadModel(String name, String skinUrl, Set<String> categories, UUID uuid, Set<String> tags) {
-    this(name, skinUrl, categories, uuid, tags, new Date());
+  public HeadModel(String name, String skinUrl, Set<String> categories, UUID uuid, Set<String> tags, double price) {
+    this(name, skinUrl, categories, uuid, tags, price, new Date());
   }
 
   @Override

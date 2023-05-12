@@ -109,6 +109,8 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
       return;
     }
 
+    // TODO: Implement withdrawing the price of this head
+
     IInventory<?> receiver = inventoryUtil.fromBukkit(player.getInventory());
     int remaining = this.inventoryUtil.addToInventory(receiver, head.item, InventoryUtil.EMPTY_SLOT_MASK, true);
 

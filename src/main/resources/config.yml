@@ -229,6 +229,7 @@ gui:
       - 'map(head.tags, (tag) => "&8➥ &d" & title_case(tag), "&cNo Tags")'
       - '" "'
       - '"&7Updated: &d" & date_format(head.lastUpdate, "date", lut["dateFormat"])'
+      - '"&7Price: &d" & if head.price == 0 then "&afree" else head.price & "$"'
       - '" "'
       - '"&7Click to &dreceive &7this head"'
 
@@ -261,16 +262,19 @@ source:
       arrayExtractor$: 'result'
 
       # Maps each entry within the array to a internal head model
-      # make_head(name: String, skinUrl: String, categories: Collection, tags: Collection, uuid: String): HeadModel
+      # make_head(name: String, skinUrl: String, uuid: String, categories: Collection<String>, tags: Collection<String>, price: double): HeadModel
       # item - Current item of the array extracted by the arrayExtractor
       # url - Current URL in the list of URLs
       itemMapper$: |
+        category = substring(url, r_index(url, "=") + 1)
+
         make_head(
           item["name"],
           base64_to_skin_url(item["value"]),
           item["uuid"],
-          list_of(substring(url, r_index(url, "=") + 1)),
-          split(item["tags"], ",")
+          list_of(category),
+          split(item["tags"], ","),
+          lut["headPrices"]?[category] ?? lut["headPrices"]["fallback"]
         )
 
 # Lookup table for this file, used to centralize and deduplicate constants
@@ -290,3 +294,8 @@ lut:
     HEAD_NAME: 'Name'
     HEAD_CATEGORIES: 'Categories'
     HEAD_TAGS: 'Tags'
+
+  headPrices:
+    plants: 0
+    alphabet: 125
+    fallback: 250

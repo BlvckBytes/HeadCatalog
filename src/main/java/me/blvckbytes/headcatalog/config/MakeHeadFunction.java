@@ -25,8 +25,9 @@ public class MakeHeadFunction extends AExpressionFunction {
     String uuidString = nullable(args, 2);
     Collection<Object> categories = nullable(args, 3);
     Collection<Object> tags = nullable(args, 4);
+    Double price = nullableWithFallback(args, 5, 0D);
 
-    return new HeadModel(name, value, convertStringCollection(categories), decideUUID(uuidString), convertStringCollection(tags));
+    return new HeadModel(name, value, convertStringCollection(categories), decideUUID(uuidString), convertStringCollection(tags), price);
   }
 
   @Override
@@ -38,6 +39,7 @@ public class MakeHeadFunction extends AExpressionFunction {
     arguments.add(new ExpressionFunctionArgument("uuid", "UUID to use for the GameProfile", false, String.class));
     arguments.add(new ExpressionFunctionArgument("categories", "Categories of the head texture", false, Collection.class));
     arguments.add(new ExpressionFunctionArgument("tags", "Tags this head is a member of", false, Collection.class));
+    arguments.add(new ExpressionFunctionArgument("price", "Price of the head", false, Double.class));
 
     return arguments;
   }
