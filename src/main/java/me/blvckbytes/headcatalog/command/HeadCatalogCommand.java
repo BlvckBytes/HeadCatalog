@@ -59,7 +59,7 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
   @Override
   protected void onPlayerInvocation(Player player, String alias, String[] args) {
     if (this.headSlots == null) {
-      player.sendMessage(this.messagesSection.getPrefix().stringify(this.messagesSection.getHeadsNotReadyYet()));
+      player.sendMessage(this.messagesSection.getHeadsNotReadyYet().stringify());
       return;
     }
 

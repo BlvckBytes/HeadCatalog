@@ -9,26 +9,26 @@
 
 # Error messages used when a command failed to execute
 commandErrorMessages: &commandErrorMessages
-  malformedDouble$: '"&7The value &c" & value & " &7is not a valid &cdouble"'
-  malformedFloat$: '"&7The value &c" & value & " &7is not a valid &cfloat"'
-  malformedLong$: '"&7The value &c" & value & " &7is not a valid &clong"'
-  malformedInteger$: '"&7The value &c" & value & " &7is not a valid &cinteger"'
-  malformedUuid$: '"&7The value &c" & value & " &7is not a valid &cUUID"'
+  malformedDouble$: 'lut["prefix"] & "&7The value &c" & value & " &7is not a valid &cdouble"'
+  malformedFloat$: 'lut["prefix"] & "&7The value &c" & value & " &7is not a valid &cfloat"'
+  malformedLong$: 'lut["prefix"] & "&7The value &c" & value & " &7is not a valid &clong"'
+  malformedInteger$: 'lut["prefix"] & "&7The value &c" & value & " &7is not a valid &cinteger"'
+  malformedUuid$: 'lut["prefix"] & "&7The value &c" & value & " &7is not a valid &cUUID"'
 
   # constants: List<String> - Enumeration constant names available
   malformedEnum$: |
-    "&7The value &c" & value & " &7is not one of (" &
+    lut["prefix"] & "&7The value &c" & value & " &7is not one of (" &
     iter_cat(constant_names, (constant_name) => "&c" & constant_name, "&7, ", "&cNo values available") &
     "&7)"
 
-  notAPlayer: '&7This command can only be executed as a &cplayer'
-  playerUnknown$: '"&7The player &c" & value & " &7has &cnot played &7on this server before"'
-  playerNotOnline$: '"&7The player &c" & value & " &7is &cnot online"'
+  notAPlayer$: 'lut["prefix"] & "&7This command can only be executed as a &cplayer"'
+  playerUnknown$: 'lut["prefix"] & "&7The player &c" & value & " &7has &cnot played &7on this server before"'
+  playerNotOnline$: 'lut["prefix"] & "&7The player &c" & value & " &7is &cnot online"'
 
   # permission: String - Missing permission value
-  missingPermission$: '"&7You\sre lacking the permission &c" & permission'
+  missingPermission$: 'lut["prefix"] & "&7You\sre lacking the permission &c" & permission'
 
-  internalError: '&4An internal error occurred'
+  internalError: 'lut["prefix"] & "&4An internal error occurred"'
 
 command:
   name: "headcatalog"
@@ -39,8 +39,7 @@ command:
 
 # Chat messages which are possibly sent to the user
 messages:
-  prefix: '&5&lHC &8| '
-  headsNotReadyYet: '&cThe heads are still loading...'
+  headsNotReadyYet$: 'lut["prefix"] & "&cThe heads are still loading..."'
 
 # Items which are common to multiple UIs that are defined once
 # and then linked by making use of YAML anchors
@@ -271,6 +270,8 @@ source:
 
 # Lookup table for this file, used to centralize and deduplicate constants
 lut:
+  prefix: '&5&lHC &8| '
+
   dateFormat: 'dd.MM.yyyy HH:mm:ss'
 
   DOUBLE_ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTE4YTJkZDViZWYwYjA3M2IxMzI3MWE3ZWViOWNmZWE3YWZlODU5M2M1N2E5MzgyMWU0MzE3NTU3MjQ2MTgxMiJ9fX0='
