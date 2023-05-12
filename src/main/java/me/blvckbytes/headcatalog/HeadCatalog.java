@@ -10,10 +10,12 @@ import me.blvckbytes.bbreflect.packets.communicator.FakeSlotCommunicator;
 import me.blvckbytes.bbreflect.packets.communicator.ItemNameCommunicator;
 import me.blvckbytes.bbreflect.packets.communicator.WindowOpenCommunicator;
 import me.blvckbytes.bbreflect.version.ServerVersion;
+import me.blvckbytes.bukkitboilerplate.InventoryUtil;
 import me.blvckbytes.bukkitboilerplate.PluginFileHandler;
 import me.blvckbytes.bukkitevaluable.ConfigManager;
 import me.blvckbytes.bukkitevaluable.IConfigManager;
 import me.blvckbytes.bukkitevaluable.IConfigPathsProvider;
+import me.blvckbytes.bukkitevaluable.section.PermissionsSection;
 import me.blvckbytes.bukkitinventoryui.InventoryRegistry;
 import me.blvckbytes.bukkitinventoryui.anvilsearch.AnvilSearchUISection;
 import me.blvckbytes.bukkitinventoryui.singlechoice.SingleChoiceUISection;
@@ -54,6 +56,7 @@ public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider {
         logger.log(Level.INFO, "Detected server version " + helper.getVersion());
         return helper;
       }, null)
+      .addSingleton(InventoryUtil.class)
       .addSingleton(HeadCatalogCommand.class)
       .addSingleton(ConfigManager.class)
       .addSingleton(ConfigManager.class)
@@ -91,6 +94,10 @@ public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider {
       .addSingleton(AnvilSearchUISection.class, dependencies -> {
         IConfigManager configManager = (IConfigManager) dependencies[0];
         return configManager.getMapper("config.yml").mapSection("anvilSearchUI", AnvilSearchUISection.class);
+      }, null, IConfigManager.class)
+      .addSingleton(PermissionsSection.class, dependencies -> {
+        IConfigManager configManager = (IConfigManager) dependencies[0];
+        return configManager.getMapper("config.yml").mapSection("permissions", PermissionsSection.class);
       }, null, IConfigManager.class)
       .addInstantiationListener(Listener.class, (listener, dependencies) -> {
         Bukkit.getPluginManager().registerEvents(listener, this);

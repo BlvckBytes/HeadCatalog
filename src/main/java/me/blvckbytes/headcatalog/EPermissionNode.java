@@ -1,10 +1,11 @@
 package me.blvckbytes.headcatalog;
 
-import me.blvckbytes.bukkitcommands.config.IPermissionNode;
+import me.blvckbytes.bukkitevaluable.section.IPermissionNode;
 
 public enum EPermissionNode implements IPermissionNode {
 
-  OPEN("open", "headcatalog.open")
+  OPEN("open", "headcatalog.open"),
+  REQUEST("request", "headcatalog.request"),
   ;
 
   private final String internalName;

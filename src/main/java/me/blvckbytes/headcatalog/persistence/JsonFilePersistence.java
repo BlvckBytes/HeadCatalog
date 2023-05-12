@@ -3,7 +3,7 @@ package me.blvckbytes.headcatalog.persistence;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import me.blvckbytes.bukkitboilerplate.IFileHandler;
-import me.blvckbytes.headcatalog.NanoTimer;
+import me.blvckbytes.bukkitboilerplate.NanoTimer;
 import me.blvckbytes.headcatalog.apis.HeadModel;
 import me.blvckbytes.utilitytypes.FUnsafeConsumer;
 import org.jetbrains.annotations.Nullable;

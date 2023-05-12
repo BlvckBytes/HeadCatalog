@@ -25,10 +25,7 @@ commandErrorMessages: &commandErrorMessages
   playerUnknown$: 'lut["prefix"] & "&7The player &c" & value & " &7has &cnot played &7on this server before"'
   playerNotOnline$: 'lut["prefix"] & "&7The player &c" & value & " &7is &cnot online"'
 
-  # permission: String - Missing permission value
-  missingPermission$: 'lut["prefix"] & "&7You\sre lacking the permission &c" & permission'
-
-  internalError: 'lut["prefix"] & "&4An internal error occurred"'
+  internalError$: 'lut["prefix"] & "&4An internal error occurred"'
 
 command:
   name: "headcatalog"
@@ -36,12 +33,18 @@ command:
     - hc
   description: Opens the head catalog
   errorMessages: *commandErrorMessages
-  permissionNodes:
+
+permissions:
+  missingMessage$: 'lut["prefix"] & "&7You\sre lacking the permission &c" & permission'
+  nodes:
     open: headcatalog.open
+    request: headcatalog.request
 
 # Chat messages which are possibly sent to the user
 messages:
   headsNotReadyYet$: 'lut["prefix"] & "&cThe heads are still loading..."'
+  inventoryFull$: 'lut["prefix"] & "&cYou have no more space left in your inventory"'
+  requestedHead$: 'lut["prefix"] & "&7You received the head &d" & head.name'
 
 # Items which are common to multiple UIs that are defined once
 # and then linked by making use of YAML anchors

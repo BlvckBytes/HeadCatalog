@@ -5,7 +5,7 @@ import me.blvckbytes.autowirer.IInitializable;
 import me.blvckbytes.bukkitevaluable.IItemBuildable;
 import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
-import me.blvckbytes.headcatalog.NanoTimer;
+import me.blvckbytes.bukkitboilerplate.NanoTimer;
 import me.blvckbytes.headcatalog.apis.HeadModel;
 import me.blvckbytes.headcatalog.apis.IHeadApisManager;
 import org.bukkit.inventory.ItemStack;
@@ -70,7 +70,7 @@ public class HeadManager implements IHeadManager, IInitializable, ICleanable {
       for (HeadModel headModel : headModels) {
         IEvaluationEnvironment environment = getHeadItemEnvironment(headModel);
         ItemStack item = representativeItem.build(environment);
-        heads.add(new Head(headModel, item));
+        heads.add(new Head(headModel, environment, item));
       }
     });
 

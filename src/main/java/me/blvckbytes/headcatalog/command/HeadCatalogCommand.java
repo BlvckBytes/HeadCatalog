@@ -2,10 +2,14 @@ package me.blvckbytes.headcatalog.command;
 
 import me.blvckbytes.autowirer.ICleanable;
 import me.blvckbytes.autowirer.IInitializable;
+import me.blvckbytes.bukkitboilerplate.IInventory;
+import me.blvckbytes.bukkitboilerplate.InventoryUtil;
 import me.blvckbytes.bukkitcommands.PlayerCommand;
+import me.blvckbytes.bukkitevaluable.section.PermissionsSection;
 import me.blvckbytes.bukkitinventoryui.IInventoryRegistry;
 import me.blvckbytes.bukkitinventoryui.anvilsearch.IAnvilSearchParameterProvider;
 import me.blvckbytes.bukkitinventoryui.base.DataBoundUISlot;
+import me.blvckbytes.bukkitinventoryui.base.IInventoryUI;
 import me.blvckbytes.bukkitinventoryui.singlechoice.ISingleChoiceParameterProvider;
 import me.blvckbytes.bukkitinventoryui.singlechoice.SingleChoiceParameter;
 import me.blvckbytes.bukkitinventoryui.singlechoice.SingleChoiceUI;
@@ -22,12 +26,15 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 public class HeadCatalogCommand extends PlayerCommand implements IInitializable, ICleanable, Listener {
 
   private final IInventoryRegistry inventoryRegistry;
   private final IHeadManager headManager;
   private final MessagesSection messagesSection;
+  private final PermissionsSection permissionsSection;
+  private final InventoryUtil inventoryUtil;
 
   private List<DataBoundUISlot<Head>> headSlots;
   private final IAnvilSearchParameterProvider anvilSearchProvider;
@@ -39,16 +46,21 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
     HeadCatalogCommandSection commandSection,
     IHeadManager headManager,
     MessagesSection messagesSection,
+    PermissionsSection permissionsSection,
     IInventoryRegistry inventoryRegistry,
     IAnvilSearchParameterProvider anvilSearchProvider,
-    ISingleChoiceParameterProvider singleChoiceProvider
+    ISingleChoiceParameterProvider singleChoiceProvider,
+    InventoryUtil inventoryUtil,
+    Logger logger
   ) {
-    super(commandSection);
+    super(commandSection, logger);
     this.inventoryRegistry = inventoryRegistry;
     this.messagesSection = messagesSection;
+    this.permissionsSection = permissionsSection;
     this.headManager = headManager;
     this.anvilSearchProvider = anvilSearchProvider;
     this.singleChoiceProvider = singleChoiceProvider;
+    this.inventoryUtil = inventoryUtil;
     this.headUiByPlayer = new HashMap<>();
   }
 
@@ -59,7 +71,10 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
 
   @Override
   protected void onPlayerInvocation(Player player, String alias, String[] args) {
-    ensurePermission(player, EPermissionNode.OPEN);
+    if (!permissionsSection.hasPermission(player, EPermissionNode.OPEN)) {
+      permissionsSection.sendMissingMessage(player, EPermissionNode.OPEN);
+      return;
+    }
 
     if (this.headSlots == null) {
       player.sendMessage(this.messagesSection.getHeadsNotReadyYet().stringify());
@@ -86,12 +101,31 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
     return singleChoiceUI;
   }
 
+  private void onHeadClick(IInventoryUI ui, Head head) {
+    Player player = ui.getViewer();
+
+    if (!permissionsSection.hasPermission(player, EPermissionNode.REQUEST)) {
+      permissionsSection.sendMissingMessage(player, EPermissionNode.REQUEST);
+      return;
+    }
+
+    IInventory<?> receiver = inventoryUtil.fromBukkit(player.getInventory());
+    int remaining = this.inventoryUtil.addToInventory(receiver, head.item, InventoryUtil.EMPTY_SLOT_MASK, true);
+
+    if (remaining > 0) {
+      player.sendMessage(this.messagesSection.getInventoryFull().stringify());
+      return;
+    }
+
+    player.sendMessage(this.messagesSection.getRequestedHead().stringify(head.environment));
+    ui.close();
+  }
+
   private void updateHeads(Collection<Head> heads) {
     List<DataBoundUISlot<Head>> result = new ArrayList<>();
     for (Head head : heads) {
       result.add(new DataBoundUISlot<>(() -> head.item, interaction -> {
-        interaction.ui.getViewer().getInventory().addItem(head.item);
-        interaction.ui.close();
+        onHeadClick(interaction.ui, head);
         return null;
       }, head));
     }
