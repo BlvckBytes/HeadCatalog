@@ -88,3 +88,79 @@ the following accessible members:
 | tags       | Set<String> | The tags which have been added to this head   |
 | price      | Double      | The price of the head                         |
 | lastUpdate | Date        | Last update or (if not updated) creation date |
+
+### Section "gui"
+
+#### representative
+
+An item description which is evaluated for each available head in order to generate representative items for the UI.
+
+| Environment Variable | Description                                  |
+|----------------------|----------------------------------------------|
+| head                 | The [head model](#head-model)                |
+
+In order to convert the locally stored skin sprite URL back to a base64 textures value, the environment provides an
+encoder [function](https://github.com/BlvckBytes/BukkitEvaluable#skin_url_to_base64).
+
+### Section "source"
+
+#### updatePeriodSeconds
+
+The time in seconds between updates. Every time an update occurs, all provided APIs are queried for their
+data and new heads are extended into the local database. The minimum time accepted by the plugin is 24h, which
+is `86400` seconds.
+
+#### apis
+
+A list of [API entries](#api-list-entry) and their properties, which feed the local database.
+
+### API List Entry
+
+#### urls
+
+A list of urls which will all be queried and processed using this entry's settings.
+
+#### userAgent
+
+Some APIs don't answer if the request doesn't contain a valid `User-Agent` header. You can specify
+any custom string here, but the default value should work across the board.
+
+#### dataType
+
+The type of response this endpoint issues. Currently, there's only **JSON** available.
+
+#### arrayExtractor
+
+A function which extracts the array of heads from the response of the API. This array will later be iterated
+and mapped to heads by the mapper function. If the API already responds with a top level array, just let this
+function be a pass-through by putting `result` as it's value.
+
+| Environment Variable | Description                                  |
+|----------------------|----------------------------------------------|
+| result               | The unmodified, parsed response from the API |
+
+#### itemMapper
+
+This mapper maps each item (entry) within the previously extracted array to a head model, to be stored locally. It will
+be called with each entry individually and has to yield a model.
+
+| Environment Variable | Description                                                 |
+|----------------------|-------------------------------------------------------------|
+| item                 | The currently iterated item of the extracted array          |
+| url                  | The currently requested URL from the list of urls           |
+| make_head            | A function which constructs a head model by it's parameters |
+
+The `make_head` function accepts the following parameters:
+
+| Parameter  | Type               | Required | Description                     |
+|------------|--------------------|----------|---------------------------------|
+| name       | String             | yes      | Name of the head                |
+| skinUrl    | String             | yes      | URL of the skin sprite          |
+| uuid       | String             | false    | UUID to use for the GameProfile |
+| categories | Collection<String> | false    | Categories this head is in      |
+| tags       | Collection<String> | false    | Tags attached to this head      |
+| price      | Double             | false    | Price of this head              |
+
+If the API of choice responds with a `base64`-encoded `textures` value, the environment provides an extractor
+[function](https://github.com/BlvckBytes/BukkitEvaluable#base64_to_skin_url) to decode that value and extract
+it's URL string.

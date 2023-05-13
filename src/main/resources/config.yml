@@ -45,10 +45,7 @@ messages:
       else
         "&7You bought the &7head &d" & head.name & " &7(&c-" & head.price & "$&7)"
     )
-  # price: Double - The price of the requested head
-  # balance: Double - The balance of the player
   missingBalance$: 'lut["prefix"] & "&7You\sre lacking &c" & head.price - balance & "$"'
-  # error_message: String - Message of the occurred error
   economyError$: 'lut["prefix"] & "&7An internal economy error occurred: &4" & error_message'
 
 # Items which are common to multiple UIs that are defined once
@@ -239,11 +236,9 @@ gui:
       - '"&7Click to &dreceive &7this head"'
 
 source:
-  # Every 24h will be the minimum value accepted
   updatePeriodSeconds: 86400
   apis:
     -
-      # Each of these URLs will be ran through the extractor and mapper below
       urls:
         - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=alphabet'
         - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=animals'
@@ -256,20 +251,10 @@ source:
         - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=monsters'
         - 'https://minecraft-heads.com/scripts/api.php?tags=true&cat=plants'
 
-      # The user agent header to apply when performing requests
       userAgent: 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11'
-
-      # Endpoint type, currently supported: JSON
       dataType: JSON
-
-      # Extracts the array from the response given by the API at the current URL
-      # result - Result given by the API
       arrayExtractor$: 'result'
 
-      # Maps each entry within the array to a internal head model
-      # make_head(name: String, skinUrl: String, uuid: String, categories: Collection<String>, tags: Collection<String>, price: double): HeadModel
-      # item - Current item of the array extracted by the arrayExtractor
-      # url - Current URL in the list of URLs
       itemMapper$: |
         category = substring(url, r_index(url, "=") + 1)
 
@@ -282,7 +267,6 @@ source:
           lut["headPrices"]?[category] ?? lut["headPrices"]["fallback"]
         )
 
-# Lookup table for this file, used to centralize and deduplicate constants
 lut:
   prefix: '&5&lHC &8| '
 
