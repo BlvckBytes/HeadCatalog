@@ -6,6 +6,7 @@ public enum EPermissionNode implements IPermissionNode {
 
   OPEN("open", "headcatalog.open"),
   REQUEST("request", "headcatalog.request"),
+  PRICE_BYPASS("priceBypass", "headcatalog.price-bypass"),
   ;
 
   private final String internalName;

@@ -13,12 +13,17 @@ import me.blvckbytes.bukkitinventoryui.base.IInventoryUI;
 import me.blvckbytes.bukkitinventoryui.singlechoice.ISingleChoiceParameterProvider;
 import me.blvckbytes.bukkitinventoryui.singlechoice.SingleChoiceParameter;
 import me.blvckbytes.bukkitinventoryui.singlechoice.SingleChoiceUI;
+import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
+import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import me.blvckbytes.headcatalog.EPermissionNode;
 import me.blvckbytes.headcatalog.config.HeadCatalogCommandSection;
 import me.blvckbytes.headcatalog.config.MessagesSection;
+import me.blvckbytes.headcatalog.economy.EconomyAdapter;
+import me.blvckbytes.headcatalog.economy.IEconomyAdapter;
 import me.blvckbytes.headcatalog.ui.*;
 import me.blvckbytes.headcatalog.heads.Head;
 import me.blvckbytes.headcatalog.heads.IHeadManager;
+import me.blvckbytes.utilitytypes.Tuple;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -35,6 +40,7 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
   private final MessagesSection messagesSection;
   private final PermissionsSection permissionsSection;
   private final InventoryUtil inventoryUtil;
+  private final IEconomyAdapter economyAdapter;
 
   private List<DataBoundUISlot<Head>> headSlots;
   private final IAnvilSearchParameterProvider anvilSearchProvider;
@@ -51,6 +57,7 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
     IAnvilSearchParameterProvider anvilSearchProvider,
     ISingleChoiceParameterProvider singleChoiceProvider,
     InventoryUtil inventoryUtil,
+    EconomyAdapter economyAdapter,
     Logger logger
   ) {
     super(commandSection, logger);
@@ -61,6 +68,7 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
     this.anvilSearchProvider = anvilSearchProvider;
     this.singleChoiceProvider = singleChoiceProvider;
     this.inventoryUtil = inventoryUtil;
+    this.economyAdapter = economyAdapter;
     this.headUiByPlayer = new HashMap<>();
   }
 
@@ -109,17 +117,52 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
       return;
     }
 
-    // TODO: Implement withdrawing the price of this head
-
     IInventory<?> receiver = inventoryUtil.fromBukkit(player.getInventory());
-    int remaining = this.inventoryUtil.addToInventory(receiver, head.item, InventoryUtil.EMPTY_SLOT_MASK, true);
+    Tuple<Integer, Runnable> result = this.inventoryUtil.prepareAddingToInventory(receiver, head.item, InventoryUtil.EMPTY_SLOT_MASK, true);
 
-    if (remaining > 0) {
+    // Item wouldn't fit
+    if (result.a > 0) {
       player.sendMessage(this.messagesSection.getInventoryFull().stringify());
       return;
     }
 
-    player.sendMessage(this.messagesSection.getRequestedHead().stringify(head.environment));
+    double price = head.model.price;
+    boolean hasPriceBypass = permissionsSection.hasPermission(player, EPermissionNode.PRICE_BYPASS);
+
+    // Only try to withdraw if the player doesn't bypass the price
+    // And an economy system is available
+    if (!hasPriceBypass && economyAdapter.isAvailable()) {
+      double balance = economyAdapter.getBalance(player);
+
+      if (balance < price) {
+        IEvaluationEnvironment environment = new EvaluationEnvironmentBuilder()
+          .withStaticVariable("price", price)
+          .withStaticVariable("balance", balance)
+          .build();
+
+        player.sendMessage(this.messagesSection.getMissingBalance().stringify(environment));
+        return;
+      }
+
+      String errorMessage;
+      if ((errorMessage = economyAdapter.withdrawAmount(player, price)) != null) {
+        IEvaluationEnvironment environment = new EvaluationEnvironmentBuilder()
+          .withStaticVariable("error_message", errorMessage)
+          .build();
+
+        player.sendMessage(this.messagesSection.getEconomyError().stringify(environment));
+        return;
+      }
+    }
+
+    // Dispatch adding the item
+    result.b.run();
+
+    if (hasPriceBypass)
+      player.sendMessage(this.messagesSection.getRequestedHeadPriceBypassed().stringify(head.environment));
+    else
+      player.sendMessage(this.messagesSection.getRequestedHead().stringify(head.environment));
+
     ui.close();
   }
 

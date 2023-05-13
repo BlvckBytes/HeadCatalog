@@ -39,12 +39,25 @@ permissions:
   nodes:
     open: headcatalog.open
     request: headcatalog.request
+    priceBypass: headcatalog.price-bypass
 
 # Chat messages which are possibly sent to the user
 messages:
   headsNotReadyYet$: 'lut["prefix"] & "&cThe heads are still loading..."'
   inventoryFull$: 'lut["prefix"] & "&cYou have no more space left in your inventory"'
-  requestedHead$: 'lut["prefix"] & "&7You received the head &d" & head.name'
+  requestedHeadPriceBypassed$: 'lut["prefix"] & "&7You received the head &d" & head.name'
+  requestedHead$: |
+    lut["prefix"] & (
+      if head.price == 0 then
+        "&7You received the &afree &7head &d" & head.name
+      else
+        "&7You bought the &7head &d" & head.name & " &7(&c-" & head.price & "$&7)"
+    )
+  # price: Double - The price of the requested head
+  # balance: Double - The balance of the player
+  missingBalance$: 'lut["prefix"] & "&7You\sre lacking &c" & price - balance & "$"'
+  # error_message: String - Message of the occurred error
+  economyError$: 'lut["prefix"] & "&7An internal economy error occurred: &4" & error_message'
 
 # Items which are common to multiple UIs that are defined once
 # and then linked by making use of YAML anchors

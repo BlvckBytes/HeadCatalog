@@ -21,6 +21,7 @@ import me.blvckbytes.bukkitinventoryui.anvilsearch.AnvilSearchUISection;
 import me.blvckbytes.bukkitinventoryui.singlechoice.SingleChoiceUISection;
 import me.blvckbytes.headcatalog.config.GuiSection;
 import me.blvckbytes.headcatalog.config.MessagesSection;
+import me.blvckbytes.headcatalog.economy.EconomyAdapter;
 import me.blvckbytes.headcatalog.heads.HeadManager;
 import me.blvckbytes.headcatalog.apis.HeadApisManager;
 import me.blvckbytes.headcatalog.command.HeadCatalogCommand;
@@ -56,6 +57,7 @@ public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider {
         logger.log(Level.INFO, "Detected server version " + helper.getVersion());
         return helper;
       }, null)
+      .addSingleton(EconomyAdapter.class)
       .addSingleton(InventoryUtil.class)
       .addSingleton(HeadCatalogCommand.class)
       .addSingleton(ConfigManager.class)
