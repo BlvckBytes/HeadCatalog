@@ -7,32 +7,25 @@
 # HeadCatalog - Developed by BlvckBytes <blvckbytes@gmail.com>
 # (ascii-art: https://patorjk.com/software/taag/#p=display&f=Speed&t=HeadCatalog)
 
-# Error messages used when a command failed to execute
-commandErrorMessages: &commandErrorMessages
-  malformedDouble$: 'lut["prefix"] & "&7The value &c" & value & " &7is not a valid &cdouble"'
-  malformedFloat$: 'lut["prefix"] & "&7The value &c" & value & " &7is not a valid &cfloat"'
-  malformedLong$: 'lut["prefix"] & "&7The value &c" & value & " &7is not a valid &clong"'
-  malformedInteger$: 'lut["prefix"] & "&7The value &c" & value & " &7is not a valid &cinteger"'
-  malformedUuid$: 'lut["prefix"] & "&7The value &c" & value & " &7is not a valid &cUUID"'
-
-  # constants: List<String> - Enumeration constant names available
-  malformedEnum$: |
-    lut["prefix"] & "&7The value &c" & value & " &7is not one of (" &
-    iter_cat(constant_names, (constant_name) => "&c" & constant_name, "&7, ", "&cNo values available") &
-    "&7)"
-
-  notAPlayer$: 'lut["prefix"] & "&7This command can only be executed as a &cplayer"'
-  playerUnknown$: 'lut["prefix"] & "&7The player &c" & value & " &7has &cnot played &7on this server before"'
-  playerNotOnline$: 'lut["prefix"] & "&7The player &c" & value & " &7is &cnot online"'
-
-  internalError$: 'lut["prefix"] & "&4An internal error occurred"'
-
 command:
   name: "headcatalog"
   aliases:
     - hc
   description: Opens the head catalog
-  errorMessages: *commandErrorMessages
+  errorMessages:
+    malformedDouble$: 'lut["prefix"] & "&7The value &c" & value & " &7is not a valid &cdouble"'
+    malformedFloat$: 'lut["prefix"] & "&7The value &c" & value & " &7is not a valid &cfloat"'
+    malformedLong$: 'lut["prefix"] & "&7The value &c" & value & " &7is not a valid &clong"'
+    malformedInteger$: 'lut["prefix"] & "&7The value &c" & value & " &7is not a valid &cinteger"'
+    malformedUuid$: 'lut["prefix"] & "&7The value &c" & value & " &7is not a valid &cUUID"'
+    malformedEnum$: |
+      lut["prefix"] & "&7The value &c" & value & " &7is not one of (" &
+      iter_cat(constant_names, (constant_name) => "&c" & constant_name, "&7, ", "&cNo values available") &
+      "&7)"
+    notAPlayer$: 'lut["prefix"] & "&7This command can only be executed as a &cplayer"'
+    playerUnknown$: 'lut["prefix"] & "&7The player &c" & value & " &7has &cnot played &7on this server before"'
+    playerNotOnline$: 'lut["prefix"] & "&7The player &c" & value & " &7is &cnot online"'
+    internalError$: 'lut["prefix"] & "&4An internal error occurred"'
 
 permissions:
   missingMessage$: 'lut["prefix"] & "&7You\sre lacking the permission &c" & permission'
@@ -41,7 +34,6 @@ permissions:
     request: headcatalog.request
     priceBypass: headcatalog.price-bypass
 
-# Chat messages which are possibly sent to the user
 messages:
   headsNotReadyYet$: 'lut["prefix"] & "&cThe heads are still loading..."'
   inventoryFull$: 'lut["prefix"] & "&cYou have no more space left in your inventory"'
@@ -55,7 +47,7 @@ messages:
     )
   # price: Double - The price of the requested head
   # balance: Double - The balance of the player
-  missingBalance$: 'lut["prefix"] & "&7You\sre lacking &c" & price - balance & "$"'
+  missingBalance$: 'lut["prefix"] & "&7You\sre lacking &c" & head.price - balance & "$"'
   # error_message: String - Message of the occurred error
   economyError$: 'lut["prefix"] & "&7An internal economy error occurred: &4" & error_message'
 

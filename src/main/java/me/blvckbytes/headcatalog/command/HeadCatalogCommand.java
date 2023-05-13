@@ -136,9 +136,8 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
 
       if (balance < price) {
         IEvaluationEnvironment environment = new EvaluationEnvironmentBuilder()
-          .withStaticVariable("price", price)
           .withStaticVariable("balance", balance)
-          .build();
+          .build(head.environment);
 
         player.sendMessage(this.messagesSection.getMissingBalance().stringify(environment));
         return;
@@ -148,7 +147,7 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
       if ((errorMessage = economyAdapter.withdrawAmount(player, price)) != null) {
         IEvaluationEnvironment environment = new EvaluationEnvironmentBuilder()
           .withStaticVariable("error_message", errorMessage)
-          .build();
+          .build(head.environment);
 
         player.sendMessage(this.messagesSection.getEconomyError().stringify(environment));
         return;
