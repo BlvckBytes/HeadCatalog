@@ -4,15 +4,13 @@
 
 A simple-to-use catalog for browsing through massive amounts of heads in an efficient manner.
 
-![Pagination Screen](readme_images/pagination.png)
-
 ![Live Browser](readme_images/live_browser.png)
 
 ## Table of Contents
 - [Configuration File](#configuration-file)
-  - [Section "command"](#section-"command")
-  - [Section "permissions"](#section-"permissions")
-  - [Section "messages"](#section-"messages")
+  - [Section command](#section-command)
+  - [Section permissions](#section-permissions)
+  - [Section messages](#section-messages)
     - [headsNotReadyYet](#headsnotreadyyet)
     - [inventoryFull](#inventoryfull)
     - [requestedHeadPriceBypassed](#requestedheadpricebypassed)
@@ -20,9 +18,10 @@ A simple-to-use catalog for browsing through massive amounts of heads in an effi
     - [missingBalance](#missingbalance)
     - [economyError](#economyerror)
   - [Head Model](#head-model)
-  - [Section "gui"](#section-"gui")
+  - [Section headCatalogUI](#section-headcatalogui)
     - [representative](#representative)
-  - [Section "source"](#section-"source")
+    - [Anvil Search UI](#anvil-search-ui)
+  - [Section source](#section-source)
     - [updatePeriodSeconds](#updateperiodseconds)
     - [apis](#apis)
   - [API List Entry](#api-list-entry)
@@ -37,11 +36,11 @@ A simple-to-use catalog for browsing through massive amounts of heads in an effi
 The configuration file makes use of [BukkitEvaluable](https://github.com/BlvckBytes/BukkitEvaluable), so it is advised
 to also get familiar with the *README* of that project in order to fully understand the process of customizing the plugin.
 
-### Section "command"
+### Section command
 
 See [BukkitCommands](https://github.com/BlvckBytes/BukkitCommands).
 
-### Section "permissions"
+### Section permissions
 
 See [BukkitEvaluable](https://github.com/BlvckBytes/BukkitEvaluable).
 
@@ -51,7 +50,7 @@ See [BukkitEvaluable](https://github.com/BlvckBytes/BukkitEvaluable).
 | request       | Request a head by clicking on it                  |
 | priceBypass   | Bypass the price of a head and never pay anything |
 
-### Section "messages"
+### Section messages
 
 #### headsNotReadyYet
 
@@ -111,7 +110,7 @@ the following accessible members:
 | price      | Double      | The price of the head                         |
 | lastUpdate | Date        | Last update or (if not updated) creation date |
 
-### Section "gui"
+### Section headCatalogUI
 
 #### representative
 
@@ -124,7 +123,11 @@ An item description which is evaluated for each available head in order to gener
 In order to convert the locally stored skin sprite URL back to a base64 textures value, the environment provides an
 encoder [function](https://github.com/BlvckBytes/BukkitEvaluable#skin_url_to_base64).
 
-### Section "source"
+#### Anvil Search UI
+
+For all remaining properties, please take a look at the section of an [Anvil Search UI](https://github.com/BlvckBytes/BukkitInventoryUI#anvil-search-ui).
+
+### Section source
 
 #### updatePeriodSeconds
 

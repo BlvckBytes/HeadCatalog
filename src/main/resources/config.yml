@@ -48,66 +48,29 @@ messages:
   missingBalance$: 'lut["prefix"] & "&7You\sre lacking &c" & head.price - balance & "$"'
   economyError$: 'lut["prefix"] & "&7An internal economy error occurred: &4" & error_message'
 
-# Items which are common to multiple UIs that are defined once
-# and then linked by making use of YAML anchors
-# See: https://support.atlassian.com/bitbucket-cloud/docs/yaml-anchors/
-commonItems:
-
-  # viewer_name: String - Name of the player viewing the inventory
-  # current_page: Integer - Current page index
-  # page_size: Integer - Size of a page in slots
-  # number_of_pages: Integer - Number of total pages available
-  # number_of_pageables: Integer - Number of items to page through
-
-  previousPage: &previousPage
-    type: PLAYER_HEAD
-    textures$: 'lut[if current_page > 1 then "ARROW_LEFT" else "ARROW_LEFT_RED"]'
-    name$: '"&8» " & (if current_page > 1 then "&dPrevious Page" else "&cNo Previous Page") & " &8«"'
-    lore$:
-      - '" "'
-      - |
-        if current_page > 1 then list_of(
-          "&8● &7Left click: &dPrevious Page",
-          "&8● &7Right click: &dFirst Page"
-        ) else list_of(
-          "&8● &7Already on the &cfirst &7page"
-        )
-
-  currentPage: &currentPage
-    type: PAPER
-    name$: '"&8» &dPage &5" & current_page & "&7/&5" & max(1, number_of_pages) & " &8«"'
-    lore$:
-      - '" "'
-      - '"&8● &7Page size: &d" & page_size'
-      - '"&8● &7Items total: &d" & number_of_pageables'
-
-  nextPage: &nextPage
-    type: PLAYER_HEAD
-    textures$: 'lut[if current_page < number_of_pages then "ARROW_RIGHT" else "ARROW_RIGHT_RED"]'
-    name$: '"&8» " & (if current_page < number_of_pages then "&dNext Page" else "&cNo Next Page") & " &8«"'
-    lore$:
-      - '" "'
-      - |
-        if current_page < number_of_pages then list_of(
-          "&8● &7Left click: &dNext Page",
-          "&8● &7Right click: &dLast Page"
-        ) else list_of(
-          "&8● &7Already on the &clast &7page"
-        )
-
-# Shown when the viewer wants to search through items of a single choice UI
-anvilSearchUI:
+headCatalogUI:
   animating: true
 
-  # Time in ticks which have to elapse after a key press in order to update the
-  # results. This debounces keystrokes and helps to avoid calculating unnecessary
-  # intermediate results which are overridden by the next keystroke anyways.
   searchDebounceTicks: 5
+  title: '&5HeadCatalog'
 
-  # previous_title: String - Title of the previous inventory that initiated searching
-  title: '&5Search HeadCatalog'
+  representative:
+    type: PLAYER_HEAD
+    textures$: 'skin_url_to_base64(head.skinUrl)'
+    name$: '"&8» &d" & head.name & " &8«"'
+    lore$:
+      - '" "'
+      - '"&7Categories:"'
+      - 'map(head.categories, (category) => "&8➥ &d" & title_case(category), "&cNo Categories")'
+      - '" "'
+      - '"&7Tags:"'
+      - 'map(head.tags, (tag) => "&8➥ &d" & title_case(tag), "&cNo Tags")'
+      - '" "'
+      - '"&7Updated: &d" & date_format(head.lastUpdate, "date", lut["dateFormat"])'
+      - '"&7Price: &d" & if head.price == 0 then "&afree" else head.price & "$"'
+      - '" "'
+      - '"&7Click to &dreceive &7this head"'
 
-  # filters: Map<String, Boolean> - Map of filter names to their active state
   filter:
     type: HOPPER
     name: '&8» &dFilter &8«'
@@ -130,7 +93,6 @@ anvilSearchUI:
 
   searchItem:
     type: PURPLE_TERRACOTTA
-    # The name should always be blank in order to allow for an empty input box
     name: ' '
     lore:
       - ' '
@@ -143,10 +105,43 @@ anvilSearchUI:
       - '" "'
       - '"&8● &7Your query: &d" & search_text'
 
-  previousPage: *previousPage
-  currentPage: *currentPage
-  nextPage: *nextPage
+  previousPage:
+    type: PLAYER_HEAD
+    textures$: 'lut[if current_page > 1 then "ARROW_LEFT" else "ARROW_LEFT_RED"]'
+    name$: '"&8» " & (if current_page > 1 then "&dPrevious Page" else "&cNo Previous Page") & " &8«"'
+    lore$:
+      - '" "'
+      - |
+        if current_page > 1 then list_of(
+          "&8● &7Left click: &dPrevious Page",
+          "&8● &7Right click: &dFirst Page"
+        ) else list_of(
+          "&8● &7Already on the &cfirst &7page"
+        )
 
+  currentPage:
+    type: PAPER
+    name$: '"&8» &dPage &5" & current_page & "&7/&5" & max(1, number_of_pages) & " &8«"'
+    lore$:
+      - '" "'
+      - '"&8● &7Page size: &d" & page_size'
+      - '"&8● &7Items total: &d" & number_of_pageables'
+
+  nextPage:
+    type: PLAYER_HEAD
+    textures$: 'lut[if current_page < number_of_pages then "ARROW_RIGHT" else "ARROW_RIGHT_RED"]'
+    name$: '"&8» " & (if current_page < number_of_pages then "&dNext Page" else "&cNo Next Page") & " &8«"'
+    lore$:
+      - '" "'
+      - |
+        if current_page < number_of_pages then list_of(
+          "&8● &7Left click: &dNext Page",
+          "&8● &7Right click: &dLast Page"
+        ) else list_of(
+          "&8● &7Already on the &clast &7page"
+        )
+
+  # The pagination items are displayed in the player's inventory
   paginationSlots$: 'range(inventory_size, inventory_size + 26)'
 
   customItems:
@@ -155,15 +150,22 @@ anvilSearchUI:
       name: ' '
 
   slotContents:
+    # Keep the pagination controls in the hotbar
     previousPage$: 'inventory_size + 29'
     currentPage$: 'inventory_size + 31'
     nextPage$: 'inventory_size + 33'
     filter$: 'inventory_size + 35'
+
     searchItem: 0
     back: 1
     resultItem: 2
+
     darkGlass$: |
       list_of(
+        # Put a spacer in slot 2 of the anvil, since there's no back button, in order
+        # to avoid the experience cost message to be displayed
+        1,
+        # Put spacers into unused hotbar slots
         inventory_size + 27,
         inventory_size + 28,
         inventory_size + 30,
@@ -171,69 +173,6 @@ anvilSearchUI:
         inventory_size + 34,
         inventory_size + 35
       )
-
-singleChoiceUI:
-  animating: true
-
-  search:
-    type: NAME_TAG
-    name: '&8» &dSearch &8«'
-    lore:
-      - ' '
-      - '&8● &7Search through items in &drealtime'
-
-  previousPage: *previousPage
-  currentPage: *currentPage
-  nextPage: *nextPage
-
-  paginationSlots$: |
-    flatten(
-      range(10, 16),
-      range(19, 25),
-      range(28, 34)
-    )
-
-  numberOfRows: 5
-
-  title: '&5HeadCatalog'
-
-  border:
-    type: BLACK_STAINED_GLASS_PANE
-
-  customItems:
-    darkGlass:
-      type: BLACK_STAINED_GLASS_PANE
-      name: ' '
-
-  slotContents:
-    previousPage: 38
-    currentPage: 40
-    nextPage: 42
-    search: 44
-    darkGlass$: |
-      flatten(
-        range(0, 8),
-        list_of(9, 18, 27, 17, 26, 35),
-        range(36, 44)
-      )
-
-gui:
-  representative:
-    type: PLAYER_HEAD
-    textures$: 'skin_url_to_base64(head.skinUrl)'
-    name$: '"&8» &d" & head.name & " &8«"'
-    lore$:
-      - '" "'
-      - '"&7Categories:"'
-      - 'map(head.categories, (category) => "&8➥ &d" & title_case(category), "&cNo Categories")'
-      - '" "'
-      - '"&7Tags:"'
-      - 'map(head.tags, (tag) => "&8➥ &d" & title_case(tag), "&cNo Tags")'
-      - '" "'
-      - '"&7Updated: &d" & date_format(head.lastUpdate, "date", lut["dateFormat"])'
-      - '"&7Price: &d" & if head.price == 0 then "&afree" else head.price & "$"'
-      - '" "'
-      - '"&7Click to &dreceive &7this head"'
 
 source:
   updatePeriodSeconds: 86400

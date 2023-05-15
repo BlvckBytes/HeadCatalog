@@ -1,10 +1,10 @@
 package me.blvckbytes.headcatalog.config;
 
-import me.blvckbytes.bbconfigmapper.sections.IConfigSection;
 import me.blvckbytes.bukkitevaluable.section.ItemStackSection;
+import me.blvckbytes.bukkitinventoryui.anvilsearch.AnvilSearchUISection;
 import me.blvckbytes.headcatalog.heads.IRepresentativeProvider;
 
-public class GuiSection implements IConfigSection, IRepresentativeProvider {
+public class HeadCatalogUISection extends AnvilSearchUISection implements IRepresentativeProvider {
 
   private ItemStackSection representative;
 

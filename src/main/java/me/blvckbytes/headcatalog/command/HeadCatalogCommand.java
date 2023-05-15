@@ -7,12 +7,11 @@ import me.blvckbytes.bukkitboilerplate.InventoryUtil;
 import me.blvckbytes.bukkitcommands.PlayerCommand;
 import me.blvckbytes.bukkitevaluable.section.PermissionsSection;
 import me.blvckbytes.bukkitinventoryui.IInventoryRegistry;
+import me.blvckbytes.bukkitinventoryui.anvilsearch.AnvilSearchParameter;
+import me.blvckbytes.bukkitinventoryui.anvilsearch.AnvilSearchUI;
 import me.blvckbytes.bukkitinventoryui.anvilsearch.IAnvilSearchParameterProvider;
 import me.blvckbytes.bukkitinventoryui.base.DataBoundUISlot;
 import me.blvckbytes.bukkitinventoryui.base.IInventoryUI;
-import me.blvckbytes.bukkitinventoryui.singlechoice.ISingleChoiceParameterProvider;
-import me.blvckbytes.bukkitinventoryui.singlechoice.SingleChoiceParameter;
-import me.blvckbytes.bukkitinventoryui.singlechoice.SingleChoiceUI;
 import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import me.blvckbytes.headcatalog.EPermissionNode;
@@ -42,11 +41,10 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
   private final InventoryUtil inventoryUtil;
   private final IEconomyAdapter economyAdapter;
 
-  private List<DataBoundUISlot<Head>> headSlots;
+  private final List<DataBoundUISlot<Head>> headSlots;
   private final IAnvilSearchParameterProvider anvilSearchProvider;
-  private final ISingleChoiceParameterProvider singleChoiceProvider;
 
-  private final Map<Player, SingleChoiceUI<Head>> headUiByPlayer;
+  private final Map<Player, AnvilSearchUI<Head>> searchUIByPlayer;
 
   public HeadCatalogCommand(
     HeadCatalogCommandSection commandSection,
@@ -55,7 +53,6 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
     PermissionsSection permissionsSection,
     IInventoryRegistry inventoryRegistry,
     IAnvilSearchParameterProvider anvilSearchProvider,
-    ISingleChoiceParameterProvider singleChoiceProvider,
     InventoryUtil inventoryUtil,
     EconomyAdapter economyAdapter,
     Logger logger
@@ -66,10 +63,11 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
     this.permissionsSection = permissionsSection;
     this.headManager = headManager;
     this.anvilSearchProvider = anvilSearchProvider;
-    this.singleChoiceProvider = singleChoiceProvider;
     this.inventoryUtil = inventoryUtil;
     this.economyAdapter = economyAdapter;
-    this.headUiByPlayer = new HashMap<>();
+
+    this.searchUIByPlayer = new HashMap<>();
+    this.headSlots = new ArrayList<>();
   }
 
   @Override
@@ -89,24 +87,22 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
       return;
     }
 
-    createOrGetHeadUI(player).show();
+    createOrGetSearchUI(player).show();
   }
 
-  private SingleChoiceUI<Head> createOrGetHeadUI(Player player) {
-    SingleChoiceUI<Head> singleChoiceUI = headUiByPlayer.get(player);
+  private AnvilSearchUI<Head> createOrGetSearchUI(Player player) {
+    AnvilSearchUI<Head> searchUI = searchUIByPlayer.get(player);
 
-    if (singleChoiceUI == null) {
-      SingleChoiceParameter<Head> singleChoiceParameter = new SingleChoiceParameter<>(
-        singleChoiceProvider, player,
-        anvilSearchProvider, HeadModelSearchFilter.HEAD_EVERYWHERE, this.headSlots
+    if (searchUI == null) {
+      AnvilSearchParameter<Head> anvilSearchParameter = new AnvilSearchParameter<>(
+        anvilSearchProvider, player, this.headSlots, HeadModelSearchFilter.HEAD_EVERYWHERE, null
       );
 
-      singleChoiceUI = new SingleChoiceUI<>(singleChoiceParameter, inventoryRegistry);
-      singleChoiceUI.setPageableSlots(this.headSlots);
-      this.headUiByPlayer.put(player, singleChoiceUI);
+      searchUI = new AnvilSearchUI<>(anvilSearchParameter, inventoryRegistry);
+      this.searchUIByPlayer.put(player, searchUI);
     }
 
-    return singleChoiceUI;
+    return searchUI;
   }
 
   private void onHeadClick(IInventoryUI ui, Head head) {
@@ -174,9 +170,11 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
       }, head));
     }
 
-    this.headSlots = result;
-    for (SingleChoiceUI<Head> ui : this.headUiByPlayer.values())
-      ui.setPageableSlots(this.headSlots);
+    this.headSlots.clear();
+    this.headSlots.addAll(result);
+
+    for (AnvilSearchUI<Head> ui : this.searchUIByPlayer.values())
+      ui.invokeFilterFunctionAndUpdatePageSlots();
   }
 
   @Override
@@ -191,6 +189,6 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
 
   @EventHandler
   public void onQuit(PlayerQuitEvent event) {
-    this.headUiByPlayer.remove(event.getPlayer());
+    this.searchUIByPlayer.remove(event.getPlayer());
   }
 }

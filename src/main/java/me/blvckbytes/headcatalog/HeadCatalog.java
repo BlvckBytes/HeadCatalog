@@ -17,16 +17,11 @@ import me.blvckbytes.bukkitevaluable.IConfigManager;
 import me.blvckbytes.bukkitevaluable.IConfigPathsProvider;
 import me.blvckbytes.bukkitevaluable.section.PermissionsSection;
 import me.blvckbytes.bukkitinventoryui.InventoryRegistry;
-import me.blvckbytes.bukkitinventoryui.anvilsearch.AnvilSearchUISection;
-import me.blvckbytes.bukkitinventoryui.singlechoice.SingleChoiceUISection;
-import me.blvckbytes.headcatalog.config.GuiSection;
-import me.blvckbytes.headcatalog.config.MessagesSection;
+import me.blvckbytes.headcatalog.config.*;
 import me.blvckbytes.headcatalog.economy.EconomyAdapter;
 import me.blvckbytes.headcatalog.heads.HeadManager;
 import me.blvckbytes.headcatalog.apis.HeadApisManager;
 import me.blvckbytes.headcatalog.command.HeadCatalogCommand;
-import me.blvckbytes.headcatalog.config.SourceSection;
-import me.blvckbytes.headcatalog.config.HeadCatalogCommandSection;
 import me.blvckbytes.headcatalog.persistence.JsonFilePersistence;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -81,21 +76,13 @@ public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider {
         IConfigManager configManager = (IConfigManager) dependencies[0];
         return configManager.getMapper("config.yml").mapSection("command", HeadCatalogCommandSection.class);
       }, null, IConfigManager.class)
-      .addSingleton(GuiSection.class, dependencies -> {
-        IConfigManager configManager = (IConfigManager) dependencies[0];
-        return configManager.getMapper("config.yml").mapSection("gui", GuiSection.class);
-      }, null, IConfigManager.class)
       .addSingleton(SourceSection.class, dependencies -> {
         IConfigManager configManager = (IConfigManager) dependencies[0];
         return configManager.getMapper("config.yml").mapSection("source", SourceSection.class);
       }, null, IConfigManager.class)
-      .addSingleton(SingleChoiceUISection.class, dependencies -> {
+      .addSingleton(HeadCatalogUISection.class, dependencies -> {
         IConfigManager configManager = (IConfigManager) dependencies[0];
-        return configManager.getMapper("config.yml").mapSection("singleChoiceUI", SingleChoiceUISection.class);
-      }, null, IConfigManager.class)
-      .addSingleton(AnvilSearchUISection.class, dependencies -> {
-        IConfigManager configManager = (IConfigManager) dependencies[0];
-        return configManager.getMapper("config.yml").mapSection("anvilSearchUI", AnvilSearchUISection.class);
+        return configManager.getMapper("config.yml").mapSection("headCatalogUI", HeadCatalogUISection.class);
       }, null, IConfigManager.class)
       .addSingleton(PermissionsSection.class, dependencies -> {
         IConfigManager configManager = (IConfigManager) dependencies[0];
