@@ -4,7 +4,7 @@
 
 A simple-to-use catalog for browsing through massive amounts of heads in an efficient manner.
 
-![Live Browser](readme_images/live_browser.png)
+![Live Browser](readme_images/live_browser.gif)
 
 <!-- #toc -->
 
