@@ -35,7 +35,6 @@ permissions:
     priceBypass: headcatalog.price-bypass
 
 messages:
-  headsNotReadyYet$: 'lut["prefix"] & "&cThe heads are still loading..."'
   inventoryFull$: 'lut["prefix"] & "&cYou have no more space left in your inventory"'
   requestedHeadPriceBypassed$: 'lut["prefix"] & "&7You received the head &d" & head.name'
   requestedHead$: |

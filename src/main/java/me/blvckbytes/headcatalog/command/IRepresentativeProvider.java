@@ -1,4 +1,4 @@
-package me.blvckbytes.headcatalog.heads;
+package me.blvckbytes.headcatalog.command;
 
 import me.blvckbytes.bukkitevaluable.section.ItemStackSection;
 

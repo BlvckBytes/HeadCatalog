@@ -1,12 +1,17 @@
 package me.blvckbytes.headcatalog.apis;
 
 import java.util.Collection;
-import java.util.function.Consumer;
 
 public interface IHeadApisManager {
 
-  void registerUpdateCallback(Consumer<Collection<HeadModel>> consumer);
+  void registerDeltaCallback(FDeltaCallback callback);
 
-  void unregisterUpdateCallback(Consumer<Collection<HeadModel>> consumer);
+  void unregisterDeltaCallback(FDeltaCallback callback);
+
+  void registerHeads(Collection<HeadModel> heads);
+
+  void unregisterHeads(Collection<HeadModel> heads);
+
+  Collection<HeadModel> getHeads();
 
 }

@@ -1,4 +1,4 @@
-package me.blvckbytes.headcatalog.heads;
+package me.blvckbytes.headcatalog.command;
 
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import me.blvckbytes.headcatalog.apis.HeadModel;
@@ -20,5 +20,17 @@ public class Head implements Comparable<Head> {
   @Override
   public int compareTo(@NotNull Head o) {
     return model.compareTo(o.model);
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (!(other instanceof Head))
+      return false;
+    return ((Head) other).model.equals(model);
+  }
+
+  @Override
+  public int hashCode() {
+    return model.hashCode();
   }
 }

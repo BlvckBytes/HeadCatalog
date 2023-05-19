@@ -5,6 +5,7 @@ import me.blvckbytes.autowirer.IInitializable;
 import me.blvckbytes.bukkitboilerplate.IInventory;
 import me.blvckbytes.bukkitboilerplate.InventoryUtil;
 import me.blvckbytes.bukkitcommands.PlayerCommand;
+import me.blvckbytes.bukkitevaluable.IItemBuildable;
 import me.blvckbytes.bukkitevaluable.section.PermissionsSection;
 import me.blvckbytes.bukkitinventoryui.IInventoryRegistry;
 import me.blvckbytes.bukkitinventoryui.anvilsearch.AnvilSearchParameter;
@@ -14,32 +15,35 @@ import me.blvckbytes.bukkitinventoryui.base.DataBoundUISlot;
 import me.blvckbytes.bukkitinventoryui.base.IInventoryUI;
 import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
+import me.blvckbytes.headcatalog.apis.EDeltaMode;
 import me.blvckbytes.headcatalog.EPermissionNode;
+import me.blvckbytes.headcatalog.apis.HeadModel;
+import me.blvckbytes.headcatalog.apis.IHeadApisManager;
 import me.blvckbytes.headcatalog.config.HeadCatalogCommandSection;
 import me.blvckbytes.headcatalog.config.MessagesSection;
 import me.blvckbytes.headcatalog.economy.EconomyAdapter;
 import me.blvckbytes.headcatalog.economy.IEconomyAdapter;
-import me.blvckbytes.headcatalog.ui.*;
-import me.blvckbytes.headcatalog.heads.Head;
-import me.blvckbytes.headcatalog.heads.IHeadManager;
 import me.blvckbytes.utilitytypes.Tuple;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class HeadCatalogCommand extends PlayerCommand implements IInitializable, ICleanable, Listener {
 
   private final IInventoryRegistry inventoryRegistry;
-  private final IHeadManager headManager;
+  private final IHeadApisManager apisManager;
   private final MessagesSection messagesSection;
   private final PermissionsSection permissionsSection;
   private final InventoryUtil inventoryUtil;
   private final IEconomyAdapter economyAdapter;
+  private final IItemBuildable representativeItem;
 
   private final List<DataBoundUISlot<Head>> headSlots;
   private final IAnvilSearchParameterProvider anvilSearchProvider;
@@ -48,7 +52,8 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
 
   public HeadCatalogCommand(
     HeadCatalogCommandSection commandSection,
-    IHeadManager headManager,
+    IHeadApisManager apisManager,
+    IRepresentativeProvider representativeProvider,
     MessagesSection messagesSection,
     PermissionsSection permissionsSection,
     IInventoryRegistry inventoryRegistry,
@@ -61,7 +66,8 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
     this.inventoryRegistry = inventoryRegistry;
     this.messagesSection = messagesSection;
     this.permissionsSection = permissionsSection;
-    this.headManager = headManager;
+    this.apisManager = apisManager;
+    this.representativeItem = representativeProvider.getRepresentative().asItem();
     this.anvilSearchProvider = anvilSearchProvider;
     this.inventoryUtil = inventoryUtil;
     this.economyAdapter = economyAdapter;
@@ -79,11 +85,6 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
   protected void onPlayerInvocation(Player player, String alias, String[] args) {
     if (!permissionsSection.hasPermission(player, EPermissionNode.OPEN)) {
       permissionsSection.sendMissingMessage(player, EPermissionNode.OPEN);
-      return;
-    }
-
-    if (this.headSlots == null) {
-      player.sendMessage(this.messagesSection.getHeadsNotReadyYet().stringify());
       return;
     }
 
@@ -161,17 +162,31 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
     ui.close();
   }
 
-  private void updateHeads(Collection<Head> heads) {
-    List<DataBoundUISlot<Head>> result = new ArrayList<>();
-    for (Head head : heads) {
-      result.add(new DataBoundUISlot<>(() -> head.item, interaction -> {
-        onHeadClick(interaction.ui, head);
-        return null;
-      }, head));
+  private IEvaluationEnvironment getHeadItemEnvironment(HeadModel headModel) {
+    return new EvaluationEnvironmentBuilder()
+      .withStaticVariable("head", headModel)
+      .build();
+  }
+
+  private void onHeadDelta(Collection<HeadModel> heads, EDeltaMode mode) {
+    if (mode == EDeltaMode.REMOVED) {
+      this.headSlots.removeIf(slot -> heads.contains(slot.data.model));
     }
 
-    this.headSlots.clear();
-    this.headSlots.addAll(result);
+    else {
+      for (HeadModel headModel : heads) {
+        IEvaluationEnvironment environment = getHeadItemEnvironment(headModel);
+        ItemStack item = this.representativeItem.build(environment);
+        Head head = new Head(headModel, environment, item);
+
+        this.headSlots.add(new DataBoundUISlot<>(() -> head.item, interaction -> {
+          onHeadClick(interaction.ui, head);
+          return null;
+        }, head));
+      }
+
+      logger.log(Level.INFO, "Mapped " + heads.size() + " head models to representative items");
+    }
 
     for (AnvilSearchUI<Head> ui : this.searchUIByPlayer.values())
       ui.invokeFilterFunctionAndUpdatePageSlots();
@@ -179,12 +194,13 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
 
   @Override
   public void cleanup() {
-    this.headManager.unregisterUpdateCallback(this::updateHeads);
+    this.apisManager.unregisterDeltaCallback(this::onHeadDelta);
+    this.searchUIByPlayer.clear();
   }
 
   @Override
   public void initialize() {
-    this.headManager.registerUpdateCallback(this::updateHeads);
+    this.apisManager.registerDeltaCallback(this::onHeadDelta);
   }
 
   @EventHandler

@@ -1,7 +1,6 @@
-package me.blvckbytes.headcatalog.ui;
+package me.blvckbytes.headcatalog.command;
 
 import me.blvckbytes.bukkitinventoryui.anvilsearch.ISearchFilterEnum;
-import me.blvckbytes.headcatalog.heads.Head;
 import me.blvckbytes.utilitytypes.FUnsafeFunction;
 
 import java.util.*;

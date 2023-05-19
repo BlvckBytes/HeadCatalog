@@ -11,7 +11,6 @@ A simple-to-use catalog for browsing through massive amounts of heads in an effi
   - [Section command](#section-command)
   - [Section permissions](#section-permissions)
   - [Section messages](#section-messages)
-    - [headsNotReadyYet](#headsnotreadyyet)
     - [inventoryFull](#inventoryfull)
     - [requestedHeadPriceBypassed](#requestedheadpricebypassed)
     - [requestedHead](#requestedhead)
@@ -51,11 +50,6 @@ See [BukkitEvaluable](https://github.com/BlvckBytes/BukkitEvaluable).
 | priceBypass   | Bypass the price of a head and never pay anything |
 
 ### Section messages
-
-#### headsNotReadyYet
-
-The heads are still loading, which either means that the persistence is not done reading yet or that
-the process of mapping head models to head representative items has not yet completed.
 
 #### inventoryFull
 

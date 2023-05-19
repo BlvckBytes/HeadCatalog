@@ -29,11 +29,6 @@ See [BukkitEvaluable](https://github.com/BlvckBytes/BukkitEvaluable).
 
 ### Section messages
 
-#### headsNotReadyYet
-
-The heads are still loading, which either means that the persistence is not done reading yet or that
-the process of mapping head models to head representative items has not yet completed.
-
 #### inventoryFull
 
 The requested head item could not be placed in the player's inventory, as it has no more space to hold it.

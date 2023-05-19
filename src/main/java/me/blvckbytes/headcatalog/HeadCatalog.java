@@ -19,7 +19,6 @@ import me.blvckbytes.bukkitevaluable.section.PermissionsSection;
 import me.blvckbytes.bukkitinventoryui.InventoryRegistry;
 import me.blvckbytes.headcatalog.config.*;
 import me.blvckbytes.headcatalog.economy.EconomyAdapter;
-import me.blvckbytes.headcatalog.heads.HeadManager;
 import me.blvckbytes.headcatalog.apis.HeadApisManager;
 import me.blvckbytes.headcatalog.command.HeadCatalogCommand;
 import me.blvckbytes.headcatalog.persistence.JsonFilePersistence;
@@ -59,7 +58,6 @@ public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider {
       .addSingleton(ConfigManager.class)
       .addSingleton(CommandRegisterer.class)
       .addSingleton(HeadApisManager.class)
-      .addSingleton(HeadManager.class)
       .addSingleton(PluginFileHandler.class)
       .addSingleton(JsonFilePersistence.class)
       .addSingleton(InventoryRegistry.class)

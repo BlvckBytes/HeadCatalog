@@ -40,12 +40,12 @@ public class HeadApisManager implements IHeadApisManager, IInitializable, IClean
   private final Logger logger;
   private final IPersistence persistence;
 
-  private final Set<Consumer<Collection<HeadModel>>> updateConsumers;
+  private final Set<FDeltaCallback> deltaCallbacks;
 
   private @Nullable BukkitTask updateTask;
   private final long updatePeriod;
 
-  private @Nullable Collection<HeadModel> headModelsUnmodifiable;
+  private final Set<HeadModel> headModels;
   private long lastFetchedLastStoreStamp;
 
   public HeadApisManager(
@@ -59,7 +59,8 @@ public class HeadApisManager implements IHeadApisManager, IInitializable, IClean
     this.plugin = plugin;
     this.logger = logger;
 
-    this.updateConsumers = new HashSet<>();
+    this.headModels = new HashSet<>();
+    this.deltaCallbacks = new HashSet<>();
     this.jsonParser = new JsonParser();
     this.makeHeadFunction = new MakeHeadFunction(logger);
     this.updatePeriod = Math.max(API_UPDATE_PERIOD_S_MIN, this.headSourceProvider.getUpdatePeriodSeconds());
@@ -71,26 +72,57 @@ public class HeadApisManager implements IHeadApisManager, IInitializable, IClean
     // Update period elapsed, fetch new data from APIs
     if (System.currentTimeMillis() - lastStoreStamp >= updatePeriod * 1000) {
       fetchHeadApis(result -> {
-        headModelsUnmodifiable = Collections.unmodifiableCollection(result);
         logger.log(Level.INFO, "Fetched " + result.size() + " heads from APIs");
-        persistence.storeHeadModels(result);
-        notifyUpdateConsumers();
+
+        // API updates should never remove, only extend
+        integrateUpdate(result, false);
+
+        // Store the local state after integrating the update
+        persistence.storeHeadModels(this.headModels);
       });
 
       return;
     }
 
     // The database holds newer values then currently loaded into memory
-    if (headModelsUnmodifiable == null || lastFetchedLastStoreStamp < lastStoreStamp) {
-      headModelsUnmodifiable = Collections.unmodifiableCollection(persistence.loadHeadModels());
+    if (this.headModels.isEmpty() || lastFetchedLastStoreStamp < lastStoreStamp) {
       lastFetchedLastStoreStamp = lastStoreStamp;
-      notifyUpdateConsumers();
+      integrateUpdate(persistence.loadHeadModels(), false);
     }
   }
 
-  private void notifyUpdateConsumers() {
-    for (Consumer<Collection<HeadModel>> consumer : updateConsumers)
-      consumer.accept(headModelsUnmodifiable);
+  private void notifyOfDelta(Collection<HeadModel> delta, EDeltaMode mode) {
+    if (delta.size() == 0)
+      return;
+
+    for (FDeltaCallback callback : deltaCallbacks)
+      callback.accept(delta, mode);
+  }
+
+  private void integrateUpdate(Set<HeadModel> heads, boolean applyRemoved) {
+    List<HeadModel> added = new ArrayList<>();
+
+    // NOTE: This collection is also used to remove wrapped entries in other
+    // collections, so using a set is serving double and should not be changed
+    Set<HeadModel> removed = new HashSet<>(headModels);
+
+    for (HeadModel head : heads) {
+      if (this.headModels.add(head))
+        added.add(head);
+
+      // Starts off with all currently existing elements
+      // Elements present after the update are removed
+      // => Remaining elements have been removed by the update
+      if (applyRemoved)
+        removed.remove(head);
+    }
+
+    if (applyRemoved) {
+      this.headModels.removeAll(removed);
+      notifyOfDelta(removed, EDeltaMode.REMOVED);
+    }
+
+    notifyOfDelta(added, EDeltaMode.ADDED);
   }
 
   @Override
@@ -269,12 +301,31 @@ public class HeadApisManager implements IHeadApisManager, IInitializable, IClean
   }
 
   @Override
-  public void registerUpdateCallback(Consumer<Collection<HeadModel>> consumer) {
-    this.updateConsumers.add(consumer);
+  public void registerDeltaCallback(FDeltaCallback callback) {
+    this.deltaCallbacks.add(callback);
   }
 
   @Override
-  public void unregisterUpdateCallback(Consumer<Collection<HeadModel>> consumer) {
-    this.updateConsumers.remove(consumer);
+  public void unregisterDeltaCallback(FDeltaCallback callback) {
+    this.deltaCallbacks.remove(callback);
+  }
+
+  @Override
+  public void registerHeads(Collection<HeadModel> heads) {
+    Set<HeadModel> temporary = new HashSet<>(this.headModels);
+    temporary.addAll(heads);
+    integrateUpdate(temporary, false);
+  }
+
+  @Override
+  public void unregisterHeads(Collection<HeadModel> heads) {
+    Set<HeadModel> temporary = new HashSet<>(this.headModels);
+    temporary.removeAll(heads);
+    integrateUpdate(temporary, true);
+  }
+
+  @Override
+  public Collection<HeadModel> getHeads() {
+    return new ArrayList<>(this.headModels);
   }
 }

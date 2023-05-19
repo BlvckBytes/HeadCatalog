@@ -9,19 +9,26 @@ public class HeadModel implements Comparable<HeadModel> {
   public final String name;
   public final String skinUrl;
   public final UUID uuid;
-
   public final Set<String> categories;
-  public final String categoriesString;
   public final Set<String> tags;
-  public final String tagsString;
-
   public final double price;
-
   public Date lastUpdate;
+
+  // As equals and hashCode are used a lot, normalized key values are computed ahead of time
+  private final String normalizedName;
+  private final String normalizedSkinUrl;
+
+  // Searching requires collections to already be collapsed into strings of space separated
+  // words, which can be computed ahead of time, to save on needless processing time
+  public final String categoriesString;
+  public final String tagsString;
 
   public HeadModel(String name, String skinUrl, Set<String> categories, UUID uuid, Set<String> tags, double price, Date lastUpdate) {
     this.name = name;
+    this.normalizedName = normalizeKey(name);
+
     this.skinUrl = skinUrl;
+    this.normalizedSkinUrl = normalizeKey(skinUrl);
 
     this.categories = Collections.unmodifiableSet(categories);
     this.categoriesString = String.join(" ", this.categories);
@@ -41,8 +48,21 @@ public class HeadModel implements Comparable<HeadModel> {
   }
 
   @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof HeadModel))
+      return false;
+
+    HeadModel other = (HeadModel) obj;
+
+    if (!normalizedName.equals(other.normalizedName))
+      return false;
+
+    return normalizedSkinUrl.equals(other.normalizedSkinUrl);
+  }
+
+  @Override
   public int hashCode() {
-    return Objects.hash(normalizeKey(name), normalizeKey(skinUrl));
+    return Objects.hash(normalizedName, normalizedSkinUrl);
   }
 
   private String normalizeKey(String input) {
@@ -57,6 +77,7 @@ public class HeadModel implements Comparable<HeadModel> {
       "  uuid='" + uuid + "',\n" +
       "  categories='" + categories + "',\n" +
       "  tags='" + tags + "',\n" +
+      "  price='" + price + "',\n" +
       "  lastUpdate='" + lastUpdate + "'\n" +
     '}';
   }

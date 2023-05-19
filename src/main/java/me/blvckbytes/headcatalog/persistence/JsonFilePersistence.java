@@ -12,8 +12,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,7 +34,7 @@ public class JsonFilePersistence implements IPersistence {
   }
 
   @Override
-  public void storeHeadModels(Collection<HeadModel> headModels) {
+  public void storeHeadModels(Set<HeadModel> headModels) {
     try {
       openForWriting(outputStream -> {
         this.lastProcessedWrapper = new PersistenceDataWrapper(headModels, System.currentTimeMillis());
@@ -58,7 +58,7 @@ public class JsonFilePersistence implements IPersistence {
   }
 
   @Override
-  public Collection<HeadModel> loadHeadModels() {
+  public Set<HeadModel> loadHeadModels() {
     if (this.lastProcessedWrapper != null)
       return this.lastProcessedWrapper.heads;
 
@@ -74,7 +74,7 @@ public class JsonFilePersistence implements IPersistence {
             PersistenceDataWrapper loadedData = this.gson.fromJson(streamReader, PersistenceDataWrapper.class);
 
             if (loadedData == null)
-              loadedData = new PersistenceDataWrapper(new ArrayList<>(), 0);
+              loadedData = new PersistenceDataWrapper(new HashSet<>(), 0);
 
             this.lastProcessedWrapper = loadedData;
           });
@@ -87,7 +87,7 @@ public class JsonFilePersistence implements IPersistence {
     }
 
     if (this.lastProcessedWrapper == null)
-      return new ArrayList<>();
+      return new HashSet<>();
 
     return this.lastProcessedWrapper.heads;
   }
@@ -118,10 +118,10 @@ public class JsonFilePersistence implements IPersistence {
 
   private static class PersistenceDataWrapper {
 
-    private final Collection<HeadModel> heads;
+    private final Set<HeadModel> heads;
     private final long lastStoreStamp;
 
-    public PersistenceDataWrapper(Collection<HeadModel> heads, long lastStoreStamp) {
+    public PersistenceDataWrapper(Set<HeadModel> heads, long lastStoreStamp) {
       this.heads = heads;
       this.lastStoreStamp = lastStoreStamp;
     }
