@@ -12,6 +12,7 @@ public class HeadModel implements Comparable<HeadModel> {
   public final Set<String> categories;
   public final Set<String> tags;
   public final double price;
+  public boolean blocked;
   public Date lastUpdate;
 
   // As equals and hashCode are used a lot, normalized key values are computed ahead of time
@@ -25,6 +26,7 @@ public class HeadModel implements Comparable<HeadModel> {
 
   public HeadModel(String name, String skinUrl, Set<String> categories, UUID uuid, Set<String> tags, double price, Date lastUpdate) {
     this.name = name;
+    this.blocked = false;
     this.normalizedName = normalizeKey(name);
 
     this.skinUrl = skinUrl;

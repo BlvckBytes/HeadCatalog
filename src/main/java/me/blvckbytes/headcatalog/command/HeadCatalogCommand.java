@@ -13,6 +13,7 @@ import me.blvckbytes.bukkitinventoryui.anvilsearch.AnvilSearchUI;
 import me.blvckbytes.bukkitinventoryui.anvilsearch.IAnvilSearchParameterProvider;
 import me.blvckbytes.bukkitinventoryui.base.DataBoundUISlot;
 import me.blvckbytes.bukkitinventoryui.base.IInventoryUI;
+import me.blvckbytes.bukkitinventoryui.base.UIInteraction;
 import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import me.blvckbytes.headcatalog.apis.EDeltaMode;
@@ -23,6 +24,9 @@ import me.blvckbytes.headcatalog.config.HeadCatalogCommandSection;
 import me.blvckbytes.headcatalog.config.MessagesSection;
 import me.blvckbytes.headcatalog.economy.EconomyAdapter;
 import me.blvckbytes.headcatalog.economy.IEconomyAdapter;
+import me.blvckbytes.headcatalog.ui.edit.HeadEditUI;
+import me.blvckbytes.headcatalog.ui.edit.HeadEditUIParameter;
+import me.blvckbytes.headcatalog.ui.edit.IHeadEditUIParameterProvider;
 import me.blvckbytes.utilitytypes.Tuple;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -43,10 +47,15 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
   private final PermissionsSection permissionsSection;
   private final InventoryUtil inventoryUtil;
   private final IEconomyAdapter economyAdapter;
+
   private final IItemBuildable representativeItem;
+  private final IItemBuildable representativeItemAdmin;
 
   private final List<DataBoundUISlot<Head>> headSlots;
+  private final List<DataBoundUISlot<Head>> headSlotsAdmin;
+
   private final IAnvilSearchParameterProvider anvilSearchProvider;
+  private final IHeadEditUIParameterProvider headEditUIParameterProvider;
 
   private final Map<Player, AnvilSearchUI<Head>> searchUIByPlayer;
 
@@ -58,6 +67,7 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
     PermissionsSection permissionsSection,
     IInventoryRegistry inventoryRegistry,
     IAnvilSearchParameterProvider anvilSearchProvider,
+    IHeadEditUIParameterProvider headEditUIParameterProvider,
     InventoryUtil inventoryUtil,
     EconomyAdapter economyAdapter,
     Logger logger
@@ -67,28 +77,54 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
     this.messagesSection = messagesSection;
     this.permissionsSection = permissionsSection;
     this.apisManager = apisManager;
+
     this.representativeItem = representativeProvider.getRepresentative().asItem();
+    this.representativeItemAdmin = this.representativeItem.patch(representativeProvider.getRepresentativeAdmin());
+
     this.anvilSearchProvider = anvilSearchProvider;
+    this.headEditUIParameterProvider = headEditUIParameterProvider;
+
     this.inventoryUtil = inventoryUtil;
     this.economyAdapter = economyAdapter;
 
     this.searchUIByPlayer = new HashMap<>();
+
     this.headSlots = new ArrayList<>();
+    this.headSlotsAdmin = new ArrayList<>();
   }
 
   @Override
-  protected List<String> onTabComplete(CommandSender commandSender, String s, String[] strings) {
+  protected List<String> onTabComplete(CommandSender sender, String label, String[] args) {
     return EMPTY_STRING_LIST;
   }
 
   @Override
   protected void onPlayerInvocation(Player player, String alias, String[] args) {
+    ECommandAction action = enumParameterOrElse(args, 0, ECommandAction.class, null);
+
+    if (action == ECommandAction.ADD) {
+      // TODO: /hc add <skin_url> <name>
+      player.sendMessage("§cComing soon!");
+      return;
+    }
+
     if (!permissionsSection.hasPermission(player, EPermissionNode.OPEN)) {
       permissionsSection.sendMissingMessage(player, EPermissionNode.OPEN);
       return;
     }
 
-    createOrGetSearchUI(player).show();
+    AnvilSearchUI<Head> ui = createOrGetSearchUI(player);
+    boolean hadSlotListDelta;
+
+    if (action == ECommandAction.ADMIN)
+      hadSlotListDelta = ui.setSlots(this.headSlotsAdmin);
+    else
+      hadSlotListDelta = ui.setSlots(this.headSlots);
+
+    ui.show();
+
+    if (hadSlotListDelta)
+      ui.invokeFilterFunctionAndUpdatePageSlots();
   }
 
   private AnvilSearchUI<Head> createOrGetSearchUI(Player player) {
@@ -106,9 +142,7 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
     return searchUI;
   }
 
-  private void onHeadClick(IInventoryUI ui, Head head) {
-    Player player = ui.getViewer();
-
+  private void handleHeadRequest(Player player, Head head, IInventoryUI ui) {
     if (!permissionsSection.hasPermission(player, EPermissionNode.REQUEST)) {
       permissionsSection.sendMissingMessage(player, EPermissionNode.REQUEST);
       return;
@@ -162,6 +196,35 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
     ui.close();
   }
 
+  private void handleHeadDelete(Player player, Head head) {
+    // TODO: Implement
+  }
+
+  private void handleHeadEdit(Player player, Head head) {
+    new HeadEditUI(new HeadEditUIParameter(headEditUIParameterProvider, player, head), inventoryRegistry).show();
+  }
+
+  private void onHeadClick(UIInteraction interaction, boolean admin, Head head) {
+    Player player = interaction.ui.getViewer();
+
+    if (interaction.clickType.isLeftClick()) {
+      handleHeadRequest(player, head, interaction.ui);
+      return;
+    }
+
+    if (!admin)
+      return;
+
+    if (interaction.clickType.isRightClick()) {
+      if (interaction.clickType.isShiftClick()) {
+        handleHeadDelete(player, head);
+        return;
+      }
+
+      handleHeadEdit(player, head);
+    }
+  }
+
   private IEvaluationEnvironment getHeadItemEnvironment(HeadModel headModel) {
     return new EvaluationEnvironmentBuilder()
       .withStaticVariable("head", headModel)
@@ -171,16 +234,25 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
   private void onHeadDelta(Collection<HeadModel> heads, EDeltaMode mode) {
     if (mode == EDeltaMode.REMOVED) {
       this.headSlots.removeIf(slot -> heads.contains(slot.data.model));
+      this.headSlotsAdmin.removeIf(slot -> heads.contains(slot.data.model));
     }
 
     else {
       for (HeadModel headModel : heads) {
         IEvaluationEnvironment environment = getHeadItemEnvironment(headModel);
+
         ItemStack item = this.representativeItem.build(environment);
-        Head head = new Head(headModel, environment, item);
+        ItemStack itemAdmin = this.representativeItemAdmin.build(environment);
+
+        Head head = new Head(headModel, environment, item, itemAdmin);
 
         this.headSlots.add(new DataBoundUISlot<>(() -> head.item, interaction -> {
-          onHeadClick(interaction.ui, head);
+          onHeadClick(interaction, false, head);
+          return null;
+        }, head));
+
+        this.headSlotsAdmin.add(new DataBoundUISlot<>(() -> head.itemAdmin, interaction -> {
+          onHeadClick(interaction, true, head);
           return null;
         }, head));
       }

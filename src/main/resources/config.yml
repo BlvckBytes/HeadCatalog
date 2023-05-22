@@ -68,7 +68,12 @@ headCatalogUI:
       - '"&7Updated: &d" & date_format(head.lastUpdate, "date", lut["dateFormat"])'
       - '"&7Price: &d" & if head.price == 0 then "&afree" else head.price & "$"'
       - '" "'
-      - '"&7Click to &dreceive &7this head"'
+      - '"&7Left click: &dRequest this head"'
+
+  representativeAdmin:
+    lore:
+      - '&7Right click: &dEdit this head'
+      - '&7Shift right click: &dDelete this head'
 
   filter:
     type: HOPPER
@@ -171,6 +176,64 @@ headCatalogUI:
         inventory_size + 32,
         inventory_size + 34,
         inventory_size + 35
+      )
+
+headEditUI:
+  title: '&5Edit Head'
+  numberOfRows: 3
+
+  blockToggle:
+    type$: 'if head.blocked then "RED_STAINED_GLASS_PANE" else "GREEN_STAINED_GLASS_PANE"'
+    name$: '"&8» " & (if head.blocked then "&cBlocked" else "&aNot Blocked") & " &8«"'
+    lore:
+      - ' '
+      - '&8● &7Click to &dtoggle &7its blocking status'
+
+  categories:
+    type: BOOK_AND_QUILL
+    name: '&8» &dCategories &8«'
+    lore:
+      - ' '
+      - '&8● &7Click to &dedit &7its category list'
+
+  tags:
+    type: PAPER
+    name: '&8» &dTags &8«'
+    lore:
+      - ' '
+      - '&8● &7Click to &dedit &7its tag list'
+
+  name:
+    type: NAME_TAG
+    name: '&8» &dName &8«'
+    lore:
+      - ' '
+      - '&8● &7Click to &dedit &7its name'
+
+  price:
+    type: GOLD_INGOT
+    name: '&8» &dPrice &8«'
+    lore:
+      - ' '
+      - '&8● &7Click to &dedit &7its price'
+
+  customItems:
+    darkGlass:
+      type: BLACK_STAINED_GLASS_PANE
+      name: ' '
+
+  slotContents:
+    representative: 10
+    blockToggle: 12
+    categories: 13
+    tags: 14
+    name: 15
+    price: 16
+    darkGlass$: |
+      flatten(
+        range(0, 8),
+        9, 11, 17,
+        range(18, 26)
       )
 
 source:

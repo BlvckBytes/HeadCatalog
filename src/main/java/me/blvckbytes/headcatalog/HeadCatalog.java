@@ -22,6 +22,7 @@ import me.blvckbytes.headcatalog.economy.EconomyAdapter;
 import me.blvckbytes.headcatalog.apis.HeadApisManager;
 import me.blvckbytes.headcatalog.command.HeadCatalogCommand;
 import me.blvckbytes.headcatalog.persistence.JsonFilePersistence;
+import me.blvckbytes.headcatalog.ui.edit.HeadEditUISection;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.event.Listener;
@@ -81,6 +82,10 @@ public class HeadCatalog extends JavaPlugin implements IConfigPathsProvider {
       .addSingleton(HeadCatalogUISection.class, dependencies -> {
         IConfigManager configManager = (IConfigManager) dependencies[0];
         return configManager.getMapper("config.yml").mapSection("headCatalogUI", HeadCatalogUISection.class);
+      }, null, IConfigManager.class)
+      .addSingleton(HeadEditUISection.class, dependencies -> {
+        IConfigManager configManager = (IConfigManager) dependencies[0];
+        return configManager.getMapper("config.yml").mapSection("headEditUI", HeadEditUISection.class);
       }, null, IConfigManager.class)
       .addSingleton(PermissionsSection.class, dependencies -> {
         IConfigManager configManager = (IConfigManager) dependencies[0];

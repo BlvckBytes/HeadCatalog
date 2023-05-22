@@ -10,10 +10,12 @@ public class Head implements Comparable<Head> {
   public final HeadModel model;
   public final IEvaluationEnvironment environment;
   public final ItemStack item;
+  public final ItemStack itemAdmin;
 
-  public Head(HeadModel model, IEvaluationEnvironment environment, ItemStack item) {
+  public Head(HeadModel model, IEvaluationEnvironment environment, ItemStack item, ItemStack itemAdmin) {
     this.model = model;
     this.item = item;
+    this.itemAdmin = itemAdmin;
     this.environment = environment;
   }
 

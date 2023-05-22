@@ -6,4 +6,6 @@ public interface IRepresentativeProvider {
 
   ItemStackSection getRepresentative();
 
+  ItemStackSection getRepresentativeAdmin();
+
 }
