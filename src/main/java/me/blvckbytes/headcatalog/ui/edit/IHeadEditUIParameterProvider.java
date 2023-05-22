@@ -15,4 +15,6 @@ public interface IHeadEditUIParameterProvider extends IInventoryUIParameterProvi
 
   IItemBuildable getPrice();
 
+  IItemBuildable getTagRepresentative();
+
 }

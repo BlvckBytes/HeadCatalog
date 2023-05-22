@@ -10,6 +10,7 @@ public class HeadEditUISection extends BaseUILayoutSection implements IHeadEditU
   private IItemBuildable tags;
   private IItemBuildable name;
   private IItemBuildable price;
+  private IItemBuildable tagRepresentative;
 
   @Override
   public IItemBuildable getBlockToggle() {
@@ -34,5 +35,10 @@ public class HeadEditUISection extends BaseUILayoutSection implements IHeadEditU
   @Override
   public IItemBuildable getPrice() {
     return this.price;
+  }
+
+  @Override
+  public IItemBuildable getTagRepresentative() {
+    return this.tagRepresentative;
   }
 }

@@ -32,12 +32,14 @@ public class HeadModel implements Comparable<HeadModel> {
     this.skinUrl = skinUrl;
     this.normalizedSkinUrl = normalizeKey(skinUrl);
 
-    this.categories = Collections.unmodifiableSet(categories);
+//    this.categories = Collections.unmodifiableSet(categories);
+    this.categories = categories;
     this.categoriesString = String.join(" ", this.categories);
 
     this.uuid = uuid;
 
-    this.tags = Collections.unmodifiableSet(tags);
+//    this.tags = Collections.unmodifiableSet(tags);
+    this.tags = tags;
     this.tagsString = String.join(" ", this.tags);
 
     this.price = price;

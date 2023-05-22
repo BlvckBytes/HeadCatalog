@@ -25,7 +25,7 @@ import me.blvckbytes.headcatalog.config.MessagesSection;
 import me.blvckbytes.headcatalog.economy.EconomyAdapter;
 import me.blvckbytes.headcatalog.economy.IEconomyAdapter;
 import me.blvckbytes.headcatalog.ui.edit.HeadEditUI;
-import me.blvckbytes.headcatalog.ui.edit.HeadEditUIParameter;
+import me.blvckbytes.headcatalog.ui.edit.HeadEditParameter;
 import me.blvckbytes.headcatalog.ui.edit.IHeadEditUIParameterProvider;
 import me.blvckbytes.utilitytypes.Tuple;
 import org.bukkit.command.CommandSender;
@@ -132,7 +132,7 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
 
     if (searchUI == null) {
       AnvilSearchParameter<Head> anvilSearchParameter = new AnvilSearchParameter<>(
-        anvilSearchProvider, player, this.headSlots, HeadModelSearchFilter.HEAD_EVERYWHERE, null
+        anvilSearchProvider, player, this.headSlots, HeadModelSearchFilter.HEAD_EVERYWHERE, null, null
       );
 
       searchUI = new AnvilSearchUI<>(anvilSearchParameter, inventoryRegistry);
@@ -201,7 +201,8 @@ public class HeadCatalogCommand extends PlayerCommand implements IInitializable,
   }
 
   private void handleHeadEdit(Player player, Head head) {
-    new HeadEditUI(new HeadEditUIParameter(headEditUIParameterProvider, player, head), inventoryRegistry).show();
+    // FIXME: Don't pass the head catalog's anvil search provider here, that SUCKS!
+    new HeadEditUI(new HeadEditParameter(headEditUIParameterProvider, player, head, anvilSearchProvider), inventoryRegistry).show();
   }
 
   private void onHeadClick(UIInteraction interaction, boolean admin, Head head) {

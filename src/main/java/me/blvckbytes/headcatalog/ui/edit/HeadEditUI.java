@@ -1,7 +1,10 @@
 package me.blvckbytes.headcatalog.ui.edit;
 
 import me.blvckbytes.bukkitinventoryui.IInventoryRegistry;
+import me.blvckbytes.bukkitinventoryui.anvilsearch.AnvilSearchParameter;
+import me.blvckbytes.bukkitinventoryui.anvilsearch.AnvilSearchUI;
 import me.blvckbytes.bukkitinventoryui.base.*;
+import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -9,7 +12,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 
 public class HeadEditUI implements IInventoryUI {
 
@@ -22,10 +27,10 @@ public class HeadEditUI implements IInventoryUI {
     KEY_PRICE = "price";
 
   private final BaseInventoryUI handle;
-  private final HeadEditUIParameter parameter;
+  private final HeadEditParameter parameter;
   private final IInventoryRegistry registry;
 
-  public HeadEditUI(HeadEditUIParameter parameter, IInventoryRegistry registry) {
+  public HeadEditUI(HeadEditParameter parameter, IInventoryRegistry registry) {
     this.parameter = parameter;
     this.registry = registry;
     this.handle = new BaseInventoryUI(parameter.provider, this::createInventory, parameter.viewer, null);
@@ -61,8 +66,52 @@ public class HeadEditUI implements IInventoryUI {
     return null;
   }
 
+  private IEvaluationEnvironment buildValueEnvironment(String value) {
+    return new EvaluationEnvironmentBuilder()
+      .withStaticVariable("value", value)
+      .build();
+  }
+
+  private List<DataBoundUISlot<String>> buildTagsSlots() {
+    List<DataBoundUISlot<String>> result = new ArrayList<>();
+
+    for (String tag : parameter.target.model.tags) {
+      IEvaluationEnvironment environment = buildValueEnvironment(tag);
+
+      result.add(new DataBoundUISlot<>(() -> parameter.provider.getTagRepresentative().build(environment), event -> {
+        if (event.clickType.isRightClick()) {
+          parameter.target.model.tags.remove(tag);
+          result.removeIf(slot -> slot.data.equals(tag));
+          ((AnvilSearchUI<?>) event.ui).invokeFilterFunctionAndUpdatePageSlots();
+
+          System.out.println("deleted: " + tag);
+          return null;
+        }
+
+        System.out.println("edit: " + tag);
+        return null;
+      }, tag));
+    }
+
+    return result;
+  }
+
   private EnumSet<EClickResultFlag> handleTagsClick(UIInteraction action) {
-    System.out.println("tags");
+    new AnvilSearchUI<>(
+      new AnvilSearchParameter<>(
+        parameter.anvilSearchProvider,
+        getViewer(),
+        buildTagsSlots(),
+        null,
+        ui -> {
+          this.show();
+        },
+        ui -> {
+          System.out.println("New button clicked!");
+        }
+      ),
+      registry
+    ).show();
     return null;
   }
 
