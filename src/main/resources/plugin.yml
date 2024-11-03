@@ -1,0 +1,9 @@
+name: HeadCatalog
+description: The quickest head-catalog you'll ever get your hands on
+main: me.blvckbytes.headcatalog.HeadCatalogPlugin
+version: ${project.version}
+author: BlvckBytes
+api-version: 1.13
+depend: [ProtocolLib]
+commands:
+  test:

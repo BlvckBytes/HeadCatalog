@@ -1,0 +1,22 @@
+# - current_page: Integer
+# - number_pages: Integer
+
+RESULT-DISPLAY-TITLE                        &8HeadCatalog &e{current_page}&8/&e{number_pages}
+
+ANY-CONTROL-LORE-SPACER                     &8&m                                                  \
+
+PREVIOUS-PAGE-NAME-HAS                      &8» &6Previous Page &8«
+PREVIOUS-PAGE-NAME-HAS-NOT                  &8» &cNo Previous Page &8«
+PREVIOUS-PAGE-LORE-LEFT-CLICK-DESCRIPTION   &8➥ &eLeft-Click &7Navigate to previous page
+PREVIOUS-PAGE-LORE-RIGHT-CLICK-DESCRIPTION  &8➥ &eRight-Click &7Jump to very first page
+
+NEXT-PAGE-NAME-HAS                      &8» &6Next Page &8«
+NEXT-PAGE-NAME-HAS-NOT                  &8» &cNo Next Page &8«
+NEXT-PAGE-LORE-LEFT-CLICK-DESCRIPTION   &8➥ &eLeft-Click &7Navigate to next page
+NEXT-PAGE-LORE-RIGHT-CLICK-DESCRIPTION  &8➥ &eRight-Click &7Jump to very last page
+
+# - search_query: String
+ANVIL-ITEM-NAME-VALID                   &8» &6Search-Query &8«
+ANVIL-ITEM-NAME-INVALID                 &8» &cSearch-Query &8«
+ANVIL-ITEM-LORE-INPUT                   &8➥ &eYour Input &7{search_query}
+ANVIL-ITEM-LORE-DESCRIPTION             &8➥ &eType Syllables &7to search through heads
