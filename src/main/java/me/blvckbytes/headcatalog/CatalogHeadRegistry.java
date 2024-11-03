@@ -1,38 +1,37 @@
 package me.blvckbytes.headcatalog;
 
+import com.comphenix.protocol.ProtocolManager;
 import com.tcoded.folialib.impl.PlatformScheduler;
-import me.blvckbytes.bukkitevaluable.BukkitEvaluable;
 import me.blvckbytes.bukkitevaluable.ConfigKeeper;
-import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import me.blvckbytes.headcatalog.config.MainSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.ClickType;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class HeadCatalogUiRegistry implements FakeUiEventHandler, Listener {
+public class CatalogHeadRegistry implements Listener {
 
   private final List<CatalogHead> catalogHeads;
   private final List<String> normalizedCategories;
 
   private final FakeUiRegistry fakeUiRegistry;
+  private final ProtocolManager protocolManager;
   private final PlatformScheduler platformScheduler;
   private final ConfigKeeper<MainSection> config;
   private final Logger logger;
 
-  public HeadCatalogUiRegistry(
+  public CatalogHeadRegistry(
     FakeUiRegistry fakeUiRegistry,
+    ProtocolManager protocolManager,
     PlatformScheduler platformScheduler,
     ConfigKeeper<MainSection> config,
     Logger logger
   ) {
     this.fakeUiRegistry = fakeUiRegistry;
+    this.protocolManager = protocolManager;
     this.platformScheduler = platformScheduler;
     this.config = config;
     this.logger = logger;
@@ -65,25 +64,11 @@ public class HeadCatalogUiRegistry implements FakeUiEventHandler, Listener {
     if (filteredHeads.isEmpty())
       return HeadCatalogOpenResult.empty(EmptyType.NO_ACCESS_TO_ANY_HEADS);
 
-    var session = fakeUiRegistry.createAndRegister(UiType.ANVIL, player, this);
-    var parameter = new HeadCatalogState(session, platformScheduler, config, filteredHeads);
-
-    session.titleComponentSupplier = () -> createTitle(config.rootSection.catalogDisplay.title, parameter.paginationEnvironment);
-    session.parameter = parameter;
-
-    session.openInventory();
-    parameter.onShow();
+    var userInterface = new HeadCatalogUi(protocolManager, platformScheduler, logger, filteredHeads, player, config);
+    fakeUiRegistry.registerFakeUi(userInterface);
+    userInterface.openInventory();
 
     return HeadCatalogOpenResult.ofCount(filteredHeads.size());
-  }
-
-  public @Nullable Object createTitle(BukkitEvaluable title, IEvaluationEnvironment environment) {
-    try {
-      return title.applicator.asChatComponent(title, environment);
-    } catch (Throwable error) {
-      logger.log(Level.SEVERE, "Could not create title-component", error);
-      return null;
-    }
   }
 
   private List<CatalogHead> filterHeadsByPermission(Player player) {
@@ -104,33 +89,5 @@ public class HeadCatalogUiRegistry implements FakeUiEventHandler, Listener {
     }
 
     return result;
-  }
-
-  @Override
-  public boolean handleClick(FakeUiSession session, int slot, boolean isTop, ClickType clickType) {
-    if (!(session.parameter instanceof HeadCatalogState state))
-      return true;
-
-    if (slot == HeadCatalogState.PREVIOUS_PAGE_SLOT) {
-      if (clickType.isRightClick())
-        state.firstPage();
-      else
-        state.previousPage();
-    }
-
-    else if (slot == HeadCatalogState.NEXT_PAGE_SLOT) {
-      if (clickType.isRightClick())
-        state.lastPage();
-      else
-        state.nextPage();
-    }
-
-    return true;
-  }
-
-  @Override
-  public void handleAnvilText(FakeUiSession session, String text) {
-    if (session.parameter instanceof HeadCatalogState state)
-      state.setSearchText(text);
   }
 }

@@ -22,9 +22,9 @@ public class HeadCatalogPlugin extends JavaPlugin implements CommandExecutor, Li
 
   private static final long HEAD_FETCH_PERIOD_S = 60 * 60 * 12;
 
-  ProtocolManager protocolManager;
-  FakeUiRegistry fakeUiRegistry;
-  HeadCatalogUiRegistry headCatalogUiRegistry;
+  private ProtocolManager protocolManager;
+  private FakeUiRegistry fakeUiRegistry;
+  private CatalogHeadRegistry catalogHeadRegistry;
 
   @Override
   public void onEnable() {
@@ -42,12 +42,12 @@ public class HeadCatalogPlugin extends JavaPlugin implements CommandExecutor, Li
       var headRegistry = new HeadRegistry(platformScheduler, logger);
       platformScheduler.runTimer(task -> headRegistry.load(), 0, HEAD_FETCH_PERIOD_S * 20);
 
-      this.fakeUiRegistry = new FakeUiRegistry(protocolManager, this);
+      this.fakeUiRegistry = new FakeUiRegistry(platformScheduler, this);
       Bukkit.getServer().getPluginManager().registerEvents(fakeUiRegistry, this);
       protocolManager.addPacketListener(fakeUiRegistry);
 
-      headCatalogUiRegistry = new HeadCatalogUiRegistry(fakeUiRegistry, platformScheduler, config, logger);
-      Bukkit.getServer().getPluginManager().registerEvents(headCatalogUiRegistry, this);
+      catalogHeadRegistry = new CatalogHeadRegistry(fakeUiRegistry, protocolManager, platformScheduler, config, logger);
+      Bukkit.getServer().getPluginManager().registerEvents(catalogHeadRegistry, this);
 
       Objects.requireNonNull(getCommand("test")).setExecutor(this);
       getServer().getPluginManager().registerEvents(this, this);
@@ -59,8 +59,10 @@ public class HeadCatalogPlugin extends JavaPlugin implements CommandExecutor, Li
 
   @Override
   public void onDisable() {
-    if (fakeUiRegistry != null)
+    if (fakeUiRegistry != null) {
+      fakeUiRegistry.onShutdown();
       protocolManager.removePacketListener(fakeUiRegistry);
+    }
   }
 
   @Override
@@ -70,7 +72,7 @@ public class HeadCatalogPlugin extends JavaPlugin implements CommandExecutor, Li
       return true;
     }
 
-    var displayedHeadCount = headCatalogUiRegistry.createForAndOpen(player);
+    var displayedHeadCount = catalogHeadRegistry.createForAndOpen(player);
 
     if (displayedHeadCount.emptyType() != null) {
       player.sendMessage(switch (displayedHeadCount.emptyType()) {
