@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 
 public class CatalogHeadRegistry implements Listener {
 
-  private final List<CatalogHead> catalogHeads;
+  private final List<Head> catalogHeads;
   private final List<String> normalizedCategories;
 
   private final FakeUiRegistry fakeUiRegistry;
@@ -42,17 +42,13 @@ public class CatalogHeadRegistry implements Listener {
 
   @EventHandler
   public void onHeadRegistryLoad(AsyncHeadRegistryLoadEvent event) {
-    logger.info("Indexing " + event.heads.size() + " heads for search");
+    // TODO: Actually build the index
 
-    catalogHeads.clear();
-    normalizedCategories.clear();
+    this.catalogHeads.clear();
+    this.catalogHeads.addAll(event.registry.heads);
 
-    for (var head : event.heads)
-      catalogHeads.add(new CatalogHead(head));
-
-    normalizedCategories.addAll(event.normalizedCategories);
-
-    logger.info("Done!");
+    this.normalizedCategories.clear();
+    this.normalizedCategories.addAll(event.registry.normalizedCategories);
   }
 
   public HeadCatalogOpenResult createForAndOpen(Player player) {
@@ -71,17 +67,16 @@ public class CatalogHeadRegistry implements Listener {
     return HeadCatalogOpenResult.ofCount(filteredHeads.size());
   }
 
-  private List<CatalogHead> filterHeadsByPermission(Player player) {
-    var result = new ArrayList<CatalogHead>();
+  private List<Head> filterHeadsByPermission(Player player) {
+    var result = new ArrayList<Head>();
     var permissionResultByNumericCategory = new Boolean[normalizedCategories.size()];
 
     for (var head : catalogHeads) {
-      var numericCategory = head.handle.numericCategory();
       Boolean hasPermission;
 
-      if ((hasPermission = permissionResultByNumericCategory[numericCategory]) == null) {
-        hasPermission = player.hasPermission("headcatalog.category." + head.handle.normalizedCategory());
-        permissionResultByNumericCategory[numericCategory] = hasPermission;
+      if ((hasPermission = permissionResultByNumericCategory[head.numericCategory]) == null) {
+        hasPermission = player.hasPermission("headcatalog.category." + head.normalizedCategory);
+        permissionResultByNumericCategory[head.numericCategory] = hasPermission;
       }
 
       if (hasPermission)

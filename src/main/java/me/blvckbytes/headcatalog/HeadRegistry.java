@@ -22,35 +22,40 @@ public class HeadRegistry {
 
   private final Logger logger;
   private final PlatformScheduler scheduler;
-  private final List<Head> heads;
+
+  private final List<Head> _heads;
+  public final Collection<Head> heads;
+
+  private final List<String> _normalizedCategories;
+  public final Collection<String> normalizedCategories;
 
   public HeadRegistry(PlatformScheduler scheduler, Logger logger) {
     this.logger = logger;
     this.scheduler = scheduler;
-    this.heads = new ArrayList<>();
+
+    this._heads = new ArrayList<>();
+    this.heads = Collections.unmodifiableCollection(this._heads);
+
+    this._normalizedCategories = new ArrayList<>();
+    this.normalizedCategories = Collections.unmodifiableCollection(this._normalizedCategories);
   }
 
   public void load() {
-    this.heads.clear();
-
     scheduler.runAsync(task -> {
-      var normalizedCategories = fetchData();
+      var headsSizePrior = _heads.size();
 
-      if (normalizedCategories == null || this.heads.isEmpty())
+      fetchData();
+
+      if (headsSizePrior == _heads.size())
         return;
 
-      logger.info("Loaded " + heads.size() + " heads into memory");
+      logger.info("Loaded " + _heads.size() + " heads into memory");
 
-      Bukkit.getServer().getPluginManager().callEvent(
-        new AsyncHeadRegistryLoadEvent(
-          Collections.unmodifiableCollection(this.heads),
-          Collections.unmodifiableCollection(normalizedCategories)
-        )
-      );
+      Bukkit.getServer().getPluginManager().callEvent(new AsyncHeadRegistryLoadEvent(this));
     });
   }
 
-  private @Nullable List<String> fetchData() {
+  private void fetchData() {
     try {
       var dataUrl = new URL(JSON_FILE_URL);
       var connection = (HttpURLConnection) dataUrl.openConnection();
@@ -60,8 +65,6 @@ public class HeadRegistry {
 
       if (connection.getResponseCode() != 200)
         throw new IllegalStateException("Unexpected status-code " + connection.getResponseCode());
-
-      var normalizedCategories = new ArrayList<String>();
 
       try (
         var inputStreamReader = new InputStreamReader(connection.getInputStream());
@@ -78,25 +81,22 @@ public class HeadRegistry {
             continue;
           }
 
-          var mappedHead = tryMapHeadFromJson(dataObject, normalizedCategories);
+          var mappedHead = tryMapHeadFromJson(dataObject);
 
           if (mappedHead == null) {
             logger.warning("Encountered malformed entry in array of head-data items: " + dataEntry);
             continue;
           }
 
-          this.heads.add(mappedHead);
+          this._heads.add(mappedHead);
         }
       }
-
-      return normalizedCategories;
     } catch (Exception e) {
       logger.log(Level.SEVERE, "An error occurred while trying to fetch heads from " + JSON_FILE_URL, e);
-      return null;
     }
   }
 
-  private @Nullable Head tryMapHeadFromJson(JsonObject data, List<String> existingCategories) {
+  private @Nullable Head tryMapHeadFromJson(JsonObject data) {
     if (!(data.get("name") instanceof JsonPrimitive namePrimitive))
       return null;
 
@@ -114,9 +114,9 @@ public class HeadRegistry {
 
     int numericCategory;
 
-    if ((numericCategory = existingCategories.indexOf(normalizedCategoryString)) < 0) {
-      numericCategory = existingCategories.size();
-      existingCategories.add(normalizedCategoryString);
+    if ((numericCategory = _normalizedCategories.indexOf(normalizedCategoryString)) < 0) {
+      numericCategory = _normalizedCategories.size();
+      _normalizedCategories.add(normalizedCategoryString);
     }
 
     return new Head(

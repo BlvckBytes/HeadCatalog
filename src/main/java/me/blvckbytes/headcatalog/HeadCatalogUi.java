@@ -7,15 +7,12 @@ import me.blvckbytes.gpeee.GPEEE;
 import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import me.blvckbytes.headcatalog.config.MainSection;
-import me.blvckbytes.syllables_matcher.Syllables;
-import me.blvckbytes.syllables_matcher.SyllablesMatcher;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.logging.Logger;
 
 public class HeadCatalogUi extends FakeAnvilUi {
@@ -28,8 +25,8 @@ public class HeadCatalogUi extends FakeAnvilUi {
   private final IEvaluationEnvironment searchEnvironment;
   private final AsyncTaskQueue taskQueue;
 
-  private final List<CatalogHead> unfilteredHeads;
-  private final List<CatalogHead> filteredHeads;
+  private final List<Head> unfilteredHeads;
+  private final List<Head> filteredHeads;
   private final ConfigKeeper<MainSection> config;
 
   private int currentPage;
@@ -39,7 +36,7 @@ public class HeadCatalogUi extends FakeAnvilUi {
     ProtocolManager protocolManager,
     PlatformScheduler platformScheduler,
     Logger logger,
-    List<CatalogHead> heads,
+    List<Head> heads,
     Player player,
     ConfigKeeper<MainSection> config
   ) {
@@ -76,31 +73,8 @@ public class HeadCatalogUi extends FakeAnvilUi {
 
   private void updateFilteredHeads() {
     this.filteredHeads.clear();
+    this.filteredHeads.addAll(unfilteredHeads);
     this.currentPage = 0;
-
-    var querySyllables = Objects.requireNonNull(Syllables.forString(false, anvilText, ' ').syllables());
-
-    if (querySyllables.size() == 0) {
-      this.filteredHeads.addAll(unfilteredHeads);
-      return;
-    }
-
-    var start = System.nanoTime();
-    var matcher = new SyllablesMatcher();
-
-    matcher.setQuery(querySyllables);
-
-    for (var head : unfilteredHeads) {
-      matcher.resetQueryMatches();
-      matcher.setTarget(head.nameSyllables);
-      matcher.match();
-
-      if (!matcher.hasUnmatchedQuerySyllables())
-        filteredHeads.add(head);
-    }
-
-    var end = System.nanoTime();
-    logger.info("Filter took " + (end - start) / 1000.0 / 1000.0);
   }
 
   private void nextPage() {

@@ -53,11 +53,6 @@
             <version>0.1</version>
         </dependency>
         <dependency>
-            <groupId>me.blvckbytes</groupId>
-            <artifactId>SyllablesMatcher</artifactId>
-            <version>0.1</version>
-        </dependency>
-        <dependency>
             <groupId>com.github.technicallycoded</groupId>
             <artifactId>FoliaLib</artifactId>
             <version>0.4.3</version>
@@ -88,7 +83,6 @@
                             <include>me.blvckbytes:BBConfigMapper</include>
                             <include>me.blvckbytes:BukkitEvaluable</include>
                             <include>me.blvckbytes:GPEEE</include>
-                            <include>me.blvckbytes:SyllablesMatcher</include>
                             <include>com.github.technicallycoded:FoliaLib</include>
                             <!-- [1] Shouldn't be necessary anymore on newer versions of bukkit, but I prefer backwards-compatibility over file-size. -->
                             <include>org.yaml:snakeyaml</include>
@@ -99,7 +93,7 @@
                     <relocations>
                         <!-- Relocate all libs into the root package -->
                         <relocation>
-                            <pattern>me/blvckbytes/(bbconfigmapper|bukkitevaluable|gpeee|syllables_matcher)/(.*)</pattern>
+                            <pattern>me/blvckbytes/(bbconfigmapper|bukkitevaluable|gpeee)/(.*)</pattern>
                             <shadedPattern>me/blvckbytes/headcatalog/$1/$2</shadedPattern>
                             <rawString>true</rawString>
                         </relocation>
