@@ -2,11 +2,12 @@ package me.blvckbytes.headcatalog;
 
 import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 public class Head {
+
+  private static final String MOJANG_TEXTURES_BASE_URL = "http://textures.minecraft.net/texture/";
 
   private final EvaluationEnvironmentBuilder headEnvironmentBuilder;
 
@@ -20,6 +21,7 @@ public class Head {
   public final int numericCategory;
 
   public final Collection<String> tags;
+  public final String textureHash;
   public final String base64Textures;
 
   public Head(
@@ -28,14 +30,15 @@ public class Head {
     String normalizedCategory,
     int numericCategory,
     List<String> tags,
-    String base64Textures
+    String textureHash
   ) {
     this.name = name;
     this.category = category;
     this.normalizedCategory = normalizedCategory;
     this.numericCategory = numericCategory;
     this.tags = Collections.unmodifiableCollection(tags);
-    this.base64Textures = base64Textures;
+    this.textureHash = textureHash;
+    this.base64Textures = base64EncodeTextureHash(textureHash);
 
     this.headEnvironmentBuilder = new EvaluationEnvironmentBuilder()
       .withStaticVariable("head_name", name)
@@ -46,5 +49,25 @@ public class Head {
 
   public EvaluationEnvironmentBuilder getHeadEnvironmentBuilder() {
     return headEnvironmentBuilder.duplicate();
+  }
+
+  private static String base64EncodeTextureHash(String hash) {
+    var jsonValue = "{\"textures\":{\"SKIN\":{\"url\":\"" + MOJANG_TEXTURES_BASE_URL + hash + "\"}}}";
+    return new String(Base64.getEncoder().encode(jsonValue.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
+  }
+
+  // When creating unique results, all the user is really interested in are the textures of the head.
+  // Thus, as many textures exist multiple times within the data, make their hash be the unique-key.
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Head head)) return false;
+    return Objects.equals(textureHash, head.textureHash);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(textureHash);
   }
 }

@@ -9,7 +9,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -119,16 +118,30 @@ public class HeadRegistry {
       _normalizedCategories.add(normalizedCategoryString);
     }
 
+    var texturesHash = extractHashFromTexturesUrl(texturePrimitive.getAsString());
+
+    if (texturesHash == null)
+      return null;
+
     return new Head(
       namePrimitive.getAsString(),
       categoryString,
       normalizedCategoryString,
       numericCategory,
       splitTags(tagsPrimitive.getAsString()),
-      // The file stores textures as URLs, but it's more convenient for rendering to
-      // have them accessible as pre-encoded base64 JSON-objects
-      base64EncodeTextureUrl(texturePrimitive.getAsString())
+      texturesHash
     );
+  }
+
+  private @Nullable String extractHashFromTexturesUrl(String url) {
+    var lastSlashIndex = url.lastIndexOf('/');
+
+    if (lastSlashIndex < 0 || lastSlashIndex == url.length() - 1)
+      return null;
+
+    // Texture-urls don't work if they're not all lower-case; while I'd hope for the data
+    // to be correct in that sense, it's better to be safe than sorry.
+    return url.substring(lastSlashIndex + 1).toLowerCase();
   }
 
   private List<String> splitTags(String tagsString) {
@@ -173,10 +186,5 @@ public class HeadRegistry {
     }
 
     return result.toString();
-  }
-
-  private String base64EncodeTextureUrl(String textureUrl) {
-    var jsonValue = "{\"textures\":{\"SKIN\":{\"url\":\"" + textureUrl + "\"}}}";
-    return new String(Base64.getEncoder().encode(jsonValue.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
   }
 }
