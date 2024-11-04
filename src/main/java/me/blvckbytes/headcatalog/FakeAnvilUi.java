@@ -19,12 +19,10 @@ public abstract class FakeAnvilUi extends FakeUi {
   // Debouncing input keystrokes, as to not needlessly filter and render when typing quickly
   private static final long INPUT_DEBOUNCE_T = 5;
 
-  // Debouncing rendering the input-item into the anvil, as to avoid feedback-loops
-  private static final long INPUT_ITEM_DEBOUNCE_T = 20;
+  protected final PlatformScheduler platformScheduler;
 
   protected String anvilText;
   private @Nullable WrappedTask previousInputDebounceTask;
-  private @Nullable WrappedTask previousInputItemDebounceTask;
 
   public FakeAnvilUi(
     ProtocolManager protocolManager,
@@ -32,8 +30,9 @@ public abstract class FakeAnvilUi extends FakeUi {
     PlatformScheduler platformScheduler,
     Player player
   ) {
-    super(protocolManager, platformScheduler, logger, player, UiType.ANVIL);
+    super(protocolManager, logger, player, UiType.ANVIL);
 
+    this.platformScheduler = platformScheduler;
     this.anvilText = " ";
   }
 
@@ -42,9 +41,13 @@ public abstract class FakeAnvilUi extends FakeUi {
   protected abstract ItemStack buildAnvilResultItem();
   protected abstract void onDebouncedAnvilText();
 
-  // TODO: Only draw the input-item on pagination, as to persist inputs, but don't do so on typing, as there'll always be glitches
-
   public void setAnvilText(String text) {
+    // Once the anvil's input-box changes, the client un-renders this slot.
+    // While it'll be set back after the debounced text re-renders the UI, this operation
+    // is cheap enough to make it look better by having the item be put back immediately.
+    setTopFakeItem(buildAnvilResultItem(), ANVIL_RESULT_ITEM_SLOT);
+    sendTopFakeSlot(ANVIL_RESULT_ITEM_SLOT);
+
     if (text.strip().equals(this.anvilText.strip()))
       return;
 
@@ -53,42 +56,19 @@ public abstract class FakeAnvilUi extends FakeUi {
     if (previousInputDebounceTask != null)
       previousInputDebounceTask.cancel();
 
-    previousInputDebounceTask = platformScheduler.runLaterAsync(() -> {
-      this.onDebouncedAnvilText();
-      this.drawAnvilSecondAndOutputItems(true);
-    }, INPUT_DEBOUNCE_T);
-
-    if (previousInputItemDebounceTask != null)
-      previousInputItemDebounceTask.cancel();
-
-    previousInputItemDebounceTask = platformScheduler.runLaterAsync(this::drawAnvilInputItemAndOthers, INPUT_ITEM_DEBOUNCE_T);
+    previousInputDebounceTask = platformScheduler.runLaterAsync(this::onDebouncedAnvilText, INPUT_DEBOUNCE_T);
   }
 
   @Override
-  public void initializeUiContents() {
-    drawAnvilInputItemAndOthers();
+  protected void afterWindowOpenPacketSent() {
+    drawAnvilItems();
   }
 
-  protected void drawAnvilInputItemAndOthers() {
+  private void drawAnvilItems() {
     setTopFakeItem(buildAnvilInputItem(), ANVIL_INPUT_ITEM_SLOT);
-
-    // Draw all, as a single slot-update will cause the other slots to go empty again
-    drawAnvilSecondAndOutputItems(false);
-    sendTopFakeContents();
-  }
-
-  private void drawAnvilSecondAndOutputItems(boolean draw) {
-    // Only draw 1 and 2, as to not render 0, which may still be debouncing
-
     setTopFakeItem(buildAnvilSecondItem(), ANVIL_SECOND_ITEM_SLOT);
-
-    if (draw)
-      sendTopFakeSlot(ANVIL_SECOND_ITEM_SLOT);
-
     setTopFakeItem(buildAnvilResultItem(), ANVIL_RESULT_ITEM_SLOT);
-
-    if (draw)
-      sendTopFakeSlot(2);
+    sendTopFakeContents();
   }
 
   @Override

@@ -71,8 +71,7 @@ public class HeadCatalogUi extends FakeAnvilUi {
   @Override
   protected void onDebouncedAnvilText() {
     updateFilteredHeads();
-    sendTitle();
-    drawPaginationItems();
+    sendWindowOpenPacket();
   }
 
   private void updateFilteredHeads() {
@@ -87,8 +86,7 @@ public class HeadCatalogUi extends FakeAnvilUi {
         return;
 
       ++this.currentPage;
-      sendTitle();
-      initializeUiContents();
+      sendWindowOpenPacket();
     });
   }
 
@@ -98,8 +96,7 @@ public class HeadCatalogUi extends FakeAnvilUi {
         return;
 
       this.currentPage = this.numberOfPages - 1;
-      sendTitle();
-      initializeUiContents();
+      sendWindowOpenPacket();
     });
   }
 
@@ -109,8 +106,7 @@ public class HeadCatalogUi extends FakeAnvilUi {
         return;
 
       --this.currentPage;
-      sendTitle();
-      initializeUiContents();
+      sendWindowOpenPacket();
     });
   }
 
@@ -120,8 +116,7 @@ public class HeadCatalogUi extends FakeAnvilUi {
         return;
 
       this.currentPage = 0;
-      sendTitle();
-      initializeUiContents();
+      sendWindowOpenPacket();
     });
   }
 
@@ -205,8 +200,8 @@ public class HeadCatalogUi extends FakeAnvilUi {
   }
 
   @Override
-  public void initializeUiContents() {
-    super.initializeUiContents();
+  protected void afterWindowOpenPacketSent() {
+    super.afterWindowOpenPacketSent();
     drawPaginationItems();
   }
 

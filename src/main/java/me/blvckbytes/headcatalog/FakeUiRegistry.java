@@ -65,7 +65,9 @@ public class FakeUiRegistry extends PacketAdapter implements Listener {
       var packet = event.getPacket();
 
       session.patchWindowTitle(packet);
-      session.setWindowOpenPacket(packet);
+      session.beforeWindowOpenPacketSent(packet);
+
+      event.getNetworkMarker().addPostListener(session.getOrCreateOpenWindowPostListener(plugin));
       return;
     }
 

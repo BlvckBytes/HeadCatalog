@@ -3,12 +3,14 @@ package me.blvckbytes.headcatalog;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.events.PacketPostListener;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
-import com.tcoded.folialib.impl.PlatformScheduler;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,15 +22,15 @@ import java.util.logging.Logger;
 
 public abstract class FakeUi {
 
-  public static final ItemStack ITEM_AIR = new ItemStack(Material.AIR);
+  protected static final ItemStack ITEM_AIR = new ItemStack(Material.AIR);
 
   public final Player player;
 
   private int windowId;
   private @Nullable PacketContainer windowOpenPacket;
+  private @Nullable PacketPostListener openWindowPostListener;
 
   private final ProtocolManager protocolManager;
-  protected final PlatformScheduler platformScheduler;
   protected final Logger logger;
   private final UiType uiType;
 
@@ -37,13 +39,11 @@ public abstract class FakeUi {
 
   public FakeUi(
     ProtocolManager protocolManager,
-    PlatformScheduler platformScheduler,
     Logger logger,
     Player player,
     UiType uiType
   ) {
     this.protocolManager = protocolManager;
-    this.platformScheduler = platformScheduler;
     this.logger = logger;
     this.player = player;
     this.uiType = uiType;
@@ -55,17 +55,39 @@ public abstract class FakeUi {
     Arrays.fill(this.bottomFakeSlots, ITEM_AIR);
   }
 
-  public void setWindowOpenPacket(@NotNull PacketContainer packet) {
-    this.windowId = packet.getIntegers().read(0);
-    this.windowOpenPacket = packet;
-    platformScheduler.runNextTick(task -> initializeUiContents());
+  public PacketPostListener getOrCreateOpenWindowPostListener(Plugin plugin) {
+    // Even though the PacketContainer for OPEN_WINDOW is cached and re-sent, two instances did not
+    // pass reference-equality, and thus, I believe that they are newly constructed internally. Also,
+    // the post-listener registry is a HashSet - thus, by keeping this listener as a reusable singleton,
+    // we're safe either way, as to never register multiple times. Also saves on allocation-calls.
+    if (this.openWindowPostListener == null) {
+      this.openWindowPostListener = new PacketPostListener() {
+
+        @Override
+        public Plugin getPlugin() {
+          return plugin;
+        }
+
+        @Override
+        public void onPostEvent(PacketEvent packetEvent) {
+          afterWindowOpenPacketSent();
+        }
+      };
+    }
+
+    return this.openWindowPostListener;
   }
 
-  public abstract void initializeUiContents();
+  public void beforeWindowOpenPacketSent(@NotNull PacketContainer packet) {
+    this.windowOpenPacket = packet;
+    this.windowId = packet.getIntegers().read(0);
+  }
+
+  protected abstract void afterWindowOpenPacketSent();
 
   public abstract Object createTitleComponent() throws Throwable;
 
-  public void sendTitle() {
+  public void sendWindowOpenPacket() {
     if (windowOpenPacket == null)
       return;
 
