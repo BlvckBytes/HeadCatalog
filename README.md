@@ -11,7 +11,7 @@
     - Price based on has tag
 
 - Filtering
-  - Selectable input-sources
+  - Selectable input-sources and selectable order (syllables sorted by selected order, then length asc - matchScore is proportional to how far down all query-syllable matches were)
     - Name
     - Category
     - Tags

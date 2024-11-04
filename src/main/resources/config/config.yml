@@ -50,7 +50,6 @@ catalogDisplay:
         - '@{NEXT-PAGE-LORE-LEFT-CLICK-DESCRIPTION}'
         - '@{NEXT-PAGE-LORE-RIGHT-CLICK-DESCRIPTION}'
         - '@{ANY-CONTROL-LORE-SPACER}'
-    # is_valid: Boolean
     # search_query: String
     anvilInputItem:
       type: PURPLE_TERRACOTTA
@@ -60,7 +59,7 @@ catalogDisplay:
     # search_query: String
     anvilResultItem:
       type: PURPLE_TERRACOTTA
-      name$: 'if is_valid then @{ANVIL-ITEM-NAME-VALID} else @{ANVIL-ITEM-NAME-INVALID}'
+      name$: '@{ANVIL-ITEM-NAME}'
       lore$:
         - '" "'
         - '@{ANY-CONTROL-LORE-SPACER}'
