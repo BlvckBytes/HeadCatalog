@@ -7,12 +7,8 @@ public class AsyncHeadRegistryLoadEvent extends Event {
 
   private static final HandlerList handlers = new HandlerList();
 
-  public final HeadRegistry registry;
-
-  public AsyncHeadRegistryLoadEvent(HeadRegistry registry) {
+  public AsyncHeadRegistryLoadEvent() {
     super(true);
-
-    this.registry = registry;
   }
 
   @Override

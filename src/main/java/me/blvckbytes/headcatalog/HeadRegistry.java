@@ -50,7 +50,7 @@ public class HeadRegistry {
 
       logger.info("Loaded " + _heads.size() + " heads into memory");
 
-      Bukkit.getServer().getPluginManager().callEvent(new AsyncHeadRegistryLoadEvent(this));
+      Bukkit.getServer().getPluginManager().callEvent(new AsyncHeadRegistryLoadEvent());
     });
   }
 

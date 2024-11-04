@@ -70,4 +70,9 @@ public class Head {
   public int hashCode() {
     return Objects.hashCode(textureHash);
   }
+
+  @Override
+  public String toString() {
+    return "Head(name=" + name + ", category=" + category + ", tags=[" + String.join(", ", tags) + "], hash=" + textureHash + ")";
+  }
 }

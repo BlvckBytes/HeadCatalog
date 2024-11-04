@@ -7,11 +7,14 @@ import me.blvckbytes.gpeee.GPEEE;
 import me.blvckbytes.gpeee.interpreter.EvaluationEnvironmentBuilder;
 import me.blvckbytes.gpeee.interpreter.IEvaluationEnvironment;
 import me.blvckbytes.headcatalog.config.MainSection;
+import me.blvckbytes.headcatalog.index.HeadIndex;
+import me.blvckbytes.headcatalog.index.WordType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -25,8 +28,9 @@ public class HeadCatalogUi extends FakeAnvilUi {
   private final IEvaluationEnvironment searchEnvironment;
   private final AsyncTaskQueue taskQueue;
 
-  private final List<Head> unfilteredHeads;
-  private final List<Head> filteredHeads;
+  private final HeadIndex headIndex;
+  private @Nullable List<Head> resultItems;
+
   private final ConfigKeeper<MainSection> config;
 
   private int currentPage;
@@ -36,17 +40,15 @@ public class HeadCatalogUi extends FakeAnvilUi {
     ProtocolManager protocolManager,
     PlatformScheduler platformScheduler,
     Logger logger,
-    List<Head> heads,
+    HeadIndex headIndex,
     Player player,
     ConfigKeeper<MainSection> config
   ) {
     super(protocolManager, logger, platformScheduler, player);
 
     this.config = config;
-    this.unfilteredHeads = heads;
-    this.filteredHeads = new ArrayList<>(heads);
+    this.headIndex = headIndex;
     this.taskQueue = new AsyncTaskQueue(platformScheduler);
-    this.numberOfPages = (heads.size() + PAGE_SIZE - 1) / PAGE_SIZE;
 
     this.paginationEnvironment = new EvaluationEnvironmentBuilder()
       .withLiveVariable("current_page", () -> this.currentPage + 1)
@@ -62,6 +64,8 @@ public class HeadCatalogUi extends FakeAnvilUi {
         return this.anvilText;
       })
       .build(paginationEnvironment);
+
+    updateFilteredHeads();
   }
 
   @Override
@@ -72,9 +76,9 @@ public class HeadCatalogUi extends FakeAnvilUi {
   }
 
   private void updateFilteredHeads() {
-    this.filteredHeads.clear();
-    this.filteredHeads.addAll(unfilteredHeads);
     this.currentPage = 0;
+    this.resultItems = this.headIndex.search(player, this.anvilText, EnumSet.allOf(WordType.class), true);
+    this.numberOfPages = Math.max(1, (resultItems.size() + PAGE_SIZE - 1) / PAGE_SIZE);
   }
 
   private void nextPage() {
@@ -122,19 +126,20 @@ public class HeadCatalogUi extends FakeAnvilUi {
   }
 
   private void drawPaginationItems() {
-    this.numberOfPages = (filteredHeads.size() + PAGE_SIZE - 1) / PAGE_SIZE;
+    if (this.resultItems == null)
+      return;
 
     int bottomSlot;
 
     for (bottomSlot = 0; bottomSlot < PAGE_SIZE; ++bottomSlot) {
       var headsIndex = currentPage * PAGE_SIZE + bottomSlot;
 
-      if (headsIndex >= filteredHeads.size()) {
+      if (headsIndex >= resultItems.size()) {
         setBottomFakeItem(null, bottomSlot);
         continue;
       }
 
-      var head = filteredHeads.get(headsIndex);
+      var head = resultItems.get(headsIndex);
 
       var headItem = config.rootSection.catalogDisplay.items.representative.build(
         head.getHeadEnvironmentBuilder()

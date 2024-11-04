@@ -42,8 +42,10 @@ public abstract class FakeAnvilUi extends FakeUi {
   protected abstract ItemStack buildAnvilResultItem();
   protected abstract void onDebouncedAnvilText();
 
+  // TODO: Only draw the input-item on pagination, as to persist inputs, but don't do so on typing, as there'll always be glitches
+
   public void setAnvilText(String text) {
-    if (text.equals(this.anvilText))
+    if (text.strip().equals(this.anvilText.strip()))
       return;
 
     this.anvilText = text;
